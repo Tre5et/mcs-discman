@@ -103,15 +103,15 @@ Optional Steps:
 - This might not work the same on every Linux Distro (tested on RaspberryPi 4B with Raspberrypi OS lite x64).
 - Open the folder ```/etc/systemd/system```.
 - Create a new file called ```discordbot.service``` (discordbot can be anything you want).
-- Copy [this code](https://github.com/Tre5et/mc-discman/blob/main/discordbot.service) into your file, edit the path and save it.
+- Copy [this code](https://github.com/Tre5et/mc-discman/blob/main/services/discordbot.service) into your file, edit the path and save it.
 - In the terminal run ```sudo service discordbot start``` to start the service and ```sudo journalctl -u discordbot -f``` to see it's output.
 
 ## Setup a Minecraft server service
 - This might not work the same on every Linux Distro (tested on RaspberryPi 4B with Raspberrypi OS lite x64).
 - Open the folder ```/etc/systemd/system```.
 - Create a new file called ```minecraft.service``` (minecraft can be anything you want).
-- Copy [this code](https://github.com/Tre5et/mc-discman/blob/main/minecraft.service) into your file, edit the path and save it.
+- Copy [this code](https://github.com/Tre5et/mc-discman/blob/main/services/minecraft.service) into your file, edit the path and save it.
 - Create a new file called ```minecraft.socket``` (minecraft can be anything you want but should be the same as specified in ```minecraft.service```).
-- Copy [this code](https://github.com/Tre5et/mc-discman/blob/main/minecraft.socket) into your file, edit the ```PartOf``` field if required and save it.
+- Copy [this code](https://github.com/Tre5et/mc-discman/blob/main/services/minecraft.socket) into your file, edit the ```PartOf``` field if required and save it.
 - In the terminal run ```sudo service minecraft start``` to start the service and ```sudo journalctl -u minecraft -f``` to see it's output.
 - In the terminal run ```echo "[your command]" > /run/minecraft.stdin``` to run a command in the server.
