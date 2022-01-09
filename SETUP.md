@@ -3,21 +3,21 @@
 ## Content
 Required Steps:
 - [Download](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#download)
-- Setup the Discord bot
-- Edit the Config
-- Start the Manager
+- [Setup the Discord bot](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#setup-the-discord-bot)
+- [Edit the Config](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#edit-the-config)
+- [Start the Manager](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#start-the-manager)
 
 Optional Steps:
-- Setup automatic backup uplaods to Google Drive
-- Create a service for easy start of the discord bot
-- Setup a Minecraft server service
+- [Setup automatic backup uplaods to Google Drive](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#setup-automatic-backup-uplaods-to-google-drive)
+- [Create a service for easy start of the discord bot](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#create-a-service-for-easy-start-of-the-manager)
+- [Setup a Minecraft server service](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#setup-a-minecraft-server-service)
 
 # Required Steps
 ## Download
 - Download the latest ```mcsdiscman-[X.X.X].zip``` file from [releases](https://github.com/Tre5et/mc-discman/releases).
 - Extract the files and put them together into a folder.
 
-## Setup the discordbot
+## Setup the Discord bot
 - Go to [discord developers](https://discord.com/developers/).
 - In the "Applications" tab click on "New Application".
 - Enter the name for your bot and click "Create".
@@ -51,7 +51,7 @@ Optional Steps:
   - Go to the server settings
   - Under "Roles" right click the role you want to be moderator (able to start/stop the server etc.), click "Copy ID" and pastte it into ```moderator_role_id```
 - The paths can be absolute or relative paths to the files location, thought absolute is recommended
-- The section ```minecraft-server-console-commands``` is setup for runnig a server as described in "Setup a new Minecraft server", you need to figure out the things to put in there yourself if you are running the server differently
+- The section ```minecraft-server-console-commands``` is setup for runnig a server as described in [Setup a Minecraft server service](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#setup-a-minecraft-server-service), you need to figure out the things to put in there yourself if you are running the server differently
 - Leave the section ```google-drive-details``` as default for now
 - #### Open ```details.conf``` 
 - Edit the values to your liking
@@ -62,7 +62,7 @@ Optional Steps:
 ## Start the manager
 - Start the manager by runnig ```mcsdiscman-deploy.jar``` in the folder.
 - In the terminal do this by using ```java -jar /path/to/your/folder/mcsdiscman-deploy.jar```.
-- If you want a more convenient way to start the bot, follow "Create a service for easy start of the discord bot".
+- If you want a more convenient way to start the bot, follow [Create a service for easy start of the discord bot](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#create-a-service-for-easy-start-of-the-manager).
 
 # Optional Steps:
 ## Setup automatic backup uplaods to Google Drive
@@ -99,7 +99,6 @@ Optional Steps:
 - A URL will be printed into the output of the programm, open it and follow the instructions to grant access to your Drive.
 - Drive is now authorized, the next time you start the manager you won't have to do this again.
 
-
 ## Create a service for easy start of the Manager
 - This might not work the same on every Linux Distro (tested on RaspberryPi 4B with Raspberrypi OS lite x64).
 - Open the folder ```/etc/systemd/system```.
@@ -112,7 +111,7 @@ Optional Steps:
 - Open the folder ```/etc/systemd/system```.
 - Create a new file called ```minecraft.service``` (minecraft can be anything you want).
 - Copy [this code](https://github.com/Tre5et/mc-discman/blob/main/minecraft.service) into your file, edit the path and save it.
-- Create a new file called ```minecraft.socket``` (minecraft can be anything you want but should be the same as specified in minecraft.service).
-- Copy [this code](https://github.com/Tre5et/mc-discman/blob/main/minecraft.socket) into your file, edit the PartOf variable if required and save it.
+- Create a new file called ```minecraft.socket``` (minecraft can be anything you want but should be the same as specified in ```minecraft.service```).
+- Copy [this code](https://github.com/Tre5et/mc-discman/blob/main/minecraft.socket) into your file, edit the ```PartOf``` field if required and save it.
 - In the terminal run ```sudo service minecraft start``` to start the service and ```sudo journalctl -u minecraft -f``` to see it's output.
 - In the terminal run ```echo "[your command]" > /run/minecraft.stdin``` to run a command in the server.
