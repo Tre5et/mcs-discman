@@ -1,0 +1,11 @@
+[Unit]
+Description=Discord Bot
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/DiscordBot
+ExecStart=java -jar /path/to/your/folder/minecraft_server_discord_bot-deploy.jar
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
