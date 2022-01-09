@@ -27,5 +27,12 @@ A Manager for your existing Minecraft Server on Linux, fully controlled through 
 
 ## [Setup](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md)
 
+## Notes
+- Validated to work with Minecraft Vanilla and Fabric versions 1.17.0 - 1.18.1, most other minecraft servers will likely work too.
+- Thus far Linux only, validated on Raspberry Pi 4B running Raspberry Pi OS Lite x32 and x64, most other Linux distros will likely work too.
+- Might also work on Mac OS maybe, as it's got the same shell as Linux? Can't validate.
+- There are plans for Windows compatibility.
+- There are no plans for intentional Mac OS compatibility.
+
 ## Licence
 This mod is available under the GNU GPLv3 license. Feel free to redistribute, modify and incorporate it in your own open-source projects.
