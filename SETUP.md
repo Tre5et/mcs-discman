@@ -14,7 +14,7 @@ Optional Steps:
 
 # Required Steps
 ## Download
-- Download the latest ```mcsdiscman-[X.X.X].zip``` file from [releases](https://github.com/Tre5et/mcs-discman/releases).
+- Download the latest ```mcsdiscman-[X.X.X].tar.gz``` file from [releases](https://github.com/Tre5et/mcs-discman/releases).
 - Extract the files and put them together into a folder.
 
 ## Setup the Discord bot
