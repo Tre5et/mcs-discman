@@ -25,7 +25,7 @@ A Manager for your existing Minecraft Server on Linux, fully controlled through 
 - Easy to understand config file for toggling (almost) all featues
 - Works with most ways of running Minecraft servers on linux so you can use your existing server
 
-## [Setup](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md)
+## [Setup](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md)
 
 ## Licence
 This mod is available under the GNU GPLv3 license. Feel free to redistribute, modify and incorporate it in your own open-source projects.
