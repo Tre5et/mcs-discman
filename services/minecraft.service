@@ -1,0 +1,14 @@
+[Unit]
+Description=Minecraft Server
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/MinecraftServer
+ExecStart=java -Xmx2048M -Xms2048M -jar /path/to/your/minecraft/server/server.jar -nogui
+Sockets=minecraft.socket
+StandardInput=socket
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
