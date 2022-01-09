@@ -1,4 +1,4 @@
-# MCS DiscMan by TreSet
+# Minecraft Server Discord Manager by TreSet
 A Manager for your existing Minecraft Server on Linux, fully controlled through Discord.
 
 ## Features
