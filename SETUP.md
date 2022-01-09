@@ -100,14 +100,14 @@ Optional Steps:
 - Drive is now authorized, the next time you start the manager you won't have to do this again.
 
 ## Create a service for easy start of the Manager
-- This might not work the same on every Linux Distro (tested on RaspberryPi 4B with Raspberrypi OS lite x64).
+- This might not work the same on every Linux Distro (tested on Raspberry Pi 4B with Raspberry Pi OS Lite x64).
 - Open the folder ```/etc/systemd/system```.
 - Create a new file called ```discordbot.service``` (discordbot can be anything you want).
 - Copy [this code](https://github.com/Tre5et/mcs-discman/blob/main/services/discordbot.service) into your file, edit the path and save it.
 - In the terminal run ```sudo service discordbot start``` to start the service and ```sudo journalctl -u discordbot -f``` to see it's output.
 
 ## Setup a Minecraft server service
-- This might not work the same on every Linux Distro (tested on RaspberryPi 4B with Raspberrypi OS lite x64).
+- This might not work the same on every Linux Distro (tested on Raspberry Pi 4B with Raspberry Pi OS Lite x64).
 - Open the folder ```/etc/systemd/system```.
 - Create a new file called ```minecraft.service``` (minecraft can be anything you want).
 - Copy [this code](https://github.com/Tre5et/mcs-discman/blob/main/services/minecraft.service) into your file, edit the path and save it.
