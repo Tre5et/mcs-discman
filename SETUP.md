@@ -2,7 +2,7 @@
 
 ## Content
 Required Steps:
-- Download
+- [Download](https://github.com/Tre5et/mc-discman/blob/main/SETUP.md#download)
 - Setup the Discord bot
 - Edit the Config
 - Start the Manager
