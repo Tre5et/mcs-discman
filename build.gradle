@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
+}
+
+group 'net.treset'
+version '1.1.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://m2.dv8tion.net/releases'
+    }
+    maven {
+        url "https://repo.spongepowered.org/maven/"
+    }
+}
+
+dependencies {
+    implementation "net.dv8tion:JDA:4.3.0_340"
+    implementation "com.github.cliftonlabs:json-simple:4.0.0"
+
+    implementation 'com.google.api-client:google-api-client:1.32.2'
+    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.32.1'
+    implementation 'com.google.apis:google-api-services-drive:v3-rev20211107-1.32.1'
+
+    implementation 'com.google.http-client:google-http-client-gson:1.40.1'
+
+    implementation('ch.qos.logback:logback-classic:1.2.10')
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+shadowJar {
+    manifest {
+        attributes "Main-Class": "net.treset.minecraft_server_discord_bot.Main"
+    }
+}

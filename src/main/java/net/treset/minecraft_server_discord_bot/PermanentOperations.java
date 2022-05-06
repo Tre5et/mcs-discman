@@ -7,14 +7,15 @@ import java.time.format.DateTimeFormatter;
 
 public class PermanentOperations {
     private static String prevData = "";
-    public static boolean isLoggingEnabled = false;
-    public static boolean isStartLoggingEnabled = false;
-    public static boolean isJoinLoggingEnabled = false;
+    private static boolean isLoggingEnabled = false;
+    private static boolean isStartLoggingEnabled = false;
+    private static boolean isJoinLoggingEnabled = false;
     public static boolean isLoggingFull = false;
-    public static boolean terminatePermanentLoop = false;
+    private static boolean terminatePermanentLoop = false;
 
     public static boolean isBackupEnabled = true;
-    public static String backupHour = "01";
+    private static String backupHour = "01";
+    private static boolean isLogNoBackup = true;
 
     private static boolean hasSomethingHappened = true;
     private static boolean wasBackedUpToday = false;
@@ -26,6 +27,9 @@ public class PermanentOperations {
     private static int crashedRecently = 0;
     private static int crashesInShortTime = 0;
 
+    private static int inactivityReminder = 0;
+    private static int daysSinceActivity = 0;
+
     public static void permanentLoop() {
         isLoggingEnabled = ConfigTools.PERMA_CONFIG.isLoggingEnabled;
         isStartLoggingEnabled = ConfigTools.PERMA_CONFIG.isStartLoggingEnabled;
@@ -34,6 +38,8 @@ public class PermanentOperations {
         isBackupEnabled = ConfigTools.PERMA_CONFIG.isBackupEnabled;
         backupHour = ConfigTools.PERMA_CONFIG.backupHour;
         isCrashCheckEnabled = ConfigTools.PERMA_CONFIG.isCrashCheckEnabled;
+        isLogNoBackup = ConfigTools.PERMA_CONFIG.isLogNoBackup;
+        inactivityReminder = ConfigTools.PERMA_CONFIG.inactivityReminder;
 
         prevData = FileTools.readFile(ConfigTools.CONFIG.LOG_PATH);
 
@@ -116,8 +122,15 @@ public class PermanentOperations {
         boolean isCorrectHour = dtfH.format(now).equals(backupHour);
 
         if(!wasBackedUpToday && isCorrectHour) {
-            if(isBackupEnabled && hasSomethingHappened) createAutoBackup();
-            else dontCreateAutoBackup();
+            if(hasSomethingHappened) {
+                daysSinceActivity = 0;
+                if(isBackupEnabled) createAutoBackup();
+            } else {
+                logInactivity();
+                if(isBackupEnabled) {
+                    dontCreateAutoBackup(ServerTools.isServerRunning() && isLogNoBackup);
+                }
+            }
 
             wasBackedUpToday = true;
             hasSomethingHappened = false;
@@ -155,9 +168,11 @@ public class PermanentOperations {
         ServerTools.runServerCommand(cmd);
     }
 
-    private static void dontCreateAutoBackup() {
-        String output = "Not creating a auto-backup because auto-backup is disabled or nothing happened today.";
-        DiscordBot.BOT_CHANNEL.sendMessage(output).queue();
+    private static void dontCreateAutoBackup(boolean log) {
+        if(log) {
+            String output = "Not creating a auto-backup because nothing happened today.";
+            DiscordBot.BOT_CHANNEL.sendMessage(output).queue();
+        }
         DiscordBot.LOGGER.info("AutoBackup handled: not necessary");
     }
 
@@ -166,6 +181,15 @@ public class PermanentOperations {
         wasBackedUpToday = false;
         prevDay = dtfD.format(LocalDateTime.now());
         DiscordBot.LOGGER.info("AutoBackup handling: day changed");
+    }
+
+    private static void logInactivity() {
+        daysSinceActivity++;
+
+        if(inactivityReminder > 0 && daysSinceActivity % inactivityReminder == 0) {
+            DiscordBot.BOT_CHANNEL.sendMessage(String.format("Reminder: The server hasn't been used in %s days. Consider stopping it.", daysSinceActivity)).queue();
+            DiscordBot.LOGGER.info(String.format("Inactivity Reminder: Reminded after %s days.", daysSinceActivity));
+        }
     }
 
     private static void checkForCrash() {

@@ -11,6 +11,8 @@ public class PermanentOperationsConfig {
     public boolean isBackupEnabled = true;
     public String backupHour = "01";
     public boolean isCrashCheckEnabled = false;
+    public boolean isLogNoBackup = true;
+    public int inactivityReminder = 0;
     
     public PermanentOperationsConfig(String source) {
         this.isJoinLoggingEnabled = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "join_leave_logging", false, false));
@@ -25,5 +27,7 @@ public class PermanentOperationsConfig {
         this.isBackupEnabled = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "autobackup", false, false));
         this.backupHour = ConfigTools.findConfigOption(source, "autobackup_hour", false, false);
         this.isCrashCheckEnabled = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "crash_check", false, false));
+        this.isLogNoBackup = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "log_no_backup", false, false));
+        this.inactivityReminder = FormatTools.stringToInt(ConfigTools.findConfigOption(source, "inactivity_reminder", false, false));
     }
 }

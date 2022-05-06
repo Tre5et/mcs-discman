@@ -43,4 +43,12 @@ public class FormatTools {
     public static boolean stringToBoolean(String input) {
         return input.equals("true") || input.equals("enabled");
     }
+
+    public static int stringToInt(String input) {
+        try {
+            return Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
 }
