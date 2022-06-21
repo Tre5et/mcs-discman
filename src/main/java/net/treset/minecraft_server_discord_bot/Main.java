@@ -2,7 +2,7 @@ package net.treset.minecraft_server_discord_bot;
 
 import net.dv8tion.jda.api.JDA;
 import net.treset.minecraft_server_discord_bot.networking.ConnectionManager;
-import net.treset.minecraft_server_discord_bot.networking.DataReciever;
+import net.treset.minecraft_server_discord_bot.networking.CommunicationManager;
 
 public class  Main {
 
@@ -13,6 +13,7 @@ public class  Main {
 
         if(!ConnectionManager.init()) return;
         if(!ConnectionManager.establishConnection()) return;
-        DataReciever.handleData();
+        new Thread(CommunicationManager::handleData).start();
+        ConnectionManager.closeConnection();
     }
 }
