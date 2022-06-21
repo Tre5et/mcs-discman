@@ -65,7 +65,9 @@ public class ConnectionManager {
     private static boolean closeAccepted = false;
     public static void acceptClose() { closeAccepted = true; }
 
-    public static boolean closeConnection() {
+    public static boolean closeConnection(boolean force) {
+        if(sessionId == null) return true;
+
         boolean success = true;
 
         if(CommunicationManager.sendToClient("cls/" + sessionId)) {
@@ -75,7 +77,7 @@ public class ConnectionManager {
                 throw new RuntimeException(e);
             }
 
-            if(!closeAccepted) return false;
+            if(!closeAccepted && !force) return false;
             closeAccepted = false;
 
             try {

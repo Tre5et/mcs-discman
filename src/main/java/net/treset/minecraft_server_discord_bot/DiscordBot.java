@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DiscordBot {
-    public static final String CONFIG_FILE = "discordbot.conf";
-    public static final String DETAILS_FILE = "details.conf";
+    public static final String CONFIG_FILE = "discordbot_test.conf";
+    public static final String DETAILS_FILE = "details_test.conf";
     public static final String PLAYERS_FILE = "storage/players.storage";
     public static JDA JDA;
     public static Guild GUILD;

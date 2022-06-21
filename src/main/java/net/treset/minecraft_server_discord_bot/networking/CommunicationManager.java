@@ -39,7 +39,7 @@ public class CommunicationManager {
     public static boolean requestCloseReader() { closeReader = true; return true; }
 
     private static void printText(String text) {
-        System.out.println(text);
+        NetworkingManager.sendMessage(text);
     }
 
     public static boolean sendToClient(String message) {

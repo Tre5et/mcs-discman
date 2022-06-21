@@ -1,5 +1,6 @@
 package net.treset.minecraft_server_discord_bot;
 
+import net.treset.minecraft_server_discord_bot.networking.ConnectionManager;
 import net.treset.minecraft_server_discord_bot.tools.*;
 
 import java.time.LocalDateTime;
@@ -197,6 +198,7 @@ public class PermanentOperations {
 
         boolean running = ServerTools.isServerRunning();
         if(!running && prevRunning) {
+            ConnectionManager.closeConnection(true);
             prevRunning = false;
             if(isStopExpected) {
                 DiscordBot.LOGGER.info("Crash Check detected: Server stopped but was expected to");

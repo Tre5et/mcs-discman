@@ -1,6 +1,7 @@
 package net.treset.minecraft_server_discord_bot.tools;
 
 import net.treset.minecraft_server_discord_bot.PermanentOperations;
+import net.treset.minecraft_server_discord_bot.networking.ConnectionManager;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,6 +20,8 @@ public class ServerTools {
     }
 
     public static void startServer() {
+        ConnectionManager.closeConnection(true);
+        ConnectionManager.establishConnection();
         String cmd = ConfigTools.CONFIG.START_COMMAND;
         ExecTools.executeCommand(cmd);
     }
