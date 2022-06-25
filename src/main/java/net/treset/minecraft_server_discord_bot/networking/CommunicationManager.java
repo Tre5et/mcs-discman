@@ -46,6 +46,7 @@ public class CommunicationManager {
     public static boolean requestCloseReader() { closeReader = true; return true; }
 
     private static void printText(String text) {
+        DiscordBot.LOGGER.info("CommunicationManager: Sending text provided by client to discord: \"" + text + "\"");
         NetworkingManager.sendMessageToDiscord(text);
     }
 
