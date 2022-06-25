@@ -1,5 +1,7 @@
 package net.treset.minecraft_server_discord_bot.networking;
 
+import net.treset.minecraft_server_discord_bot.DiscordBot;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -10,7 +12,10 @@ public class CommunicationManager {
     //continuous code, only run async
     public static boolean handleData() {
         BufferedReader br = ConnectionManager.getClientReader();
-        if(br == null) return false;
+        if(br == null) {
+            DiscordBot.LOGGER.warn("CommunicationManager: Not starting data handling: No client reader active.");
+            return false;
+        }
 
         String msg;
 
@@ -18,6 +23,8 @@ public class CommunicationManager {
             try {
                 msg = br.readLine();
             } catch (IOException e) {
+                DiscordBot.LOGGER.error("CommunicationManager: Error reading line from client. Stacktrace:");
+                e.printStackTrace();
                 return false;
             }
 
@@ -39,10 +46,12 @@ public class CommunicationManager {
     public static boolean requestCloseReader() { closeReader = true; return true; }
 
     private static void printText(String text) {
-        NetworkingManager.sendMessage(text);
+        NetworkingManager.sendMessageToDiscord(text);
     }
 
     public static boolean sendToClient(String message) {
+        if(ConnectionManager.getClientSender() == null) return false;
+
         ConnectionManager.getClientSender().println(message + "\n");
         return true;
     }

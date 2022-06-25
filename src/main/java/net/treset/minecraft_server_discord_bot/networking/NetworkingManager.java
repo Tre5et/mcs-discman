@@ -7,14 +7,12 @@ public class NetworkingManager {
     public static void init() {
         if(!ConnectionManager.init()) return;
 
-        if(!ConnectionManager.establishConnection()) return;
-
-        DiscordBot.LOGGER.info("Connection setup");
+        if(!ConnectionManager.openConnection()) return;
 
         CommunicationManager.handleData();
     }
 
-    public static void sendMessage(String message) {
+    public static void sendMessageToDiscord(String message) {
         DiscordBot.BOT_CHANNEL.sendMessage(message).queue();
     }
 }

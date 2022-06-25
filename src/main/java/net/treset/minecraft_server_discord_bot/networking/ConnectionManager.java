@@ -1,5 +1,7 @@
 package net.treset.minecraft_server_discord_bot.networking;
 
+import net.treset.minecraft_server_discord_bot.DiscordBot;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,20 +31,25 @@ public class ConnectionManager {
         try {
             ss = new ServerSocket(port);
         } catch (IOException e) {
+            DiscordBot.LOGGER.error("ConnectionManager: Unable to create socket at port " + port + ". Stacktrace:");
+            e.printStackTrace();
             return false;
         }
 
-        System.out.println("Conn init");
+        DiscordBot.LOGGER.info("ConnectionManager: Connection initialized.");
         return true;
     }
 
     //waits for client to connect, only use async
-    public static boolean establishConnection() {
+    public static boolean openConnection() {
+        DiscordBot.LOGGER.info("ConnectionManager: Opening connection");
         try {
             s = ss.accept();
             clientReader = new BufferedReader(new InputStreamReader(s.getInputStream()));
             clientSender = new PrintStream(s.getOutputStream());
         } catch (IOException e) {
+            DiscordBot.LOGGER.error("ConnectionManager: Unable to open socket. Stacktrace:");
+            e.printStackTrace();
             return false;
         }
 
@@ -50,15 +57,22 @@ public class ConnectionManager {
         try {
             initMsg = clientReader.readLine();
         } catch (IOException e) {
+            DiscordBot.LOGGER.error("ConnectionManager: Unable to receive session id from client. Stacktrace:");
+            e.printStackTrace();
             return false;
         }
 
-        if (!initMsg.startsWith("sid/")) return false;
+        if (!initMsg.startsWith("sid/")) {
+            DiscordBot.LOGGER.error("ConnectionManager: Unable to establish session id with client. Forcefully closing connection. Initial message wasn't a session id: \"" + initMsg + "\"");
+            sessionId = "-1";
+            closeConnection(true);
+            return false;
+        }
         sessionId = initMsg.substring(4);
 
         CommunicationManager.sendToClient("sid/" + sessionId);
 
-        System.out.println("Conn est");
+        DiscordBot.LOGGER.info("ConnectionManager: Established connection to client " + sessionId);
         return true;
     }
 
@@ -68,8 +82,12 @@ public class ConnectionManager {
     public static boolean closeConnection(boolean force) {
         if(sessionId == null) return true;
 
-        boolean success = true;
+        if(closeAccepted) {
+            DiscordBot.LOGGER.warn("ConnectionManager: Found illegal close acceptance state when closing. Closing anyway.");
+            closeAccepted = false;
+        }
 
+        DiscordBot.LOGGER.info("ConnectionManager: Closing connection to client " + sessionId);
         if(CommunicationManager.sendToClient("cls/" + sessionId)) {
             try {
                 Thread.sleep(10);
@@ -77,7 +95,14 @@ public class ConnectionManager {
                 throw new RuntimeException(e);
             }
 
-            if(!closeAccepted && !force) return false;
+            if(!closeAccepted) {
+                if(!force) {
+                    DiscordBot.LOGGER.error("ConnectionManager: Error closing connection: Close not accepted by client " + sessionId);
+                    return false;
+                } else {
+                    DiscordBot.LOGGER.warn("ConnectionManager: Forcing close: Close not accepted by client " + sessionId);
+                }
+            }
             closeAccepted = false;
 
             try {
@@ -86,32 +111,41 @@ public class ConnectionManager {
                 clientSender.close();
                 s.close();
             } catch (IOException e) {
+                DiscordBot.LOGGER.error("ConnectionManager: Error closing connection: Unable to close socket. Stacktrace:");
+                e.printStackTrace();
                 return false;
             }
+
+            DiscordBot.LOGGER.info("ConnectionManager: Closed connection to client " + sessionId);
 
             clientSender = null;
             clientReader = null;
             sessionId = null;
-        }
-        else success = false;
 
-        System.out.println(success ? "Connection close" : "Connection close unsuccessfull");
-        return success;
+            return true;
+        }
+        DiscordBot.LOGGER.error("ConnectionManager: Error closing connection: Unable to send close request to client " + sessionId);
+        return false;
     }
 
     public static boolean respondToClosingConnection(String sid) {
+        DiscordBot.LOGGER.info("ConnectionManager: Received connection close request from client " + sid);
+
         if(!sid.equals(sessionId)) {
             CommunicationManager.sendToClient("dcl/" + sessionId);
+            DiscordBot.LOGGER.warn("ConnectionManager: Rejected close request form client " + sid + ". Client session doesn't match current connection " + sessionId);
             return false;
         }
 
         boolean success = true;
         if(CommunicationManager.sendToClient("acl/" + sessionId)) {
-            System.out.println("Connection close accepted");
+            DiscordBot.LOGGER.info("ConnectionManager: Accepted connection close from client " + sessionId);
             try {
                 clientReader.close();
                 clientSender.close();
             } catch (IOException e) {
+                DiscordBot.LOGGER.error("ConnectionManager: Error handling connection close request from client " + sessionId + ": Unable to close io. Stacktrace:");
+                e.printStackTrace();
                 success = false;
             }
 
@@ -121,15 +155,22 @@ public class ConnectionManager {
             try {
                 s.close();
             } catch (IOException e) {
+                DiscordBot.LOGGER.error("ConnectionManager: Error handling connection close request from client " + sessionId + ": Unable to close socket. Stacktrace:");
+                e.printStackTrace();
                 success = false;
             }
 
+            if(success) {
+                DiscordBot.LOGGER.info("ConnectionManager: Closed connection after close request from client " + sessionId);
+            }
+
             sessionId = null;
-        } else success = false;
 
-        System.out.println(success ? "Connection closed" : "Connection closed unsuccessfully");
+            return success;
+        }
+        DiscordBot.LOGGER.error("ConnectionManager: Error handling connection close request from client " + sessionId + ": Unable to send accept message to client.");
 
-        return success;
+        return false;
     }
 
 }

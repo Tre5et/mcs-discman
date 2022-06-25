@@ -21,7 +21,7 @@ public class ServerTools {
 
     public static void startServer() {
         ConnectionManager.closeConnection(true);
-        ConnectionManager.establishConnection();
+        ConnectionManager.openConnection();
         String cmd = ConfigTools.CONFIG.START_COMMAND;
         ExecTools.executeCommand(cmd);
     }
