@@ -27,6 +27,9 @@ public class ConnectionManager {
     public static BufferedReader getClientReader() { return clientReader; }
     public static PrintStream getClientSender() { return clientSender; }
 
+    private static boolean connected = false;
+    public static boolean isConnected() { return connected; }
+
     public static boolean init() {
         try {
             ss = new ServerSocket(port);
@@ -42,6 +45,9 @@ public class ConnectionManager {
 
     //waits for client to connect, only use async
     public static boolean openConnection() {
+        if(connected && sessionId == null) {
+            DiscordBot.LOGGER.warn("ConnectionManager: Not opening connection because connection to " + sessionId + " is already opened");
+        }
         DiscordBot.LOGGER.info("ConnectionManager: Opening connection");
         try {
             s = ss.accept();
@@ -73,6 +79,7 @@ public class ConnectionManager {
         CommunicationManager.sendToClient("sid/" + sessionId);
 
         DiscordBot.LOGGER.info("ConnectionManager: Established connection to client " + sessionId);
+        connected = true;
         return true;
     }
 
@@ -80,7 +87,7 @@ public class ConnectionManager {
     public static void acceptClose() { closeAccepted = true; }
 
     public static boolean closeConnection(boolean force) {
-        if(sessionId == null) return true;
+        if(sessionId == null || !connected) return true;
 
         if(closeAccepted) {
             DiscordBot.LOGGER.warn("ConnectionManager: Found illegal close acceptance state when closing. Closing anyway.");
@@ -121,6 +128,8 @@ public class ConnectionManager {
             clientSender = null;
             clientReader = null;
             sessionId = null;
+
+            connected = false;
 
             return true;
         }
@@ -165,6 +174,8 @@ public class ConnectionManager {
             }
 
             sessionId = null;
+
+            connected = true;
 
             return success;
         }
