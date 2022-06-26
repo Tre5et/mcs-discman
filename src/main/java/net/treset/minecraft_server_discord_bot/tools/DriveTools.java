@@ -15,6 +15,8 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import net.treset.minecraft_server_discord_bot.DiscordBot;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
@@ -57,12 +59,11 @@ public class DriveTools {
             SERVICE = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                     .setApplicationName(APPLICATION_NAME)
                     .build();
-            DiscordBot.LOGGER.info("Drive client initialized");
+            MessageManager.log("Drive client initialized.", LogLevel.INFO);
         }catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
-            DiscordBot.LOGGER.warn("Couldn't create Drive client, disabling drive features");
+            MessageManager.log("Unable to create Drive client. Disabling drive features.", LogLevel.WARN);
             ConfigTools.CONFIG.DRIVE_UPLOAD = false;
-            return;
         }
     }
 

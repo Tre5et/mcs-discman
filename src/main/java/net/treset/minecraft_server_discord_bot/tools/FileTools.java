@@ -1,6 +1,8 @@
 package net.treset.minecraft_server_discord_bot.tools;
 
 import net.treset.minecraft_server_discord_bot.DiscordBot;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,6 +28,7 @@ public class FileTools {
             myReader.close();
             return data;
         } catch (FileNotFoundException e) {
+            MessageManager.log(String.format("Unable to read file %s! -> Stacktrace.", path), LogLevel.ERROR);
             e.printStackTrace();
             return "ERROR";
         }
@@ -37,7 +40,7 @@ public class FileTools {
             writer.write(data);
             writer.close();
         } catch (IOException e) {
-            DiscordBot.LOGGER.warn(String.format("An error occurred trying to write %s to %s!", data, path));
+            MessageManager.log(String.format("Unable to write %s to %s! -> Stacktrace.", data, path), LogLevel.ERROR);
             e.printStackTrace();
         }
     }

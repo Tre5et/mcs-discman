@@ -3,6 +3,9 @@ package net.treset.minecraft_server_discord_bot.commands;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.PermanentOperations;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
+import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
 import net.treset.minecraft_server_discord_bot.tools.ServerTools;
 
@@ -16,13 +19,13 @@ public class StopServerCommand {
             if(!ServerTools.isServerRunning()) {
                 output = "Server is already stopped.";
                 event.reply(output).queue();
-                DiscordBot.LOGGER.info("StopServer Command handled: already stopped");
+                MessageManager.log("Handled. Already stopped.", LogLevel.INFO);
             } else {
                 ServerTools.stopServer();
 
                 output = "Stopping the server...";
                 event.reply(output).queue();
-                DiscordBot.LOGGER.info("StopServer Command handling started: stopping");
+                MessageManager.log("Stopping server.", LogLevel.INFO);
 
                 int timeSinceStop = 0;
                 while(ServerTools.isServerRunning()) {
@@ -36,9 +39,9 @@ public class StopServerCommand {
 
                     if(timeSinceStop > 90) {
                         output = "Server stop failed. Try again.";
-                        DiscordBot.BOT_CHANNEL.sendMessage(output).queue();
+                        MessageManager.sendText(output, MessageOrigin.COMMAND);
 
-                        DiscordBot.LOGGER.info("StopServer command FAILED: timeout");
+                        MessageManager.log("Stop timed out.", LogLevel.ERROR);
 
                         PermanentOperations.isStopExpected = false;
 
@@ -46,15 +49,14 @@ public class StopServerCommand {
                     }
                 }
 
-                output = "Server stopped.";
-                DiscordBot.BOT_CHANNEL.sendMessage(output).queue();
+                MessageManager.sendStopped(MessageOrigin.COMMAND);
 
-                DiscordBot.LOGGER.info("StopServer Command handled: success");
+                MessageManager.log("Handled. Stopped.", LogLevel.INFO);
             }
         } else {
             output = "You don't have permission to do that.";
             event.reply(output).queue();
-            DiscordBot.LOGGER.info("StopServer Command handled: permission required");
+            MessageManager.log("Handled. Permission required.", LogLevel.INFO);
         }
     }
 }

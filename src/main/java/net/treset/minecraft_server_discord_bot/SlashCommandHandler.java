@@ -3,6 +3,8 @@ package net.treset.minecraft_server_discord_bot;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.treset.minecraft_server_discord_bot.commands.*;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +34,7 @@ public class SlashCommandHandler extends ListenerAdapter {
             case "stopserver": CompletableFuture.runAsync(() -> StopServerCommand.handleCommand(event)); break;
             default:
                 event.reply("Sorry, I don't know that :worried:").queue();
-                DiscordBot.LOGGER.info("Couldn't handle command: unknown command: event.getName() = " + event.getName());
+                MessageManager.log(String.format("Unable to handle command \"%s\". Unknown.", event.getName()), LogLevel.WARN);
                 break;
         }
     }

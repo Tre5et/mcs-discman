@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
+import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
 import net.treset.minecraft_server_discord_bot.tools.DriveTools;
@@ -32,7 +34,7 @@ public class DiscordBot {
         DiscordTools.upsertCommands();
 
         assert BOT_CHANNEL != null;
-        BOT_CHANNEL.sendMessage("Hi, I'm online now!").queue();
+        MessageManager.sendText("Hi, I'm online now.", MessageOrigin.SCHEDULE);
 
         PermanentOperations.permanentLoop();
     }

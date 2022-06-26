@@ -1,6 +1,7 @@
 package net.treset.minecraft_server_discord_bot.networking;
 
 import net.treset.minecraft_server_discord_bot.DiscordBot;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 
@@ -15,7 +16,7 @@ public class CommunicationManager {
     public static boolean handleData() {
         BufferedReader br = ConnectionManager.getClientReader();
         if(br == null) {
-            DiscordBot.LOGGER.warn("CommunicationManager: Not starting data handling: No client reader active.");
+            MessageManager.log("Not starting data handling. No client reader.", LogLevel.WARN);
             return false;
         }
 
@@ -25,7 +26,7 @@ public class CommunicationManager {
             try {
                 msg = br.readLine();
             } catch (IOException e) {
-                DiscordBot.LOGGER.error("CommunicationManager: Error reading line from client. Stacktrace:");
+                MessageManager.log("Error reading line. -> Stacktrace.", LogLevel.ERROR);
                 e.printStackTrace();
                 return false;
             }

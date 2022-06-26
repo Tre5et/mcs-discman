@@ -1,5 +1,8 @@
 package net.treset.minecraft_server_discord_bot;
 
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
+import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.networking.ConnectionManager;
 import net.treset.minecraft_server_discord_bot.tools.*;
 
@@ -30,6 +33,8 @@ public class PermanentOperations {
 
     private static int inactivityReminder = 0;
     private static int daysSinceActivity = 0;
+
+    public static void setSomethingHappened() { hasSomethingHappened = true; }
 
     public static void permanentLoop() {
         isLoggingEnabled = ConfigTools.PERMA_CONFIG.isLoggingEnabled;
@@ -82,36 +87,30 @@ public class PermanentOperations {
     }
 
     private static void logFullConsole(String input) {
-        DiscordBot.BOT_CHANNEL.sendMessage(input).queue();
-        DiscordBot.LOGGER.info("PermanentLogger logged: full console");
+        MessageManager.sendText(input, MessageOrigin.LOG_FILE);
+        MessageManager.log("Full console logged.", LogLevel.INFO);
         hasSomethingHappened = true;
     }
 
     private static void logStarted(String input) {
         if (input.contains("Done (")) {
-            DiscordBot.BOT_CHANNEL.sendMessage("Server started.").queue();
-            DiscordBot.LOGGER.info("PermanentLogger logged: server started");
-            hasSomethingHappened = true;
+            MessageManager.sendStarted(MessageOrigin.LOG_FILE);
         }
     }
 
     private static void logPlayerJoin(String input) {
         String playerName = FormatTools.findStringBetween(input, "INFO]: ", " joined the game");
         if(!playerName.equals("")) {
-            DiscordBot.BOT_CHANNEL.sendMessage(String.format("%s joined the game.", playerName)).queue();
+            MessageManager.sendJoin(playerName, MessageOrigin.LOG_FILE);
             ConfigTools.addPlayer(playerName);
-            DiscordBot.LOGGER.info("PermanentLogger logged: " + playerName + " joined the game");
-            hasSomethingHappened = true;
         }
     }
 
     private static void logPlayerLeave(String input) {
         String playerName = FormatTools.findStringBetween(input, "INFO]: ", " left the game");
         if(!playerName.equals("")) {
-            DiscordBot.BOT_CHANNEL.sendMessage(String.format("%s left the game.", playerName)).queue();
+            MessageManager.sendLeave(playerName, MessageOrigin.LOG_FILE);
             ConfigTools.removePlayer(playerName);
-            DiscordBot.LOGGER.info("PermanentLogger logged: " + playerName + " left the game");
-            hasSomethingHappened = true;
         }
     }
 
@@ -146,24 +145,25 @@ public class PermanentOperations {
         if (ServerTools.isServerRunning()) ServerTools.prepareServerForBackup();
 
         output = "Creating auto-backup.";
-        DiscordBot.BOT_CHANNEL.sendMessage(output).queue();
+        MessageManager.sendText(output, MessageOrigin.SCHEDULE);
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDateTime now = LocalDateTime.now();
         String date = dtf.format(now);
         if (FileTools.zipFile(ConfigTools.CONFIG.WORLD_PATH, ConfigTools.CONFIG.BACKUPS_PATH + date + "-auto.zip")) {
+            MessageManager.log("Local backup complete.", LogLevel.INFO);
             if(DriveTools.uploadFile(ConfigTools.CONFIG.BACKUPS_PATH + date + "-auto.zip", date + "-auto.zip", "application/x-zip-compressed", ConfigTools.CONFIG.DRIVE_FOLDER_ID) != null) {
                 output = "Created auto-backup successfully.";
-                DiscordBot.LOGGER.info("CreateBackup Command handled: success");
+                MessageManager.log("Online backup complete.", LogLevel.INFO);
             } else {
                 output = "Created local auto-backup successfully.";
-                DiscordBot.LOGGER.warn("CreateBackup Command handled: failed to upload file");
+                MessageManager.log("Error creating online backup. Unable to upload file.", LogLevel.WARN);
             }
         } else {
             output = "Failed to create auto-backup.";
-            DiscordBot.LOGGER.error("AutoBackup FAILED: failed to create file");
+            MessageManager.log("Error creating local backup. Unable to create file.", LogLevel.ERROR);
         }
-        DiscordBot.BOT_CHANNEL.sendMessage(output).queue();
+        MessageManager.sendText(output, MessageOrigin.SCHEDULE);
 
         String cmd = "save-on";
         ServerTools.runServerCommand(cmd);
@@ -172,24 +172,24 @@ public class PermanentOperations {
     private static void dontCreateAutoBackup(boolean log) {
         if(log) {
             String output = "Not creating a auto-backup because nothing happened today.";
-            DiscordBot.BOT_CHANNEL.sendMessage(output).queue();
+            MessageManager.sendText(output, MessageOrigin.SCHEDULE);
         }
-        DiscordBot.LOGGER.info("AutoBackup handled: not necessary");
+        MessageManager.log("Not necessary to create backup.", LogLevel.INFO);
     }
 
     private static void changeDay() {
         DateTimeFormatter dtfD = DateTimeFormatter.ofPattern("dd");
         wasBackedUpToday = false;
         prevDay = dtfD.format(LocalDateTime.now());
-        DiscordBot.LOGGER.info("AutoBackup handling: day changed");
+        MessageManager.log("Day changed.", LogLevel.DEBUG);
     }
 
     private static void logInactivity() {
         daysSinceActivity++;
 
         if(inactivityReminder > 0 && daysSinceActivity % inactivityReminder == 0) {
-            DiscordBot.BOT_CHANNEL.sendMessage(String.format("Reminder: The server hasn't been used in %s days. Consider stopping it.", daysSinceActivity)).queue();
-            DiscordBot.LOGGER.info(String.format("Inactivity Reminder: Reminded after %s days.", daysSinceActivity));
+            MessageManager.sendText(String.format("Reminder: The server hasn't been used in %s days. Consider stopping it.", daysSinceActivity), MessageOrigin.SCHEDULE);
+            MessageManager.log(String.format("Inactivity reminder sent after %s days.", daysSinceActivity), LogLevel.INFO);
         }
     }
 
@@ -201,14 +201,16 @@ public class PermanentOperations {
             ConnectionManager.closeConnection(true);
             prevRunning = false;
             if(isStopExpected) {
-                DiscordBot.LOGGER.info("Crash Check detected: Server stopped but was expected to");
+                MessageManager.log("Expected server stop detected.", LogLevel.DEBUG);
                 isStopExpected = false;
             } else if(crashesInShortTime >= 5) {
-                DiscordBot.BOT_CHANNEL.sendMessage("Server stopped unexpectedly, has crashed too often in a short time, not attempting to restart.").queue();
-                DiscordBot.LOGGER.warn("Crash Check detected: Server stopped unexpectedly, crashed to often, not attempting restart");
+                MessageManager.sendText("Server stopped unexpectedly, has crashed too often in a short time, not attempting to restart.", MessageOrigin.SCHEDULE);
+
+                MessageManager.log("Server stopped unexpectedly. Crashed to often. Not attempting restart.", LogLevel.WARN);
             } else {
-                DiscordBot.BOT_CHANNEL.sendMessage("Server stopped unexpectedly, attempting to restart...").queue();
-                DiscordBot.LOGGER.warn("Crash Check detected: Server stopped unexpectedly, restarting");
+                MessageManager.sendText("Server stopped unexpectedly, attempting to restart...", MessageOrigin.SCHEDULE);
+
+                MessageManager.log("Server stopped unexpectedly. Restarting.", LogLevel.WARN);
 
                 crashedRecently = 60; //600 sec * 0.1 loops per second
                 crashesInShortTime++;
@@ -220,8 +222,9 @@ public class PermanentOperations {
                     MiscTools.timeout(500);
                     time += .2f;
                     if (time >= 30) {
-                        DiscordBot.BOT_CHANNEL.sendMessage("Failed to start Server, not trying again.").queue();
-                        DiscordBot.LOGGER.error("Crash Check detected: Failed to initialize restart after server crash");
+                        MessageManager.sendText("Failed to start Server, not trying again.", MessageOrigin.SCHEDULE);
+
+                        MessageManager.log("Failed to start server after unexpected stop.", LogLevel.ERROR);
                         break;
                     }
                 }

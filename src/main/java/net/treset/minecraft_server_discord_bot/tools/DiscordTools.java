@@ -5,6 +5,8 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.SlashCommandHandler;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
 import javax.security.auth.login.LoginException;
 
@@ -30,7 +32,7 @@ public class DiscordTools {
         DiscordBot.BOT_CHANNEL = DiscordBot.JDA.getTextChannelById(ConfigTools.CONFIG.MESSAGE_CHANNEL_ID);
         DiscordBot.MODERATOR_ROLE = DiscordBot.JDA.getRoleById(ConfigTools.CONFIG.MODERATOR_ID);
 
-        DiscordBot.LOGGER.info("Client initialized");
+        MessageManager.log("Client initialized.", LogLevel.INFO);
     }
 
     public static void upsertCommands() {
@@ -50,7 +52,7 @@ public class DiscordTools {
         DiscordBot.GUILD.upsertCommand("startserver", "Start the server! [Moderator only]").queue();
         DiscordBot.GUILD.upsertCommand("stopserver", "Start the server! [Moderator only]").queue();
 
-        DiscordBot.LOGGER.info("Commands enabled");
+        MessageManager.log("Commands enabled.", LogLevel.INFO);
     }
 
     public static boolean isModerator(SlashCommandEvent event) {

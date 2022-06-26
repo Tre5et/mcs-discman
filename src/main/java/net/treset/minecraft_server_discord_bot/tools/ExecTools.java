@@ -1,6 +1,8 @@
 package net.treset.minecraft_server_discord_bot.tools;
 
 import net.treset.minecraft_server_discord_bot.DiscordBot;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
 import java.io.*;
 
@@ -28,7 +30,7 @@ public class ExecTools {
             assert exitCode == 0;
 
         } catch (Exception e) {
-            DiscordBot.LOGGER.warn(String.format("ExecTools failed: couldn't execute command \"%s\"", command));
+            MessageManager.log(String.format("Unable to execute command \"%s\". -> Stacktrace.", command), LogLevel.ERROR);
             e.printStackTrace();
         }
 

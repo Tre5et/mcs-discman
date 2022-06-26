@@ -2,6 +2,8 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.DiscordBot;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 
 public class JoinCommand {
@@ -15,6 +17,6 @@ public class JoinCommand {
 
         event.reply(output).queue();
 
-        DiscordBot.LOGGER.info("Join Command handled.");
+        MessageManager.log("Handled.", LogLevel.INFO);
     }
 }

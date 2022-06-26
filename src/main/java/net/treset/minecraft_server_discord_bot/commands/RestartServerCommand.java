@@ -3,6 +3,9 @@ package net.treset.minecraft_server_discord_bot.commands;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.PermanentOperations;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
+import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
 import net.treset.minecraft_server_discord_bot.tools.MiscTools;
 import net.treset.minecraft_server_discord_bot.tools.ServerTools;
@@ -17,7 +20,7 @@ public class RestartServerCommand {
 
                 output = "Stopping the server for a restart...";
                 event.reply(output).queue();
-                DiscordBot.LOGGER.info("RestartServer Command handling started: stopping");
+                MessageManager.log("Stopping server.", LogLevel.INFO);
 
                 int timeSinceStop = 0;
                 while(ServerTools.isServerRunning()) {
@@ -28,9 +31,9 @@ public class RestartServerCommand {
 
                     if(timeSinceStop > 90) {
                         output = "Server stop failed. Try again.";
-                        DiscordBot.BOT_CHANNEL.sendMessage(output).queue();
+                        MessageManager.sendText(output, MessageOrigin.COMMAND);
 
-                        DiscordBot.LOGGER.info("RestartServer command FAILED: stop timeout");
+                        MessageManager.log("Stop timed out.", LogLevel.ERROR);
 
                         PermanentOperations.isStopExpected = false;
                         return;
@@ -38,9 +41,9 @@ public class RestartServerCommand {
                 }
 
                 output = "Server stopped, restarting... (this may take a few minutes)";
-                DiscordBot.BOT_CHANNEL.sendMessage(output).queue();
+                MessageManager.sendText(output, MessageOrigin.COMMAND);
 
-                DiscordBot.LOGGER.info("RestartServer Command handling: stopped");
+                MessageManager.log("Stopped server.", LogLevel.INFO);
 
             } else {
                 output = "Restarting... (this may take a few minutes)";
@@ -48,16 +51,12 @@ public class RestartServerCommand {
             }
             ServerTools.startServer();
 
-            DiscordBot.LOGGER.info("RestartServer Command handled: success");
+            MessageManager.log("Handled. Restarting.", LogLevel.INFO);
         } else {
             output = "You don't have permission to do that.";
             event.reply(output).queue();
 
-            DiscordBot.LOGGER.info("RestartServer Command handled: permission required");
+            MessageManager.log("Handled. Permission required.", LogLevel.INFO);
         }
-    }
-
-    private static void waitForServerStop() {
-
     }
 }

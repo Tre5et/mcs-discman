@@ -4,6 +4,8 @@ import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.io.DiscordbotConfig;
 import net.treset.minecraft_server_discord_bot.io.PermanentOperationsConfig;
 import net.treset.minecraft_server_discord_bot.io.ServerDetails;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,7 +82,7 @@ public class ConfigTools {
         String end = (multiline) ? " *;" : " *;|$";
         String output = FormatTools.findStringBetween(config, start, end);
         if((!allowEmpty && output.isEmpty()) || output == null) {
-            DiscordBot.LOGGER.error(String.format("Couldn't read config option '%s'. Check that you have correctly formatted it. Continuing execution but this may cause unexpected behaviour.", option));
+            MessageManager.log(String.format("Unable to read config \"%s\". Check for formatting issues. Continuing execution anyways.", option), LogLevel.ERROR);
         }
         if(multiline) output = output.replaceAll("\n", "").replaceAll("\r", "");
         return output;

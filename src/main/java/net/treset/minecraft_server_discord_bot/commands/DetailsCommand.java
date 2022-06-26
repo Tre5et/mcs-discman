@@ -2,6 +2,8 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.DiscordBot;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 import net.treset.minecraft_server_discord_bot.tools.FormatTools;
 
@@ -20,6 +22,6 @@ public class DetailsCommand {
 
         event.reply(output).queue();
 
-        DiscordBot.LOGGER.info("Details Command handled.");
+        MessageManager.log("Handled.", LogLevel.INFO);
     }
 }
