@@ -11,8 +11,4 @@ public class NetworkingManager {
 
         CommunicationManager.handleData();
     }
-
-    public static void sendMessageToDiscord(String message) {
-        DiscordBot.BOT_CHANNEL.sendMessage(message).queue();
-    }
 }

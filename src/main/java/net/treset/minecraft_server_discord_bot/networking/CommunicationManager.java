@@ -1,6 +1,8 @@
 package net.treset.minecraft_server_discord_bot.networking;
 
 import net.treset.minecraft_server_discord_bot.DiscordBot;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
+import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,8 +33,11 @@ public class CommunicationManager {
             if(msg == null) continue;
 
             switch(msg.substring(0, 3)) {
+                case "joi" -> MessageManager.sendJoin(msg.substring(4), MessageOrigin.CLIENT);
+                case "lev" -> MessageManager.sendLeave(msg.substring(4), MessageOrigin.CLIENT);
+                case "dth" -> MessageManager.sendDeath(msg.substring(4), MessageOrigin.CLIENT);
+                case "txt" -> MessageManager.sendText(msg.substring(4), MessageOrigin.CLIENT);
                 case "cls" -> ConnectionManager.respondToClosingConnection(msg.substring(4));
-                case "txt" -> printText(msg.substring(4));
                 case "acl" -> ConnectionManager.acceptClose();
                 default -> System.out.println(msg);
 
@@ -44,11 +49,6 @@ public class CommunicationManager {
     }
 
     public static boolean requestCloseReader() { closeReader = true; return true; }
-
-    private static void printText(String text) {
-        DiscordBot.LOGGER.info("CommunicationManager: Sending text provided by client to discord: \"" + text + "\"");
-        NetworkingManager.sendMessageToDiscord(text);
-    }
 
     public static boolean sendToClient(String message) {
         if(ConnectionManager.getClientSender() == null) return false;
