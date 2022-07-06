@@ -18,7 +18,7 @@ public class OnlineCommand {
 
         output = String.format("There %s online%s", (players.size() == 1) ? "is **1** player" : "are **" + players.size() + "** players",  (players.size() == 0) ? "." : ":**\n" + FormatTools.formatList(players, "\n") + "**");
 
-        event.reply(output).queue();
+        event.getHook().sendMessage(output).queue();
 
         MessageManager.log("Handled.", LogLevel.INFO);
     }

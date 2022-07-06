@@ -19,7 +19,7 @@ public class RestartServerCommand {
                 ServerTools.stopServer();
 
                 output = "Stopping the server for a restart...";
-                event.reply(output).queue();
+                event.getHook().sendMessage(output).queue();
                 MessageManager.log("Stopping server.", LogLevel.INFO);
 
                 int timeSinceStop = 0;
@@ -47,14 +47,14 @@ public class RestartServerCommand {
 
             } else {
                 output = "Restarting... (this may take a few minutes)";
-                event.reply(output).queue();
+                event.getHook().sendMessage(output).queue();
             }
             ServerTools.startServer();
 
             MessageManager.log("Handled. Restarting.", LogLevel.INFO);
         } else {
             output = "You don't have permission to do that.";
-            event.reply(output).queue();
+            event.getHook().sendMessage(output).queue();
 
             MessageManager.log("Handled. Permission required.", LogLevel.INFO);
         }

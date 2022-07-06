@@ -17,7 +17,7 @@ public class BackupsCommand {
         if(ConfigTools.CONFIG.DRIVE_UPLOAD && !backupLocation.equals("")) output = String.format("Backups are available at **%s**.\nFurther backups can be requested from %s.", backupLocation, admin);
         else output = String.format("Backups can be requested from %s.", admin);
 
-        event.reply(output).queue();
+        event.getHook().sendMessage(output).queue();
 
         MessageManager.log("Handled.", LogLevel.INFO);
     }

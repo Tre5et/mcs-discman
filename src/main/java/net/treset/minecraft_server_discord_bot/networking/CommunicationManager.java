@@ -1,12 +1,12 @@
 package net.treset.minecraft_server_discord_bot.networking;
 
-import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Objects;
 
 public class CommunicationManager {
 
@@ -40,6 +40,7 @@ public class CommunicationManager {
                 case "txt" -> MessageManager.sendText(msg.substring(4), MessageOrigin.CLIENT);
                 case "cls" -> ConnectionManager.respondToClosingConnection(msg.substring(4));
                 case "acl" -> ConnectionManager.acceptClose();
+                case "tim" -> receiveTime(msg.substring(4));
                 default -> System.out.println(msg);
 
             }
@@ -47,6 +48,35 @@ public class CommunicationManager {
         closeReader = false;
 
         return true;
+    }
+
+    private static Integer time = -1;
+    public static int getTime() {
+        if(!ConnectionManager.isConnected()) {
+            return -2;
+        }
+
+        time = -1;
+        sendToClient("tim/ig_now");
+
+        for(int i = 0; i < 300; i++) {
+            if(time == null) {
+                return -1;
+            } else if(Objects.requireNonNull(time) != -1) {
+                return time;
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return -1;
+    }
+
+    private static void receiveTime(String timeStr) {
+        Integer tmpTime = Integer.parseInt(timeStr);
+        time = tmpTime;
     }
 
     public static boolean requestCloseReader() { closeReader = true; return true; }

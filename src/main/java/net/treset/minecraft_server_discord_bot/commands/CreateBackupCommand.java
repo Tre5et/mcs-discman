@@ -17,7 +17,7 @@ public class CreateBackupCommand {
             if (ServerTools.isServerRunning()) ServerTools.prepareServerForBackup();
 
             output = "Creating backup... (this may take a few minutes)";
-            event.reply(output).queue();
+            event.getHook().sendMessage(output).queue();
             MessageManager.log("Creating backup.", LogLevel.INFO);
 
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm");
@@ -52,7 +52,7 @@ public class CreateBackupCommand {
             ServerTools.undoBackupPreparation();
         } else {
             output = "You don't have permission to do that.";
-            event.reply(output).queue();
+            event.getHook().sendMessage(output).queue();
             MessageManager.log("Handled.", LogLevel.INFO);
         }
     }

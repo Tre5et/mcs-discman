@@ -15,7 +15,7 @@ public class JoinCommand {
 
         output = String.format("Join the server with on ip-adress **%s**.\nYou must be member to join. Type ``/members`` for more details.", url);
 
-        event.reply(output).queue();
+        event.getHook().sendMessage(output).queue();
 
         MessageManager.log("Handled.", LogLevel.INFO);
     }

@@ -29,6 +29,6 @@ public class StartServerCommand {
             MessageManager.log("Handled. Permission required.", LogLevel.INFO);
         }
 
-        event.reply(output).queue();
+        event.getHook().sendMessage(output).queue();
     }
 }

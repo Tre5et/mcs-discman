@@ -19,7 +19,7 @@ public class MembersCommand {
 
         output = String.format("Current members are: **%s**.\nTo become a member DM %s.", FormatTools.formatList(members, ", "), admin);
 
-        event.reply(output).queue();
+        event.getHook().sendMessage(output).queue();
 
         MessageManager.log("Handled.", LogLevel.INFO);
     }

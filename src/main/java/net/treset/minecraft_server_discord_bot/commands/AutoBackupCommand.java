@@ -16,29 +16,29 @@ public class AutoBackupCommand {
             if(Objects.requireNonNull(event.getOption("state")).getAsBoolean()) {
                 if(PermanentOperations.isBackupEnabled) {
                     output = "Auto-Backup is already enabled.";
-                    event.reply(output).queue();
+                    event.getHook().sendMessage(output).queue();
                     MessageManager.log("Handled. Already active.", LogLevel.INFO);
                 } else {
                     PermanentOperations.isBackupEnabled = true;
                     output = "Enabled Auto-Backup";
-                    event.reply(output).queue();
+                    event.getHook().sendMessage(output).queue();
                     MessageManager.log("Handled. Enabled.", LogLevel.INFO);
                 }
             } else {
                 if(PermanentOperations.isBackupEnabled) {
                     PermanentOperations.isBackupEnabled = false;
                     output = "Disabled Auto-Backup";
-                    event.reply(output).queue();
+                    event.getHook().sendMessage(output).queue();
                     MessageManager.log("Handled. Disabled.", LogLevel.INFO);
                 } else {
                     output = "Auto-Backup is already disabled.";
-                    event.reply(output).queue();
+                    event.getHook().sendMessage(output).queue();
                     MessageManager.log("Handled. Already inactive.", LogLevel.INFO);
                 }
             }
         } else {
             output = "You don't have permission to do that.";
-            event.reply(output).queue();
+            event.getHook().sendMessage(output).queue();
             MessageManager.log("Handled. Permission required.", LogLevel.INFO);
         }
     }

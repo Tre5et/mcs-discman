@@ -20,7 +20,7 @@ public class DetailsCommand {
 
         output = String.format("The server is running **%s** for version **%s** with %s.", server, version, (mods.size() == 0) ? "no mods" : "the mods: **" + FormatTools.formatList(mods, ", ") + "**");
 
-        event.reply(output).queue();
+        event.getHook().sendMessage(output).queue();
 
         MessageManager.log("Handled.", LogLevel.INFO);
     }

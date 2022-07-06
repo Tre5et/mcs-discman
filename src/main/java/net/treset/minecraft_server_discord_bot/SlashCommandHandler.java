@@ -16,12 +16,15 @@ public class SlashCommandHandler extends ListenerAdapter {
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
         if(!event.getChannel().getId().equals(ConfigTools.CONFIG.MESSAGE_CHANNEL_ID)) return;
 
+        event.deferReply().queue();
+
         switch (event.getName()) {
             case "active": CompletableFuture.runAsync(() -> ActiveCommand.handleCommand(event)); break;
             case "autobackup": CompletableFuture.runAsync(() -> AutoBackupCommand.handleCommand(event)); break;
             case "backups": CompletableFuture.runAsync(() -> BackupsCommand.handleCommand(event)); break;
             case "createbackup": CompletableFuture.runAsync(() -> CreateBackupCommand.handleCommand(event)); break;
             case "details": CompletableFuture.runAsync(() -> DetailsCommand.handleCommand(event)); break;
+            case "ingame" : CompletableFuture.runAsync(() -> IngameCommand.handleCommand(event)); break;
             case "join": CompletableFuture.runAsync(() -> JoinCommand.handleCommand(event));break;
             case "members": CompletableFuture.runAsync(() -> MembersCommand.handleCommand(event)); break;
             case "logconsole":  CompletableFuture.runAsync(() ->LogConsoleCommand.handleCommand(event)); break;
@@ -33,7 +36,7 @@ public class SlashCommandHandler extends ListenerAdapter {
             case "startserver": CompletableFuture.runAsync(() -> StartServerCommand.handleCommand(event)); break;
             case "stopserver": CompletableFuture.runAsync(() -> StopServerCommand.handleCommand(event)); break;
             default:
-                event.reply("Sorry, I don't know that :worried:").queue();
+                event.getHook().sendMessage("Sorry, I don't know that :worried:").queue();
                 MessageManager.log(String.format("Unable to handle command \"%s\". Unknown.", event.getName()), LogLevel.WARN);
                 break;
         }

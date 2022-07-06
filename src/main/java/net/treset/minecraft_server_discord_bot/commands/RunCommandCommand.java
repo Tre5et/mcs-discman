@@ -1,7 +1,6 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
@@ -20,12 +19,12 @@ public class RunCommandCommand {
             ServerTools.runServerCommand(cmd);
 
             output = String.format("Successfully ran command **%s**.", cmd);
-            event.reply(output).queue();
+            event.getHook().sendMessage(output).queue();
 
             MessageManager.log(String.format("Handled. Ran command \"%s\".", cmd), LogLevel.INFO);
         } else {
             output = "You don't have permission to do that.";
-            event.reply(output).queue();
+            event.getHook().sendMessage(output).queue();
 
             MessageManager.log(String.format("Handled. Permission denied for command \"%s\".", cmd), LogLevel.INFO);
         }

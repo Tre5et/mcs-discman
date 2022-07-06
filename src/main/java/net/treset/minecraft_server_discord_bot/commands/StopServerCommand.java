@@ -18,13 +18,13 @@ public class StopServerCommand {
         if(DiscordTools.isModerator(event)) {
             if(!ServerTools.isServerRunning()) {
                 output = "Server is already stopped.";
-                event.reply(output).queue();
+                event.getHook().sendMessage(output).queue();
                 MessageManager.log("Handled. Already stopped.", LogLevel.INFO);
             } else {
                 ServerTools.stopServer();
 
                 output = "Stopping the server...";
-                event.reply(output).queue();
+                event.getHook().sendMessage(output).queue();
                 MessageManager.log("Stopping server.", LogLevel.INFO);
 
                 int timeSinceStop = 0;
@@ -55,7 +55,7 @@ public class StopServerCommand {
             }
         } else {
             output = "You don't have permission to do that.";
-            event.reply(output).queue();
+            event.getHook().sendMessage(output).queue();
             MessageManager.log("Handled. Permission required.", LogLevel.INFO);
         }
     }

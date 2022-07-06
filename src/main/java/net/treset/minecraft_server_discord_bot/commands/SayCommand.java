@@ -12,12 +12,12 @@ public class SayCommand {
     public static void handleCommand(SlashCommandEvent event) {
         String message = Objects.requireNonNull(event.getOption("message")).getAsString();
         if(DiscordTools.isModerator(event)) {
-            event.reply(message).queue();
+            event.getHook().sendMessage(message).queue();
 
             MessageManager.log(String.format("Handled. Said \"%s\".", message), LogLevel.INFO);
         } else {
             String output = "You don't have permission to do that.";
-            event.reply(output).queue();
+            event.getHook().sendMessage(output).queue();
 
             MessageManager.log(String.format("Handled. Permission required to say \"%s\".", message), LogLevel.INFO);
         }

@@ -12,7 +12,7 @@ public class ActiveCommand {
         if(ServerTools.isServerRunning()) output = "The server is **running**.";
         else output = "The server is **not** running.";
 
-        event.reply(output).queue();
+        event.getHook().sendMessage(output).queue();
 
         MessageManager.log(String.format("Handled: %s.", (ServerTools.isServerRunning())? "running": "not running"), LogLevel.INFO);
     }
