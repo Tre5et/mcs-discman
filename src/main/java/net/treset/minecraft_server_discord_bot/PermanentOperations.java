@@ -74,8 +74,8 @@ public class PermanentOperations {
                     String[] lines = formattedData.split("\\r?\\n");
 
                     for (String line : lines) {
-                        if(isStartLoggingEnabled) logStarted(line);
-                        if(isJoinLoggingEnabled) {
+                        if (isStartLoggingEnabled) logStarted(line);
+                        if (isJoinLoggingEnabled && !ConnectionManager.isConnected()) {
                             logPlayerJoin(line);
                             logPlayerLeave(line);
                         }

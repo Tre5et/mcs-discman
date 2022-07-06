@@ -9,6 +9,7 @@ import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
 import javax.security.auth.login.LoginException;
+import java.util.Objects;
 
 public class DiscordTools {
     public static void initClient() {
@@ -56,6 +57,6 @@ public class DiscordTools {
     }
 
     public static boolean isModerator(SlashCommandEvent event) {
-        return event.getMember().getRoles().contains(DiscordBot.MODERATOR_ROLE);
+        return Objects.requireNonNull(event.getMember()).getRoles().contains(DiscordBot.MODERATOR_ROLE);
     }
 }
