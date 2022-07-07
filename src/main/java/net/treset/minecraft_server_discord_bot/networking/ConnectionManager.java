@@ -1,6 +1,5 @@
 package net.treset.minecraft_server_discord_bot.networking;
 
-import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
@@ -82,6 +81,8 @@ public class ConnectionManager {
 
         MessageManager.log(String.format("Opened connection to client %s.", sessionId), LogLevel.INFO);
         connected = true;
+        CommunicationManager.updateReader();
+
         return true;
     }
 
@@ -116,7 +117,6 @@ public class ConnectionManager {
             closeAccepted = false;
 
             try {
-                CommunicationManager.requestCloseReader();
                 clientSender.close();
                 clientSender.close();
                 s.close();
@@ -133,6 +133,8 @@ public class ConnectionManager {
             sessionId = null;
 
             connected = false;
+
+            CommunicationManager.updateReader();
 
             return true;
         }
@@ -179,6 +181,10 @@ public class ConnectionManager {
             sessionId = null;
 
             connected = true;
+
+            CommunicationManager.updateReader();
+
+            openConnection();
 
             return success;
         }

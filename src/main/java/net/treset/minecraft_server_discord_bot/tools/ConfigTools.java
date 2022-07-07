@@ -53,6 +53,14 @@ public class ConfigTools {
         PLAYERS.removeIf(""::equals);
     }
 
+    public static void setPlayers(String[] newPlayers) {
+        PLAYERS = List.of(newPlayers);
+
+        String players = String.join(",", PLAYERS);
+
+        FileTools.writeFile(DiscordBot.PLAYERS_FILE, players);
+    }
+
     public static void addPlayer(String name) {
         loadPlayers();
 

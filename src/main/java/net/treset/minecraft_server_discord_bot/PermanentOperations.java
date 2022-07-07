@@ -95,6 +95,7 @@ public class PermanentOperations {
     private static void logStarted(String input) {
         if (input.contains("Done (")) {
             MessageManager.sendStarted(MessageOrigin.LOG_FILE);
+            ConfigTools.setPlayers(new String[]{});
         }
     }
 
