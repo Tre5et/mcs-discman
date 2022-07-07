@@ -61,6 +61,7 @@ public class CommunicationManager {
 
         for(int i = 0; i < 300; i++) {
             if(time == null) {
+                MessageManager.log("Error getting time. Received invalid time.", LogLevel.WARN);
                 return -1;
             } else if(Objects.requireNonNull(time) != -1) {
                 return time;
@@ -71,12 +72,12 @@ public class CommunicationManager {
                 throw new RuntimeException(e);
             }
         }
+        MessageManager.log("Error getting time. Timed out.", LogLevel.WARN);
         return -1;
     }
 
     private static void receiveTime(String timeStr) {
-        Integer tmpTime = Integer.parseInt(timeStr);
-        time = tmpTime;
+        time = Integer.parseInt(timeStr);
     }
 
     public static boolean requestCloseReader() { closeReader = true; return true; }
