@@ -19,6 +19,8 @@ public class ConnectionManager {
     private static BufferedReader clientReader;
     private static PrintStream clientSender;
 
+    public static Thread connectionThread;
+
     public static int getPort() { return port; }
     public static boolean setPort(int newPort) { port = newPort; return true; }
 
@@ -29,9 +31,24 @@ public class ConnectionManager {
     public static PrintStream getClientSender() { return clientSender; }
 
     private static boolean connected = false;
+    private static boolean waitingForConnection = false;
     public static boolean isConnected() { return connected; }
+    public static boolean isWaitingForConnection() { return waitingForConnection; }
 
-    public static boolean init() {
+    public static boolean openConnection() {
+        if(connected || waitingForConnection || (connectionThread != null && !connectionThread.isInterrupted())) {
+            MessageManager.log(String.format("Not opening connection. Connection to %s is already open.", sessionId), LogLevel.WARN);
+            return false;
+        }
+        connectionThread = new Thread(ConnectionManager::openConnectionThread);
+        connectionThread.start();
+        return true;
+    }
+
+    //waits for client to connect, only use async
+    private static boolean openConnectionThread() {
+        MessageManager.log("Opening connection.", LogLevel.INFO);
+
         try {
             ss = new ServerSocket(port);
         } catch (IOException e) {
@@ -40,23 +57,16 @@ public class ConnectionManager {
             return false;
         }
 
-        MessageManager.log("Connection initialized.", LogLevel.INFO);
-        return true;
-    }
-
-    //waits for client to connect, only use async
-    public static boolean openConnection() {
-        if(connected && sessionId != null) {
-            MessageManager.log(String.format("Not opening connection. Connection to %s is already open.", sessionId), LogLevel.WARN);
-        }
-        MessageManager.log("Opening connection.", LogLevel.INFO);
         try {
+            waitingForConnection = true;
             s = ss.accept();
+            waitingForConnection = false;
             clientReader = new BufferedReader(new InputStreamReader(s.getInputStream()));
             clientSender = new PrintStream(s.getOutputStream());
         } catch (IOException e) {
             MessageManager.log("Unable to open socket. -> Stacktrace.", LogLevel.ERROR);
             e.printStackTrace();
+            waitingForConnection = false;
             return false;
         }
 
@@ -72,7 +82,7 @@ public class ConnectionManager {
         if (!initMsg.startsWith("sid/")) {
             MessageManager.log(String.format("Unable to establish session id with client. Forcefully closing connection. Initial message wasn't a session id: \"%s\". -> Stacktrace.", initMsg), LogLevel.ERROR);
             sessionId = "-1";
-            closeConnection(true);
+            closeConnection(true, false);
             return false;
         }
         sessionId = initMsg.substring(4);
@@ -89,8 +99,29 @@ public class ConnectionManager {
     private static boolean closeAccepted = false;
     public static void acceptClose() { closeAccepted = true; }
 
-    public static boolean closeConnection(boolean force) {
-        if(sessionId == null || !connected) return true;
+    public static boolean closeConnection(boolean force, boolean reopen) {
+        if(!waitingForConnection && !connected) return true;
+        if(waitingForConnection) {
+            if(reopen) return true;
+
+            try {
+                ss.close();
+            } catch (IOException e) {
+                MessageManager.log("Error closing server socket. -> Stacktrace", LogLevel.ERROR);
+                e.printStackTrace();
+                return false;
+            }
+
+            try {
+                connectionThread.interrupt();
+            } catch (SecurityException e) {
+                MessageManager.log("Unable to terminate connection thread. -> Stacktrace", LogLevel.ERROR);
+                e.printStackTrace();
+            }
+
+            waitingForConnection = false;
+            return true;
+        }
 
         if(closeAccepted) {
             MessageManager.log("Found illegal close acceptance state when closing. Closing anyway.", LogLevel.WARN);
@@ -101,7 +132,7 @@ public class ConnectionManager {
 
         if(CommunicationManager.sendToClient("cls/" + sessionId)) {
             try {
-                Thread.sleep(10);
+                Thread.sleep(50);
             } catch(InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -120,10 +151,26 @@ public class ConnectionManager {
                 clientSender.close();
                 clientSender.close();
                 s.close();
+                connectionThread.interrupt();
             } catch (IOException e) {
                 MessageManager.log("Error closing connection. Unable to close socket. -> Stacktrace.", LogLevel.ERROR);
                 e.printStackTrace();
                 return false;
+            }
+
+            try {
+                ss.close();
+            } catch (IOException e) {
+                MessageManager.log("Error closing server socket. -> Stacktrace", LogLevel.ERROR);
+                e.printStackTrace();
+                return false;
+            }
+
+            try {
+                connectionThread.interrupt();
+            } catch (SecurityException e) {
+                MessageManager.log("Unable to terminate connection thread. -> Stacktrace", LogLevel.ERROR);
+                e.printStackTrace();
             }
 
             MessageManager.log(String.format("Closed connection to client %s.", sessionId), LogLevel.INFO);
@@ -136,13 +183,15 @@ public class ConnectionManager {
 
             CommunicationManager.updateReader();
 
+            if(reopen) openConnection();
+
             return true;
         }
         MessageManager.log(String.format("Error closing connection. Unable to send close request to client %s.", sessionId), LogLevel.ERROR);
         return false;
     }
 
-    public static boolean respondToClosingConnection(String sid) {
+    public static boolean respondToClosingConnection(String sid, boolean reopen) {
         MessageManager.log(String.format("Received close request from client %s.", sid), LogLevel.INFO);
 
         if(!sid.equals(sessionId)) {
@@ -174,6 +223,21 @@ public class ConnectionManager {
                 success = false;
             }
 
+            try {
+                ss.close();
+            } catch (IOException e) {
+                MessageManager.log("Error closing server socket. -> Stacktrace", LogLevel.ERROR);
+                e.printStackTrace();
+                return false;
+            }
+
+            try {
+                connectionThread.interrupt();
+            } catch (SecurityException e) {
+                MessageManager.log("Unable to terminate connection thread. -> Stacktrace", LogLevel.ERROR);
+                e.printStackTrace();
+            }
+
             if(success) {
                 MessageManager.log(String.format("Closed connection after request from client %s. ", sessionId), LogLevel.INFO);
             }
@@ -184,7 +248,7 @@ public class ConnectionManager {
 
             CommunicationManager.updateReader();
 
-            openConnection();
+            if(reopen) openConnection();
 
             return success;
         }

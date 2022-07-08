@@ -25,11 +25,6 @@ public class CommunicationManager {
     public static boolean handleData() {
         updateReader();
 
-        if(br == null) {
-            MessageManager.log("Not starting data handling. No client reader.", LogLevel.WARN);
-            return false;
-        }
-
         MessageManager.log("Opened reader.", LogLevel.INFO);
 
         String msg;
@@ -59,7 +54,7 @@ public class CommunicationManager {
                 case "lev" -> MessageManager.sendLeave(msg.substring(4), MessageOrigin.CLIENT);
                 case "dth" -> MessageManager.sendDeath(msg.substring(4), MessageOrigin.CLIENT);
                 case "txt" -> MessageManager.sendText(msg.substring(4), MessageOrigin.CLIENT);
-                case "cls" -> ConnectionManager.respondToClosingConnection(msg.substring(4));
+                case "cls" -> ConnectionManager.respondToClosingConnection(msg.substring(4), false);
                 case "acl" -> ConnectionManager.acceptClose();
                 case "tim" -> receiveTime(msg.substring(4));
                 case "ply" -> receivePlayers(msg.substring(4));

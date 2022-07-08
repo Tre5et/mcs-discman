@@ -43,6 +43,10 @@ public class DiscordTools {
                 .addOption(OptionType.BOOLEAN, "state", "The state the auto-backup should be in.", true).queue();
         DiscordBot.GUILD.upsertCommand("backups", "See where to find backups!").queue();
         DiscordBot.GUILD.upsertCommand("createbackup", "Create a backup! [Moderator only]").queue();
+        DiscordBot.GUILD.upsertCommand("connection", "Manage connection to server mod! [Moderator only]").addOptions(
+                new OptionData(OptionType.STRING, "action", "The thing to do.", true)
+                        .addChoice("status", "status").addChoice("open", "open").addChoice("close", "close")
+        ).queue();
         DiscordBot.GUILD.upsertCommand("details", "See details about the server!").queue();
         DiscordBot.GUILD.upsertCommand("ingame", "Do or get InGame stuff!").addOptions(
                 new OptionData(OptionType.STRING, "action", "The thing that will be done.", true)

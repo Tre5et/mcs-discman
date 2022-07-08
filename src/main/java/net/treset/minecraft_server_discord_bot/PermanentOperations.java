@@ -199,7 +199,7 @@ public class PermanentOperations {
 
         boolean running = ServerTools.isServerRunning();
         if(!running && prevRunning) {
-            ConnectionManager.closeConnection(true);
+            ConnectionManager.closeConnection(true, true);
             prevRunning = false;
             if(isStopExpected) {
                 MessageManager.log("Expected server stop detected.", LogLevel.DEBUG);
