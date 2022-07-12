@@ -2,6 +2,7 @@ package net.treset.minecraft_server_discord_bot.networking;
 
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
+import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class ConnectionManager {
     public static boolean isWaitingForConnection() { return waitingForConnection; }
 
     public static boolean openConnection() {
+        if(!ConfigTools.CLIENT_CONFIG.CLIENT_ENABLED) return true;
         if(connected || waitingForConnection || (connectionThread != null && !connectionThread.isInterrupted())) {
             MessageManager.log(String.format("Not opening connection. Connection to %s is already open.", sessionId), LogLevel.WARN);
             return false;
@@ -48,6 +50,8 @@ public class ConnectionManager {
     //waits for client to connect, only use async
     private static boolean openConnectionThread() {
         MessageManager.log("Opening connection.", LogLevel.INFO);
+
+        port = ConfigTools.CLIENT_CONFIG.PORT;
 
         try {
             ss = new ServerSocket(port);

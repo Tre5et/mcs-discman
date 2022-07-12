@@ -1,5 +1,8 @@
 package net.treset.minecraft_server_discord_bot.tools;
 
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
+import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
+
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +51,7 @@ public class FormatTools {
         try {
             return Integer.parseInt(input);
         } catch (NumberFormatException e) {
+            MessageManager.log(String.format("Unable to convert string \"%s\" to int.", input), LogLevel.WARN);
             return -1;
         }
     }

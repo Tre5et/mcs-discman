@@ -4,30 +4,30 @@ import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 import net.treset.minecraft_server_discord_bot.tools.FormatTools;
 
 public class PermanentOperationsConfig {
-    public boolean isLoggingEnabled = false;
-    public boolean isStartLoggingEnabled = false;
-    public boolean isJoinLoggingEnabled = false;
-    public boolean isLoggingFull = false;
-    public boolean isBackupEnabled = true;
-    public String backupHour = "01";
-    public boolean isCrashCheckEnabled = false;
-    public boolean isLogNoBackup = true;
-    public int inactivityReminder = 0;
+    public boolean LOGGING_ENABLED = false;
+    public boolean START_LOGGING = false;
+    public boolean JOIN_LOGGING = false;
+    public boolean FULL_LOGGING = false;
+    public boolean BACKUP_ENABLED = true;
+    public String BACKUP_HOUR = "01";
+    public boolean CRASH_CHECK_ENABLED = false;
+    public boolean LOG_NO_BACKUP = true;
+    public int INACTIVITY_REMINDER_ENABLED = 0;
     
     public PermanentOperationsConfig(String source) {
-        this.isJoinLoggingEnabled = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "join_leave_logging", false, false));
-        this.isStartLoggingEnabled = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "start_logging", false, false));
-        this.isLoggingFull = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "full_console_logging", false, false));
+        this.JOIN_LOGGING = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "join_leave_logging", false, false));
+        this.START_LOGGING = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "start_logging", false, false));
+        this.FULL_LOGGING = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "full_console_logging", false, false));
 
-        this.isLoggingEnabled =
-                this.isJoinLoggingEnabled ||
-                        this.isStartLoggingEnabled ||
-                        this.isLoggingFull;
+        this.LOGGING_ENABLED =
+                this.JOIN_LOGGING ||
+                        this.START_LOGGING ||
+                        this.FULL_LOGGING;
 
-        this.isBackupEnabled = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "autobackup", false, false));
-        this.backupHour = ConfigTools.findConfigOption(source, "autobackup_hour", false, false);
-        this.isCrashCheckEnabled = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "crash_check", false, false));
-        this.isLogNoBackup = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "log_no_backup", false, false));
-        this.inactivityReminder = FormatTools.stringToInt(ConfigTools.findConfigOption(source, "inactivity_reminder", false, false));
+        this.BACKUP_ENABLED = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "autobackup", false, false));
+        this.BACKUP_HOUR = ConfigTools.findConfigOption(source, "autobackup_hour", false, false);
+        this.CRASH_CHECK_ENABLED = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "crash_check", false, false));
+        this.LOG_NO_BACKUP = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "log_no_backup", false, false));
+        this.INACTIVITY_REMINDER_ENABLED = FormatTools.stringToInt(ConfigTools.findConfigOption(source, "inactivity_reminder", false, false));
     }
 }

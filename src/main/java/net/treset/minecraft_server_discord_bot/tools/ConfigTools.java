@@ -1,6 +1,7 @@
 package net.treset.minecraft_server_discord_bot.tools;
 
 import net.treset.minecraft_server_discord_bot.DiscordBot;
+import net.treset.minecraft_server_discord_bot.io.ClientConfig;
 import net.treset.minecraft_server_discord_bot.io.DiscordbotConfig;
 import net.treset.minecraft_server_discord_bot.io.PermanentOperationsConfig;
 import net.treset.minecraft_server_discord_bot.io.ServerDetails;
@@ -15,12 +16,14 @@ import java.util.List;
 public class ConfigTools {
     public static DiscordbotConfig CONFIG;
     public static PermanentOperationsConfig PERMA_CONFIG;
+    public static ClientConfig CLIENT_CONFIG;
     public static ServerDetails DETAILS;
     public static List<String> PLAYERS = new ArrayList<>();
 
     public static void initConfig() {
         loadConfig();
         loadPermanentOperationsConfig();
+        loadClientConfig();
         loadDetails();
         loadPlayers();
     }
@@ -35,6 +38,12 @@ public class ConfigTools {
         String config = FileTools.readFile(DiscordBot.CONFIG_FILE);
 
         PERMA_CONFIG = new PermanentOperationsConfig(config);
+    }
+
+    public static void loadClientConfig() {
+        String config = FileTools.readFile(DiscordBot.CONFIG_FILE);
+
+        CLIENT_CONFIG = new ClientConfig(config);
     }
 
     public static void loadDetails() {

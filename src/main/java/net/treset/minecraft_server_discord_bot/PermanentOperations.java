@@ -37,15 +37,15 @@ public class PermanentOperations {
     public static void setSomethingHappened() { hasSomethingHappened = true; }
 
     public static void permanentLoop() {
-        isLoggingEnabled = ConfigTools.PERMA_CONFIG.isLoggingEnabled;
-        isStartLoggingEnabled = ConfigTools.PERMA_CONFIG.isStartLoggingEnabled;
-        isJoinLoggingEnabled = ConfigTools.PERMA_CONFIG.isJoinLoggingEnabled;
-        isLoggingFull = ConfigTools.PERMA_CONFIG.isLoggingFull;
-        isBackupEnabled = ConfigTools.PERMA_CONFIG.isBackupEnabled;
-        backupHour = ConfigTools.PERMA_CONFIG.backupHour;
-        isCrashCheckEnabled = ConfigTools.PERMA_CONFIG.isCrashCheckEnabled;
-        isLogNoBackup = ConfigTools.PERMA_CONFIG.isLogNoBackup;
-        inactivityReminder = ConfigTools.PERMA_CONFIG.inactivityReminder;
+        isLoggingEnabled = ConfigTools.PERMA_CONFIG.LOGGING_ENABLED;
+        isStartLoggingEnabled = ConfigTools.PERMA_CONFIG.START_LOGGING;
+        isJoinLoggingEnabled = ConfigTools.PERMA_CONFIG.JOIN_LOGGING;
+        isLoggingFull = ConfigTools.PERMA_CONFIG.FULL_LOGGING;
+        isBackupEnabled = ConfigTools.PERMA_CONFIG.BACKUP_ENABLED;
+        backupHour = ConfigTools.PERMA_CONFIG.BACKUP_HOUR;
+        isCrashCheckEnabled = ConfigTools.PERMA_CONFIG.CRASH_CHECK_ENABLED;
+        isLogNoBackup = ConfigTools.PERMA_CONFIG.LOG_NO_BACKUP;
+        inactivityReminder = ConfigTools.PERMA_CONFIG.INACTIVITY_REMINDER_ENABLED;
 
         prevData = FileTools.readFile(ConfigTools.CONFIG.LOG_PATH);
 
@@ -75,7 +75,7 @@ public class PermanentOperations {
 
                     for (String line : lines) {
                         if (isStartLoggingEnabled) logStarted(line);
-                        if (isJoinLoggingEnabled && !ConnectionManager.isConnected()) {
+                        if (isJoinLoggingEnabled && (!ConnectionManager.isConnected() || !ConfigTools.CLIENT_CONFIG.OVERRIDE_CONSOLE_READER)) {
                             logPlayerJoin(line);
                             logPlayerLeave(line);
                         }

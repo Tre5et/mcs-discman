@@ -2,6 +2,7 @@ package net.treset.minecraft_server_discord_bot.messaging;
 
 import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.PermanentOperations;
+import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 
 public class MessageManager {
     private static void sendMessageToDiscord(String message) {
@@ -31,6 +32,8 @@ public class MessageManager {
     }
 
     public static void sendJoin(String player, MessageOrigin org) {
+        if(!ConfigTools.PERMA_CONFIG.JOIN_LOGGING || !ConfigTools.CLIENT_CONFIG.OVERRIDE_CONSOLE_READER) return;
+
         sendMessageToDiscord(String.format("%s joined the game.", player));
 
         log(String.format("Sent join of player %s %s.", player, org.getMessage()), LogLevel.INFO);
@@ -39,6 +42,8 @@ public class MessageManager {
     }
 
     public static void sendLeave(String player, MessageOrigin org) {
+        if(!ConfigTools.PERMA_CONFIG.JOIN_LOGGING || !ConfigTools.CLIENT_CONFIG.OVERRIDE_CONSOLE_READER) return;
+
         sendMessageToDiscord(String.format("%s left the game.", player));
 
         log(String.format("Sent leave of player %s %s.", player, org.getMessage()), LogLevel.INFO);
@@ -47,6 +52,8 @@ public class MessageManager {
     }
 
     public static void sendDeath(String message, MessageOrigin org) {
+        if(!ConfigTools.CLIENT_CONFIG.DEATH_LOGGING) return;
+
         sendMessageToDiscord(message + ".");
 
         log(String.format("Sent death \"%s\" %s.", message, org.getMessage()), LogLevel.INFO);

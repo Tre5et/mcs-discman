@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
+import net.treset.minecraft_server_discord_bot.networking.NetworkingManager;
 import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
 import net.treset.minecraft_server_discord_bot.tools.DriveTools;
@@ -28,6 +29,8 @@ public class DiscordBot {
 
         DiscordTools.initClient();
 
+        new Thread(NetworkingManager::init).start();
+
         DriveTools.initDriveClient();
 
         assert GUILD != null;
@@ -36,6 +39,6 @@ public class DiscordBot {
         assert BOT_CHANNEL != null;
         MessageManager.sendText("Hi, I'm online now.", MessageOrigin.SCHEDULE);
 
-        PermanentOperations.permanentLoop();
+        new Thread(PermanentOperations::permanentLoop).start();
     }
 }
