@@ -248,7 +248,7 @@ public class ConnectionManager {
 
             sessionId = null;
 
-            connected = true;
+            connected = false;
 
             CommunicationManager.updateReader();
 

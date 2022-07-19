@@ -61,6 +61,18 @@ public class MessageManager {
         PermanentOperations.setSomethingHappened();
     }
 
+    public static void sendAdvancement(String message, MessageOrigin org) {
+        if(!ConfigTools.CLIENT_CONFIG.ADVANCEMENT_LOGGING) return;
+
+        message = message.replaceAll("[\\[\\]]", "\"");
+
+        sendMessageToDiscord(message + ".");
+
+        log(String.format("Sent advancement \"%s\" %s.", message, org.getMessage()), LogLevel.INFO);
+
+        PermanentOperations.setSomethingHappened();
+    }
+
     public static void log(String message, LogLevel level) {
         String org = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getSimpleName();
         String msg = org + ": " + message;

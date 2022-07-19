@@ -53,6 +53,7 @@ public class CommunicationManager {
                 case "joi" -> MessageManager.sendJoin(msg.substring(4), MessageOrigin.CLIENT);
                 case "lev" -> MessageManager.sendLeave(msg.substring(4), MessageOrigin.CLIENT);
                 case "dth" -> MessageManager.sendDeath(msg.substring(4), MessageOrigin.CLIENT);
+                case "adv" -> MessageManager.sendAdvancement(msg.substring(4), MessageOrigin.CLIENT);
                 case "txt" -> MessageManager.sendText(msg.substring(4), MessageOrigin.CLIENT);
                 case "cls" -> ConnectionManager.respondToClosingConnection(msg.substring(4), false);
                 case "acl" -> ConnectionManager.acceptClose();
