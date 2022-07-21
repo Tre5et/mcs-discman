@@ -44,6 +44,10 @@ public class CommunicationManager {
             } catch (IOException e) {
                 MessageManager.log("Error reading line. -> Stacktrace.", LogLevel.ERROR);
                 e.printStackTrace();
+                if(e.getMessage().equals("Connection reset")) {
+                    MessageManager.log("Closing connection to client " + ConnectionManager.getSessionId() + " because client closed unexpectedly.", LogLevel.WARN);
+                    ConnectionManager.closeConnection(true, true);
+                }
                 continue;
             }
 

@@ -17,7 +17,7 @@ public class ConnectionCommand {
             switch (type) {
                 case "status" -> output = getStatus();
                 case "open" -> output = openConnection();
-                case "close" -> output = closeConnection();
+                case "close" -> output = closeConnection(event);
                 default -> output = "not found";
             }
         } else {
@@ -48,11 +48,17 @@ public class ConnectionCommand {
         return "Failed to open the connection. Try again.";
     }
 
-    private static String closeConnection() {
+    private static String closeConnection(SlashCommandEvent event) {
         if(!ConnectionManager.isConnected() && !ConnectionManager.isWaitingForConnection()) {
             return "No connection is open. Open one first.";
         }
-        if(ConnectionManager.closeConnection(false, false)) {
+
+        boolean force = false;
+        if(event.getOption("action") != null) {
+            force = Objects.requireNonNull(event.getOption("action")).getAsBoolean();
+        }
+
+        if(ConnectionManager.closeConnection(force, false)) {
             return "Connection closed successfully.";
         }
         return "Failed to close the connection. Try again.";

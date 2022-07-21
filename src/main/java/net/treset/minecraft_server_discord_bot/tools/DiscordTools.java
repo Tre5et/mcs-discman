@@ -46,7 +46,7 @@ public class DiscordTools {
         DiscordBot.GUILD.upsertCommand("connection", "Manage connection to server mod! [Moderator only]").addOptions(
                 new OptionData(OptionType.STRING, "action", "The thing to do.", true)
                         .addChoice("status", "status").addChoice("open", "open").addChoice("close", "close")
-        ).queue();
+            ).addOption(OptionType.BOOLEAN, "force", "Force closing the connection; Does nothing if another action than close is selected", false).queue();
         DiscordBot.GUILD.upsertCommand("details", "See details about the server!").queue();
         DiscordBot.GUILD.upsertCommand("ingame", "Do or get InGame stuff!").addOptions(
                 new OptionData(OptionType.STRING, "action", "The thing that will be done.", true)
