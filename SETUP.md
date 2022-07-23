@@ -8,6 +8,7 @@ Required Steps:
 - [Start the Manager](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md#start-the-manager)
 
 Optional Steps:
+- [Setup the client mod](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md#setup-the-client-mod)
 - [Setup automatic backup uplaods to Google Drive](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md#setup-automatic-backup-uplaods-to-google-drive)
 - [Create a service for easy start of the discord bot](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md#create-a-service-for-easy-start-of-the-manager)
 - [Setup a Minecraft server service](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md#setup-a-minecraft-server-service)
@@ -33,7 +34,7 @@ Optional Steps:
 ## Edit the config
 - In the folder you have extracted, you will find two .conf files.
 - #### Open ```discordbot.conf```.
-- Edit the options how you need them, they're rellatively self explanatory, here are a few notes though:
+- Edit the options how you need them, they're relatively self-explanatory, here are a few notes though:
 - Semicolons ```;``` in the config represent comments, anything after them in the same line isn't interpreted
 - Some options may be left empty, most can't be though, if you don't know what to enter try leaving it empty
 - Spaces directly after the ```=``` and directly before the ```;``` or the end of the line are ignored, other spaces are counted
@@ -53,6 +54,8 @@ Optional Steps:
 - The paths can be absolute or relative paths to the files location, thought absolute is recommended
 - The section ```minecraft-server-console-commands``` is setup for runnig a server as described in [Setup a Minecraft server service](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md#setup-a-minecraft-server-service), you need to figure out the things to put in there yourself if you are running the server differently
 - Leave the section ```google-drive-details``` as default for now
+- ```death_logging``` and ``advancement_logging`` won't do anything for now. You need to [Setup the client mod](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md#setup-the-client-mod) for it to work
+- Leave the section ``client-connection-options`` as default for now
 - #### Open ```details.conf``` 
 - Edit the values to your liking
 - ```Server``` should be "vanilla", "fabric-loader", "bukkit" etc.
@@ -65,6 +68,27 @@ Optional Steps:
 - If you want a more convenient way to start the bot, follow [Create a service for easy start of the discord bot](https://github.com/Tre5et/mcs-discman/blob/main/SETUP.md#create-a-service-for-easy-start-of-the-manager).
 
 # Optional Steps:
+## Setup the client mod
+- This will only work if you are running a fabric server
+- The client mod provides the following functionality:
+  - Death and advancement logging
+  - Faster join and leave logging
+  - Completely reliable online player detection, even if the server stops unexpectedly
+  - Getting the ingame time from discord (more to come)
+  - Sending messages to discord through an ingame command
+- Download the latest version of the client from [GitHub](https://github.com/Tre5et/mcs-discman-client/releases)
+- Place it into the mods folder of your fabric server
+- #### Edit the config
+- Enable or disable ```death_logging``` and ``advancement_logging`` to your liking
+- In ``client-connection-options`` make sure ``enable_client`` is set to true
+- ``override_conole`` enables faster join and leave logging as well as reliable online detection
+- ``port`` can be left default unless you already have something running on the default port
+- #### Restart the discman and then restart your minecraft server
+- In the minecraft server folder you will find a config file ```config/discman-client.json```, edit it
+- If you changed the port, make sure to set the same port in here
+- If ``requireServer`` is set to ``true`` the minecraft server will not start unless it can connect to a discman instance
+- Remember to restart the minecraft server to apply any settings you have changed
+
 ## Setup automatic backup uplaods to Google Drive
 - Open the [Google Cloud Developers Console](https://console.cloud.google.com/).
 - Login with your Google account.
