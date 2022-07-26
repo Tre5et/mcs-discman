@@ -19,6 +19,7 @@ public class DiscordbotConfig {
     public String RUN_COMMAND;
     public boolean DRIVE_UPLOAD;
     public String DRIVE_FOLDER_ID;
+    public boolean DEBUG = false;
     
     public DiscordbotConfig(String source) {
         this.TOKEN = ConfigTools.findConfigOption(source, "token", false, false);
@@ -34,6 +35,7 @@ public class DiscordbotConfig {
         this.RUN_COMMAND = ConfigTools.findConfigOption(source, "runcommand_command", false, false);
         this.DRIVE_UPLOAD = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "auto_upload_enabled", false, false));
         this.DRIVE_FOLDER_ID = ConfigTools.findConfigOption(source, "upload_folder_id", false, true);
+        this.DEBUG = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "debug", false, true, true));
 
         String logPath = serverPath;
         String worldPath = serverPath;

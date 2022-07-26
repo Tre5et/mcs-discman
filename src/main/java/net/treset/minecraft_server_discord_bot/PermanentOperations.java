@@ -96,6 +96,7 @@ public class PermanentOperations {
         if (input.contains("Done (")) {
             MessageManager.sendStarted(MessageOrigin.LOG_FILE);
             ConfigTools.setPlayers(new String[]{});
+            hasSomethingHappened = true;
         }
     }
 
@@ -104,6 +105,7 @@ public class PermanentOperations {
         if(!playerName.equals("")) {
             MessageManager.sendJoin(playerName, MessageOrigin.LOG_FILE);
             ConfigTools.addPlayer(playerName);
+            hasSomethingHappened = true;
         }
     }
 
@@ -112,6 +114,7 @@ public class PermanentOperations {
         if(!playerName.equals("")) {
             MessageManager.sendLeave(playerName, MessageOrigin.LOG_FILE);
             ConfigTools.removePlayer(playerName);
+            hasSomethingHappened = true;
         }
     }
 

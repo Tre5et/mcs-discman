@@ -7,10 +7,24 @@
 
     <property name="LOG_FILE" value="discordbot" />
     <property name="LOG_DIR"  value="logs" />
+    <property name="DEBUG_FILE" value="discordbot_debug" />
+    <property name="DEBUG_DIR" value="debug" />
+
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/${LOG_FILE}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_DIR}/${LOG_FILE}-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${LOG_FILE}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/${DEBUG_DIR}/${DEBUG_FILE}-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <totalSizeCap>3GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
@@ -24,6 +38,14 @@
     <logger name="net.treset.minecraft_server_discord_bot.DiscordBot" level="info">
         <appender-ref ref="FILE" />
     </logger>
+
+    <logger name="net.dv8tion.jda.api.JDA" level="debug">
+        <appender-ref ref="DEBUG" />
+    </logger>
+    <logger name="net.treset.minecraft_server_discord_bot.DiscordBot" level="debug">
+        <appender-ref ref="DEBUG" />
+    </logger>
+
     <root level="debug">
         <appender-ref ref="STDOUT" />
     </root>

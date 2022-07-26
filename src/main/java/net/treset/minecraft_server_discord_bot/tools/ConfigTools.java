@@ -95,10 +95,14 @@ public class ConfigTools {
     }
 
     public static String findConfigOption(String config, String option, boolean multiline, boolean allowEmpty) {
+        return findConfigOption(config, option, multiline, allowEmpty, false);
+    }
+
+    public static String findConfigOption(String config, String option, boolean multiline, boolean allowEmpty, boolean allowNonexistent) {
         String start = String.format("^%s= *", option);
         String end = (multiline) ? " *;" : " *;|$";
         String output = FormatTools.findStringBetween(config, start, end);
-        if((!allowEmpty && output.isEmpty()) || output == null) {
+        if((!allowEmpty && output.isEmpty()) || (output == null && !allowNonexistent)) {
             MessageManager.log(String.format("Unable to read config \"%s\". Check for formatting issues. Continuing execution anyways.", option), LogLevel.ERROR);
         }
         if(multiline) output = output.replaceAll("\n", "").replaceAll("\r", "");

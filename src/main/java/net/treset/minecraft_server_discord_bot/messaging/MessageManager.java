@@ -77,7 +77,9 @@ public class MessageManager {
         String org = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getSimpleName();
         String msg = org + ": " + message;
         switch(level) {
-            case DEBUG -> DiscordBot.LOGGER.debug(msg);
+            case DEBUG -> {
+                if(ConfigTools.CONFIG.DEBUG) DiscordBot.LOGGER.debug(msg);
+            }
             case INFO -> DiscordBot.LOGGER.info(msg);
             case WARN -> DiscordBot.LOGGER.warn(msg);
             case ERROR -> DiscordBot.LOGGER.error(msg);
