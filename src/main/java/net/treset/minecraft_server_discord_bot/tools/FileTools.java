@@ -1,6 +1,5 @@
 package net.treset.minecraft_server_discord_bot.tools;
 
-import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
@@ -79,6 +78,10 @@ public class FileTools {
             return false;
         }
         return true;
+    }
+
+    public static boolean fileExists(String path) {
+        return new File(path).isFile();
     }
 
 }

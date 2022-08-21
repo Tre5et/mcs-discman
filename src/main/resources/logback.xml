@@ -22,7 +22,7 @@
     </appender>
 
     <appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR}/${LOG_FILE}.log</file>
+        <file>${LOG_DIR}/${DEBUG_DIR}/${DEBUG_FILE}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_DIR}/${DEBUG_DIR}/${DEBUG_FILE}-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <totalSizeCap>3GB</totalSizeCap>

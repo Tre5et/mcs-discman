@@ -38,6 +38,8 @@ public class MessageManager {
 
         log(String.format("Sent join of player %s %s.", player, org.getMessage()), LogLevel.INFO);
 
+        ConfigTools.addPlayer(player);
+
         PermanentOperations.setSomethingHappened();
     }
 
@@ -47,6 +49,8 @@ public class MessageManager {
         sendMessageToDiscord(String.format("%s left the game.", player));
 
         log(String.format("Sent leave of player %s %s.", player, org.getMessage()), LogLevel.INFO);
+
+        ConfigTools.removePlayer(player);
 
         PermanentOperations.setSomethingHappened();
     }

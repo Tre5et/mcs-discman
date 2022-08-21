@@ -102,20 +102,14 @@ public class PermanentOperations {
 
     private static void logPlayerJoin(String input) {
         String playerName = FormatTools.findStringBetween(input, "INFO]: ", " joined the game");
-        if(!playerName.equals("")) {
+        if(!playerName.equals(""))
             MessageManager.sendJoin(playerName, MessageOrigin.LOG_FILE);
-            ConfigTools.addPlayer(playerName);
-            hasSomethingHappened = true;
-        }
     }
 
     private static void logPlayerLeave(String input) {
         String playerName = FormatTools.findStringBetween(input, "INFO]: ", " left the game");
-        if(!playerName.equals("")) {
+        if(!playerName.equals(""))
             MessageManager.sendLeave(playerName, MessageOrigin.LOG_FILE);
-            ConfigTools.removePlayer(playerName);
-            hasSomethingHappened = true;
-        }
     }
 
     private static void autoBackup() {

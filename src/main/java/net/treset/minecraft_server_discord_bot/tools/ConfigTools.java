@@ -21,11 +21,19 @@ public class ConfigTools {
     public static List<String> PLAYERS = new ArrayList<>();
 
     public static void initConfig() {
+        getConfig();
         loadConfig();
         loadPermanentOperationsConfig();
         loadClientConfig();
         loadDetails();
         loadPlayers();
+    }
+
+    private static void getConfig() {
+        if(FileTools.fileExists("discordbot_test.conf")) {
+            DiscordBot.CONFIG_FILE = "discordbot_test.conf";
+            DiscordBot.DETAILS_FILE = "details_test.conf";
+        }
     }
 
     public static void loadConfig() {
