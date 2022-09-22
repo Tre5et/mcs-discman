@@ -5,6 +5,7 @@ import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.networking.ConnectionManager;
 import net.treset.minecraft_server_discord_bot.tools.*;
+import org.apache.commons.logging.Log;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -122,7 +123,7 @@ public class PermanentOperations {
         if(!wasBackedUpToday && isCorrectHour) {
             if(hasSomethingHappened) {
                 daysSinceActivity = 0;
-                if(isBackupEnabled) createAutoBackup();
+                if(isBackupEnabled) new Thread(PermanentOperations::createAutoBackup).start();
             } else {
                 logInactivity();
                 if(isBackupEnabled) {
@@ -139,6 +140,27 @@ public class PermanentOperations {
     }
 
     private static void createAutoBackup() {
+
+        Thread buThread = new Thread(PermanentOperations::executeBackup);
+        buThread.start();
+
+        try {
+            Thread.sleep(1100000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        if(buThread.isAlive() || buThread.isInterrupted()) {
+            MessageManager.log("Error creating auto backup. Timed out.", LogLevel.ERROR);
+            MessageManager.sendText("Failed to create auto backup.", MessageOrigin.SCHEDULE);
+
+            buThread.interrupt();
+
+            ServerTools.undoBackupPreparation();
+        }
+    }
+
+    private static void executeBackup() {
         String output = "";
         if (ServerTools.isServerRunning()) ServerTools.prepareServerForBackup();
 
@@ -163,8 +185,7 @@ public class PermanentOperations {
         }
         MessageManager.sendText(output, MessageOrigin.SCHEDULE);
 
-        String cmd = "save-on";
-        ServerTools.runServerCommand(cmd);
+        ServerTools.undoBackupPreparation();
     }
 
     private static void dontCreateAutoBackup(boolean log) {
@@ -183,6 +204,8 @@ public class PermanentOperations {
     }
 
     private static void logInactivity() {
+        if(!ServerTools.isServerRunning()) return;
+
         daysSinceActivity++;
 
         if(inactivityReminder > 0 && daysSinceActivity % inactivityReminder == 0) {
@@ -194,6 +217,10 @@ public class PermanentOperations {
     private static void checkForCrash() {
         if(!isCrashCheckEnabled) return;
 
+        new Thread(PermanentOperations::executeCrashHandler).start();
+    }
+
+    private static void executeCrashHandler() {
         boolean running = ServerTools.isServerRunning();
         if(!running && prevRunning) {
             ConnectionManager.closeConnection(true, true);
@@ -215,10 +242,10 @@ public class PermanentOperations {
 
                 ServerTools.startServer();
 
-                float time = 0;
+                double time = 0;
                 while (!ServerTools.isServerRunning()) {
                     MiscTools.timeout(500);
-                    time += .2f;
+                    time += .2d;
                     if (time >= 30) {
                         MessageManager.sendText("Failed to start Server, not trying again.", MessageOrigin.SCHEDULE);
 
