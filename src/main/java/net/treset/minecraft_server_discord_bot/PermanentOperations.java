@@ -20,6 +20,7 @@ public class PermanentOperations {
 
     public static boolean isBackupEnabled = true;
     private static String backupHour = "01";
+    private static int backupTimeout = 1200;
     private static boolean isLogNoBackup = true;
 
     private static boolean hasSomethingHappened = true;
@@ -44,6 +45,7 @@ public class PermanentOperations {
         isLoggingFull = ConfigTools.PERMA_CONFIG.FULL_LOGGING;
         isBackupEnabled = ConfigTools.PERMA_CONFIG.BACKUP_ENABLED;
         backupHour = ConfigTools.PERMA_CONFIG.BACKUP_HOUR;
+        backupTimeout = ConfigTools.PERMA_CONFIG.BACKUP_TIMEOUT;
         isCrashCheckEnabled = ConfigTools.PERMA_CONFIG.CRASH_CHECK_ENABLED;
         isLogNoBackup = ConfigTools.PERMA_CONFIG.LOG_NO_BACKUP;
         inactivityReminder = ConfigTools.PERMA_CONFIG.INACTIVITY_REMINDER_ENABLED;
@@ -145,7 +147,7 @@ public class PermanentOperations {
         buThread.start();
 
         try {
-            Thread.sleep(1100000);
+            Thread.sleep(backupTimeout * 1000L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

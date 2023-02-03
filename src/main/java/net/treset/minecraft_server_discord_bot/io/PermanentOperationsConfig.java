@@ -10,6 +10,7 @@ public class PermanentOperationsConfig {
     public boolean FULL_LOGGING = false;
     public boolean BACKUP_ENABLED = true;
     public String BACKUP_HOUR = "01";
+    public int BACKUP_TIMEOUT = 1200;
     public boolean CRASH_CHECK_ENABLED = false;
     public boolean LOG_NO_BACKUP = true;
     public int INACTIVITY_REMINDER_ENABLED = 0;
@@ -26,6 +27,7 @@ public class PermanentOperationsConfig {
 
         this.BACKUP_ENABLED = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "autobackup", false, false));
         this.BACKUP_HOUR = ConfigTools.findConfigOption(source, "autobackup_hour", false, false);
+        this.BACKUP_TIMEOUT = FormatTools.stringToInt(ConfigTools.findConfigOption(source, "autobackup_timeout", false, true));
         this.CRASH_CHECK_ENABLED = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "crash_check", false, false));
         this.LOG_NO_BACKUP = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "log_no_backup", false, false));
         this.INACTIVITY_REMINDER_ENABLED = FormatTools.stringToInt(ConfigTools.findConfigOption(source, "inactivity_reminder", false, false));
