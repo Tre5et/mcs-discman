@@ -23,6 +23,8 @@ public class ServerTools {
         ConnectionManager.closeConnection(true, true);
         String cmd = ConfigTools.CONFIG.START_COMMAND;
         ExecTools.executeCommand(cmd);
+        if(!ConnectionManager.isConnected() && !ConnectionManager.isWaitingForConnection())
+            ConnectionManager.openConnection();
     }
 
     public static void stopServer() {
