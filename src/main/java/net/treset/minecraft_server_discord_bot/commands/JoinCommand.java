@@ -13,7 +13,7 @@ public class JoinCommand {
         ConfigTools.loadDetails();
         String url = ConfigTools.DETAILS.url;
 
-        output = String.format("Join the server with on ip-adress **%s**.\nYou must be member to join. Type ``/members`` for more details.", url);
+        output = String.format("Join the server using the ip-adress **%s**.\nYou must be member to join. Type ``/members`` for more details.", url);
 
         event.getHook().sendMessage(output).queue();
 
