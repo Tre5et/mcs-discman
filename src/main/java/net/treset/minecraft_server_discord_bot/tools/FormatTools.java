@@ -1,5 +1,7 @@
 package net.treset.minecraft_server_discord_bot.tools;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
@@ -54,5 +56,9 @@ public class FormatTools {
             MessageManager.log(String.format("Unable to convert string \"%s\" to int.", input), LogLevel.WARN);
             return -1;
         }
+    }
+
+    public static JsonObject parseJson(String jsonString) {
+        return JsonParser.parseString(jsonString).getAsJsonObject();
     }
 }

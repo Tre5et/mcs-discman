@@ -3,10 +3,7 @@ package net.treset.minecraft_server_discord_bot.tools;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -82,6 +79,30 @@ public class FileTools {
 
     public static boolean fileExists(String path) {
         return new File(path).isFile();
+    }
+    public static boolean dirExists(String path) {
+        return new File(path).isDirectory();
+    }
+
+    public static File[] findFilesMatching(String pattern, String path) {
+        File dir = new File(path);
+        if(!dir.isDirectory()) {
+            return new File[0];
+        }
+
+        return dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.matches(pattern);
+            }
+        });
+    }
+
+    public static boolean createDir(String path) {
+        if(!dirExists(path)) {
+            return new File(path).mkdirs();
+        }
+        return true;
     }
 
 }
