@@ -1,24 +1,13 @@
 package net.treset.minecraft_server_discord_bot.tools;
 
-import com.google.api.client.util.IOUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import net.treset.minecraft_server_discord_bot.DiscordBot;
-import net.treset.minecraft_server_discord_bot.io.DiscordbotConfig;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class DataTools {
     public static List<String> loadWhitelist() {
@@ -34,24 +23,24 @@ public class DataTools {
             return new ArrayList<>();
         }
 
-        String whitelistJson = FileTools.readFile(filePath);
-        JsonObject whitelist = FormatTools.parseJson(whitelistJson);
-        List<String> whitelistPlayers = new ArrayList<>();
-        if(whitelist.isJsonArray()) {
-            JsonArray whitelistArray = whitelist.getAsJsonArray();
+        String playerListJson = FileTools.readFile(filePath);
+        JsonElement playerList = FormatTools.parseJson(playerListJson);
+        List<String> players = new ArrayList<>();
+        if(playerList.isJsonArray()) {
+            JsonArray whitelistArray = playerList.getAsJsonArray();
             for(JsonElement p : whitelistArray) {
                 if(p.isJsonObject()) {
                     JsonObject pObject = p.getAsJsonObject();
                     if (pObject.get("name").isJsonPrimitive()) {
                         JsonPrimitive pName = pObject.getAsJsonPrimitive("name");
                         if(pName.isString()) {
-                            whitelistPlayers.add(pName.getAsString());
+                            players.add(pName.getAsString());
                         }
                     }
                 }
             }
         }
-        return whitelistPlayers;
+        return players;
     }
 
     public static ServerType loadServerType() {
@@ -59,67 +48,78 @@ public class DataTools {
         if(jars.length == 1) {
             if(jars[0].getName().equals("server.jar")) {
                 return ServerType.VANILLA;
-            } else return ServerType.VANILLA_L;
+            }
+            if(FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "mods") || FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "config")) {
+                return ServerType.MODDED;
+            }
+            return ServerType.VANILLA_L;
         }
-        if(FileTools.findFilesMatching(".*fabric.*", ConfigTools.CONFIG.SERVER_PATH).length > 0) {
-            if(FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "libraries/net/fabricmc")) {
+        if(FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "libraries/net/fabricmc")) {
+            if(FileTools.findFilesMatching(".*fabric.*", ConfigTools.CONFIG.SERVER_PATH).length > 0) {
                 return ServerType.FABRIC;
             }
             return ServerType.FABRIC_L;
         }
-        if(jars.length == 0 && FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "libraries/net/minecraftforge")) {
-            return ServerType.FORGE;
+        if(FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "libraries/net/minecraftforge")) {
+            if(jars.length == 0) {
+                return ServerType.FORGE;
+            }
+            return ServerType.FORGE_L;
         }
-        if(jars.length >= 2) {
+        if(jars.length >= 2 || FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "mods") || FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "config")) {
             return ServerType.MODDED;
         }
         return ServerType.UNKNOWN;
     }
 
     public static String loadVersion() {
-        if(FileTools.fileExists(ConfigTools.CONFIG.SERVER_PATH + "server.jar")) {
-            FileTools.createDir("./temp");
+        String versionJson = FileTools.getFileFromZip(ConfigTools.CONFIG.SERVER_PATH + "server.jar", "version.json");
 
-            try {
-                ZipFile zipFile = new ZipFile(ConfigTools.CONFIG.SERVER_PATH + "server.jar");
+        if(versionJson.isBlank()) {
+            return "??";
+        }
 
-                Enumeration<? extends ZipEntry> entries = zipFile.entries();
-
-                while(entries.hasMoreElements()) {
-                    ZipEntry entry = entries.nextElement();
-                    if(!entry.isDirectory() && entry.getName().equals("version.json")) {
-                        InputStream stream = zipFile.getInputStream(entry);
-                        StringBuilder versionJson = new StringBuilder();
-                        try (Reader reader = new BufferedReader(new InputStreamReader
-                                (stream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-                            int c = 0;
-                            while ((c = reader.read()) != -1) {
-                                versionJson.append((char) c);
-                            }
-                        }
-
-                        JsonObject version = FormatTools.parseJson(versionJson.toString());
-                        if(version != null && version.isJsonObject()) {
-                            if(version.get("name").isJsonPrimitive()) {
-                                JsonPrimitive versionName = version.getAsJsonPrimitive("name");
-                                if(versionName.isString()) {
-                                    return versionName.getAsString();
-                                }
-                            }
-                        }
-
-                        return "??";
-                    }
+        JsonElement version = FormatTools.parseJson(versionJson.toString());
+        if(version != null && version.isJsonObject()) {
+            if(version.getAsJsonObject().get("name").isJsonPrimitive()) {
+                JsonPrimitive versionName = version.getAsJsonObject().getAsJsonPrimitive("name");
+                if(versionName.isString()) {
+                    return versionName.getAsString();
                 }
-
-                zipFile.close();
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
-
         }
 
         return "??";
+    }
+
+    public static List<String> loadFabricMods() {
+        if(!FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "mods")) {
+            return new ArrayList<>();
+        }
+
+        File[] mods = FileTools.findFilesMatching(".*\\.jar", ConfigTools.CONFIG.SERVER_PATH + "mods");
+
+        List<String> modList = new ArrayList<>();
+
+        for(File f : mods) {
+            String fabricModJson = FileTools.getFileFromZip(f.getPath(), "fabric.mod.json");
+            if(!fabricModJson.isBlank()) {
+                JsonElement fabricMod = FormatTools.parseJson(fabricModJson);
+                if(fabricMod.isJsonObject()) {
+                    if(fabricMod.getAsJsonObject().get("name").isJsonPrimitive()) {
+                        JsonPrimitive modName = fabricMod.getAsJsonObject().getAsJsonPrimitive("name");
+                        if(modName.isString()) {
+                            modList.add(modName.getAsString());
+                        }
+                    } else if(fabricMod.getAsJsonObject().get("id").isJsonPrimitive()) {
+                        JsonPrimitive modId = fabricMod.getAsJsonObject().getAsJsonPrimitive("id");
+                        if(modId.isString()) {
+                            modList.add(modId.getAsString());
+                        }
+                    }
+                }
+            }
+        }
+        return modList;
     }
 }

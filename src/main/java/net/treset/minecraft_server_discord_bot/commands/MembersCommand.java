@@ -17,7 +17,7 @@ public class MembersCommand {
         List<String> members = ConfigTools.DETAILS.members;
         String admin = ConfigTools.DETAILS.admin;
 
-        output = String.format("Current members are: **%s**.\nTo become a member DM %s.", FormatTools.formatList(members, ", "), admin);
+        output = String.format("Current members are: **%s**.\nTo become a member DM **%s**.", FormatTools.formatList(members, ", "), admin);
 
         event.getHook().sendMessage(output).queue();
 

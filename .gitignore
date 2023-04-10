@@ -6,5 +6,4 @@ out/
 releases/
 tokens/
 credentials.json
-discordbot_test.conf
-details_test.conf
+*_test.conf

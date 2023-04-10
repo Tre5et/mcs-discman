@@ -4,12 +4,16 @@ import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class FileTools {
@@ -103,6 +107,36 @@ public class FileTools {
             return new File(path).mkdirs();
         }
         return true;
+    }
+
+    public static String getFileFromZip(String zipFileName, String fileName) {
+        if(FileTools.fileExists(zipFileName)) {
+
+            try {
+                ZipFile zipFile = new ZipFile(zipFileName);
+
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (!entry.isDirectory() && entry.getName().equals(fileName)) {
+                        InputStream stream = zipFile.getInputStream(entry);
+                        StringBuilder fileContent = new StringBuilder();
+                        try (Reader reader = new BufferedReader(new InputStreamReader
+                                (stream, Charset.forName(StandardCharsets.UTF_8.name())))) {
+                            int c = 0;
+                            while ((c = reader.read()) != -1) {
+                                fileContent.append((char) c);
+                            }
+                        }
+                        return fileContent.toString();
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return "";
     }
 
 }

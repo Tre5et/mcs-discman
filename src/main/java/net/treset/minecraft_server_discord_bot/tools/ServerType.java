@@ -8,13 +8,13 @@ public enum ServerType {
     FORGE(true, "Forge"),
     FORGE_L(false, "likely Forge"),
     MODDED(false, "likely Modded"),
-    UNKNOWN(false, "unknown");
+    UNKNOWN(false, "unknown and not specified");
 
     private boolean certain;
     private String displayName;
 
     ServerType(boolean certain, String displayName) {
-        this.certain = true;
+        this.certain = certain;
         this.displayName = displayName;
     }
 

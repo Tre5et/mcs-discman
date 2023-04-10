@@ -1,7 +1,9 @@
 package net.treset.minecraft_server_discord_bot.tools;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
@@ -58,7 +60,12 @@ public class FormatTools {
         }
     }
 
-    public static JsonObject parseJson(String jsonString) {
-        return JsonParser.parseString(jsonString).getAsJsonObject();
+    public static JsonElement parseJson(String jsonString) {
+        try {
+            return JsonParser.parseString(jsonString);
+        } catch (IllegalStateException e) {
+            MessageManager.log(String.format("Unable to parse json=%s;\n%s", jsonString, e), LogLevel.ERROR);
+        }
+        return new JsonObject();
     }
 }

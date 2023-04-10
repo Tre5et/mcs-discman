@@ -11,6 +11,7 @@ import java.util.List;
 
 public class ServerDetails {
     public String server;
+    private ServerType serverType;
     public String version;
     public List<String> mods = new ArrayList<>();
     public List<String> members = new ArrayList<>();
@@ -20,15 +21,16 @@ public class ServerDetails {
 
     public ServerDetails(String source) {
         if(ConfigTools.CONFIG.AUTODETECT_DETAILS) {
-            ServerType type = DataTools.loadServerType();
-            if (!type.isCertain()) {
+            this.serverType = DataTools.loadServerType();
+            if (!this.serverType.isCertain()) {
                 this.server = ConfigTools.findConfigOption(source, "server", false, true);
             }
             if(this.server == null || this.server.isBlank()) {
-                this.server = type.toString();
+                this.server = this.serverType.toString();
             }
+        } else {
+            this.server = ConfigTools.findConfigOption(source, "server", false, false);
         }
-        this.server = ConfigTools.findConfigOption(source, "server", false, false);
 
         if(ConfigTools.CONFIG.AUTODETECT_DETAILS) {
             this.version = DataTools.loadVersion();
@@ -44,8 +46,8 @@ public class ServerDetails {
         this.url = ConfigTools.findConfigOption(source, "url", false, false);
         this.admin = ConfigTools.findConfigOption(source, "admin", false, false);
 
-        if(ConfigTools.CONFIG.AUTODETECT_DETAILS) {
-            this.mods = DataTools.loadOps();
+        if(ConfigTools.CONFIG.AUTODETECT_DETAILS && (this.serverType == ServerType.FABRIC || this.serverType == ServerType.FABRIC_L)) {
+            this.mods = DataTools.loadFabricMods();
         }
         if(this.mods == null || this.mods.isEmpty()) {
             String[] modsArray = ConfigTools.findConfigOption(source, "mods", true, true).split(",");

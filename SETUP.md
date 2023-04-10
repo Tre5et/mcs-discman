@@ -47,8 +47,8 @@ Optional Steps:
   - Open your Discord App or the Web App
   - Open your user settings
   - Under "Advanced" enable "Developer Mode"
-  - Right click on your server's title, click "Copy ID" and paste it into ```guild_id```
-  - Right click the channel you want the bot to send messages in, click "Copy ID" and pastte it into ```message_channel_id```
+  - Right-click on your server's title, click "Copy ID" and paste it into ```guild_id```
+  - Right-click the channel you want the bot to send messages in, click "Copy ID" and paste it into ```message_channel_id```
   - Go to the server settings
   - Under "Roles" right click the role you want to be moderator (able to start/stop the server etc.), click "Copy ID" and pastte it into ```moderator_role_id```
 - The paths can be absolute or relative paths to the files location, thought absolute is recommended
@@ -58,9 +58,7 @@ Optional Steps:
 - Leave the section ``client-connection-options`` as default for now
 - #### Open ```details.conf``` 
 - Edit the values to your liking
-- ```Server``` should be "vanilla", "fabric-loader", "bukkit" etc.
-- ```mods``` may be left empty.
-- ```members``` should reflect your whitelist.
+- By default, the bot will try autodetect ``server``, ``version``, ``mods`` and ``members``. It will only fall back to these values if it can't figure something out. This can be disabled in the main config using ``autodetect_details``.
 
 ## Start the manager
 - Start the manager by runnig ```mcsdiscman-deploy.jar``` in the folder.
