@@ -20,7 +20,7 @@ dependencies {
     implementation "net.dv8tion:JDA:4.4.0_350"
     implementation "com.github.cliftonlabs:json-simple:4.0.0"
 
-    implementation 'com.google.api-client:google-api-client:2.1.2'
+    implementation 'com.google.api-client:google-api-client:1.32.2'
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.32.1'
     implementation 'com.google.apis:google-api-services-drive:v3-rev20211107-1.32.1'
 
