@@ -14,7 +14,6 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
-import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
@@ -36,9 +35,6 @@ public class DriveTools {
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
         InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
-        if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
-        }
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
@@ -61,8 +57,7 @@ public class DriveTools {
                     .build();
             MessageManager.log("Drive client initialized.", LogLevel.INFO);
         }catch (IOException | GeneralSecurityException e) {
-            e.printStackTrace();
-            MessageManager.log("Unable to create Drive client. Disabling drive features.", LogLevel.WARN);
+            MessageManager.log("Unable to create Drive client. Disabling drive features.", LogLevel.WARN, e);
             ConfigTools.CONFIG.DRIVE_UPLOAD = false;
         }
     }
@@ -79,7 +74,7 @@ public class DriveTools {
         try {
             file = SERVICE.files().create(fileMetadata, mediaContent).setFields("id").execute();
         } catch (IOException e) {
-            e.printStackTrace();
+            MessageManager.log("Failed to upload file to drive.", LogLevel.WARN, e);
             return null;
         }
         return file.getId();

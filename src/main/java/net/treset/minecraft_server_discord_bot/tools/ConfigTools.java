@@ -8,6 +8,7 @@ import net.treset.minecraft_server_discord_bot.io.ServerDetails;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -20,7 +21,7 @@ public class ConfigTools {
     public static ServerDetails DETAILS;
     public static List<String> PLAYERS = new ArrayList<>();
 
-    public static void initConfig() {
+    public static void initConfig() throws IOException {
         getConfig();
         loadConfig();
         loadPermanentOperationsConfig();
@@ -36,31 +37,31 @@ public class ConfigTools {
         }
     }
 
-    public static void loadConfig() {
+    public static void loadConfig() throws IOException {
         String config = FileTools.readFile(DiscordBot.CONFIG_FILE);
 
         CONFIG = new DiscordbotConfig(config);
     }
 
-    public static void loadPermanentOperationsConfig() {
+    public static void loadPermanentOperationsConfig() throws IOException {
         String config = FileTools.readFile(DiscordBot.CONFIG_FILE);
 
         PERMA_CONFIG = new PermanentOperationsConfig(config);
     }
 
-    public static void loadClientConfig() {
+    public static void loadClientConfig() throws IOException {
         String config = FileTools.readFile(DiscordBot.CONFIG_FILE);
 
         CLIENT_CONFIG = new ClientConfig(config);
     }
 
-    public static void loadDetails() {
+    public static void loadDetails() throws IOException {
         String config = FileTools.readFile(DiscordBot.DETAILS_FILE);
 
         DETAILS = new ServerDetails(config);
     }
 
-    public static void loadPlayers() {
+    public static void loadPlayers() throws IOException {
         String players = FileTools.readFile(DiscordBot.PLAYERS_FILE);
         players = players.replaceAll("\n", "").replaceAll("\r", "");
 
@@ -75,11 +76,20 @@ public class ConfigTools {
 
         String players = String.join(",", PLAYERS);
 
-        FileTools.writeFile(DiscordBot.PLAYERS_FILE, players);
+        try {
+            FileTools.writeFile(DiscordBot.PLAYERS_FILE, players);
+        } catch (Exception e) {
+            MessageManager.log("Unable to write players to file!", LogLevel.ERROR, e);
+        }
     }
 
     public static void addPlayer(String name) {
-        loadPlayers();
+        try {
+            loadPlayers();
+        } catch (IOException e) {
+            MessageManager.log("Unable to load players from file!", LogLevel.ERROR, e);
+            return;
+        }
 
         if(PLAYERS.contains(name)) return;
 
@@ -87,11 +97,20 @@ public class ConfigTools {
 
         String players = String.join(",", PLAYERS);
 
-        FileTools.writeFile(DiscordBot.PLAYERS_FILE, players);
+        try {
+            FileTools.writeFile(DiscordBot.PLAYERS_FILE, players);
+        } catch (Exception e) {
+            MessageManager.log("Unable to write players to file!", LogLevel.ERROR, e);
+        }
     }
 
     public static void removePlayer(String name) {
-        loadPlayers();
+        try {
+            loadPlayers();
+        } catch (IOException e) {
+            MessageManager.log("Unable to load players from file!", LogLevel.ERROR, e);
+            return;
+        }
 
         if(!PLAYERS.contains(name)) return;
 
@@ -99,7 +118,11 @@ public class ConfigTools {
 
         String players = String.join(",", PLAYERS);
 
-        FileTools.writeFile(DiscordBot.PLAYERS_FILE, players);
+        try {
+            FileTools.writeFile(DiscordBot.PLAYERS_FILE, players);
+        } catch (Exception e) {
+            MessageManager.log("Unable to write players to file!", LogLevel.ERROR, e);
+        }
     }
 
     public static String findConfigOption(String config, String option, boolean multiline, boolean allowEmpty) {
@@ -113,7 +136,7 @@ public class ConfigTools {
         if((!allowEmpty && output.isEmpty()) || (output == null && !allowNonexistent)) {
             MessageManager.log(String.format("Unable to read config \"%s\". Check for formatting issues. Continuing execution anyways.", option), LogLevel.ERROR);
         }
-        if(multiline) output = output.replaceAll("\n", "").replaceAll("\r", "");
+        if(output != null && multiline) output = output.replaceAll("\n", "").replaceAll("\r", "");
         return output;
     }
 }

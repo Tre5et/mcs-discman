@@ -6,19 +6,20 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataTools {
-    public static List<String> loadWhitelist() {
+    public static List<String> loadWhitelist() throws IOException {
         return loadPlayersFromFile(ConfigTools.CONFIG.SERVER_PATH + "whitelist.json");
     }
 
-    public static List<String> loadOps() {
+    public static List<String> loadOps() throws IOException {
         return loadPlayersFromFile(ConfigTools.CONFIG.SERVER_PATH + "ops.json");
     }
 
-    public static List<String> loadPlayersFromFile(String filePath) {
+    public static List<String> loadPlayersFromFile(String filePath) throws IOException {
         if(!FileTools.fileExists(filePath)) {
             return new ArrayList<>();
         }
@@ -72,14 +73,14 @@ public class DataTools {
         return ServerType.UNKNOWN;
     }
 
-    public static String loadVersion() {
+    public static String loadVersion() throws IOException {
         String versionJson = FileTools.getFileFromZip(ConfigTools.CONFIG.SERVER_PATH + "server.jar", "version.json");
 
         if(versionJson.isBlank()) {
             return "??";
         }
 
-        JsonElement version = FormatTools.parseJson(versionJson.toString());
+        JsonElement version = FormatTools.parseJson(versionJson);
         if(version != null && version.isJsonObject()) {
             if(version.getAsJsonObject().get("name").isJsonPrimitive()) {
                 JsonPrimitive versionName = version.getAsJsonObject().getAsJsonPrimitive("name");
@@ -92,7 +93,7 @@ public class DataTools {
         return "??";
     }
 
-    public static List<String> loadFabricMods() {
+    public static List<String> loadFabricMods() throws IOException {
         if(!FileTools.dirExists(ConfigTools.CONFIG.SERVER_PATH + "mods")) {
             return new ArrayList<>();
         }

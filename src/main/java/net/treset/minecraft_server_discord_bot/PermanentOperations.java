@@ -5,8 +5,8 @@ import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.networking.ConnectionManager;
 import net.treset.minecraft_server_discord_bot.tools.*;
-import org.apache.commons.logging.Log;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -50,7 +50,12 @@ public class PermanentOperations {
         isLogNoBackup = ConfigTools.PERMA_CONFIG.LOG_NO_BACKUP;
         inactivityReminder = ConfigTools.PERMA_CONFIG.INACTIVITY_REMINDER_ENABLED;
 
-        prevData = FileTools.readFile(ConfigTools.CONFIG.LOG_PATH);
+        try {
+            prevData = FileTools.readFile(ConfigTools.CONFIG.LOG_PATH);
+        } catch (IOException e) {
+            MessageManager.log("Error reading log file.", LogLevel.WARN, e);
+            prevData = "";
+        }
 
         while(!terminatePermanentLoop) {
 
@@ -68,7 +73,13 @@ public class PermanentOperations {
 
     public static void logFromFile() {
         if (isLoggingEnabled) {
-            String data = FileTools.readFile(ConfigTools.CONFIG.LOG_PATH);
+            String data;
+            try {
+                data = FileTools.readFile(ConfigTools.CONFIG.LOG_PATH);
+            } catch (IOException e) {
+                MessageManager.log("Error reading log file.", LogLevel.WARN, e);
+                return;
+            }
             String formattedData = data.replace(prevData, "");
 
             if (!formattedData.isEmpty()) {
@@ -105,13 +116,13 @@ public class PermanentOperations {
 
     private static void logPlayerJoin(String input) {
         String playerName = FormatTools.findStringBetween(input, "INFO]: ", " joined the game");
-        if(!playerName.equals(""))
+        if(!playerName.isEmpty())
             MessageManager.sendJoin(playerName, MessageOrigin.LOG_FILE);
     }
 
     private static void logPlayerLeave(String input) {
         String playerName = FormatTools.findStringBetween(input, "INFO]: ", " left the game");
-        if(!playerName.equals(""))
+        if(!playerName.isEmpty())
             MessageManager.sendLeave(playerName, MessageOrigin.LOG_FILE);
     }
 
@@ -163,7 +174,7 @@ public class PermanentOperations {
     }
 
     private static void executeBackup() {
-        String output = "";
+        String output;
         if (ServerTools.isServerRunning()) ServerTools.prepareServerForBackup();
 
         output = "Creating auto-backup.";
@@ -172,7 +183,8 @@ public class PermanentOperations {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDateTime now = LocalDateTime.now();
         String date = dtf.format(now);
-        if (FileTools.zipFile(ConfigTools.CONFIG.WORLD_PATH, ConfigTools.CONFIG.BACKUPS_PATH + date + "-auto.zip")) {
+        try {
+            FileTools.zipFile(ConfigTools.CONFIG.WORLD_PATH, ConfigTools.CONFIG.BACKUPS_PATH + date + "-auto.zip");
             MessageManager.log("Local backup complete.", LogLevel.INFO);
             if(DriveTools.uploadFile(ConfigTools.CONFIG.BACKUPS_PATH + date + "-auto.zip", date + "-auto.zip", "application/x-zip-compressed", ConfigTools.CONFIG.DRIVE_FOLDER_ID) != null) {
                 output = "Created auto-backup successfully.";
@@ -181,9 +193,9 @@ public class PermanentOperations {
                 output = "Created local auto-backup successfully.";
                 MessageManager.log("Error creating online backup. Unable to upload file.", LogLevel.WARN);
             }
-        } else {
+        } catch (IOException e) {
             output = "Failed to create auto-backup.";
-            MessageManager.log("Error creating local backup. Unable to create file.", LogLevel.ERROR);
+            MessageManager.log("Error Zipping backup file.", LogLevel.ERROR, e);
         }
         MessageManager.sendText(output, MessageOrigin.SCHEDULE);
 

@@ -3,7 +3,6 @@ package net.treset.minecraft_server_discord_bot.tools;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
@@ -14,17 +13,17 @@ import java.util.regex.Pattern;
 public class FormatTools {
 
     public static String formatList(List<String> list, String seperator) {
-        String output = "";
+        StringBuilder output = new StringBuilder();
 
         for (int i = 0; i < list.size(); i++) {
             if(i == list.size() - 1) {
-                output += list.get(i);
+                output.append(list.get(i));
             } else {
-                output += list.get(i) + seperator;
+                output.append(list.get(i)).append(seperator);
             }
         }
 
-        return output;
+        return output.toString();
     }
 
     public static String findStringBetween(String input, String str1, String str2){
@@ -48,15 +47,28 @@ public class FormatTools {
     }
 
     public static boolean stringToBoolean(String input) {
+        return stringToBoolean(input, false);
+    }
+
+    public static boolean stringToBoolean(String input, boolean defaultValue) {
+        if(input == null || input.isBlank()) {
+            return defaultValue;
+        }
         return input.equals("true") || input.equals("enabled");
     }
 
     public static int stringToInt(String input) {
+        return stringToInt(input, -1);
+    }
+    public static int stringToInt(String input, int defaultValue) {
+        if(input == null || input.isBlank()) {
+            return defaultValue;
+        }
         try {
             return Integer.parseInt(input);
         } catch (NumberFormatException e) {
             MessageManager.log(String.format("Unable to convert string \"%s\" to int.", input), LogLevel.WARN);
-            return -1;
+            return defaultValue;
         }
     }
 

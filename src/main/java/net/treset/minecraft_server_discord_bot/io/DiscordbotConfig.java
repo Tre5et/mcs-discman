@@ -2,7 +2,6 @@ package net.treset.minecraft_server_discord_bot.io;
 
 import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 import net.treset.minecraft_server_discord_bot.tools.FormatTools;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.regex.Pattern;
 
@@ -23,7 +22,7 @@ public class DiscordbotConfig {
     public String RUN_COMMAND;
     public boolean DRIVE_UPLOAD;
     public String DRIVE_FOLDER_ID;
-    public boolean DEBUG = false;
+    public boolean DEBUG;
     
     public DiscordbotConfig(String source) {
         this.TOKEN = ConfigTools.findConfigOption(source, "token", false, false);
@@ -40,9 +39,9 @@ public class DiscordbotConfig {
         this.RUN_COMMAND = ConfigTools.findConfigOption(source, "runcommand_command", false, false);
         this.DRIVE_UPLOAD = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "auto_upload_enabled", false, false));
         this.DRIVE_FOLDER_ID = ConfigTools.findConfigOption(source, "upload_folder_id", false, true);
-        this.DEBUG = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "debug", false, true, true));
+        this.DEBUG = FormatTools.stringToBoolean(ConfigTools.findConfigOption(source, "debug", false, true, true), false);
 
-        if(FormatTools.matchRegex(this.SERVER_PATH, Pattern.compile("(\\/$)")).equals("")) { //account for / at the end
+        if(FormatTools.matchRegex(this.SERVER_PATH, Pattern.compile("(\\/$)", Pattern.MULTILINE)).isEmpty()) { //account for / at the end
             this.SERVER_PATH += "/";
         }
         this.LOG_PATH = this.SERVER_PATH + "logs/latest.log";

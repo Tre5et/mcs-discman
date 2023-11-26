@@ -13,22 +13,13 @@ import javax.security.auth.login.LoginException;
 import java.util.Objects;
 
 public class DiscordTools {
-    public static void initClient() {
-        try {
-            DiscordBot.JDA = JDABuilder.createDefault(ConfigTools.CONFIG.TOKEN)
-                    .addEventListeners(new SlashCommandHandler())
-                    .build();
-        } catch (LoginException e) {
-            e.printStackTrace();
-            return;
-        }
+    public static void initClient() throws LoginException, InterruptedException {
+        DiscordBot.JDA = JDABuilder.createDefault(ConfigTools.CONFIG.TOKEN)
+                .addEventListeners(new SlashCommandHandler())
+                .build();
 
-        try {
-            DiscordBot.JDA.awaitReady();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return;
-        }
+
+        DiscordBot.JDA.awaitReady();
 
         DiscordBot.GUILD = DiscordBot.JDA.getGuildById(ConfigTools.CONFIG.GUILD_ID);
         DiscordBot.BOT_CHANNEL = DiscordBot.JDA.getTextChannelById(ConfigTools.CONFIG.MESSAGE_CHANNEL_ID);

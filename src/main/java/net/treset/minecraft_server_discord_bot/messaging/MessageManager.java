@@ -78,15 +78,43 @@ public class MessageManager {
     }
 
     public static void log(String message, LogLevel level) {
+        log(message, level, null);
+    }
+
+    public static void log(String message, LogLevel level, Exception e) {
         String org = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getSimpleName();
         String msg = org + ": " + message;
         switch(level) {
             case DEBUG -> {
-                if(ConfigTools.CONFIG.DEBUG) DiscordBot.LOGGER.debug(msg);
+                if(ConfigTools.CONFIG.DEBUG) {
+                    if (e == null) {
+                        DiscordBot.LOGGER.debug(msg);
+                    } else {
+                        DiscordBot.LOGGER.debug(msg, e);
+                    }
+                }
             }
-            case INFO -> DiscordBot.LOGGER.info(msg);
-            case WARN -> DiscordBot.LOGGER.warn(msg);
-            case ERROR -> DiscordBot.LOGGER.error(msg);
+            case INFO -> {
+                if (e == null) {
+                    DiscordBot.LOGGER.info(msg);
+                } else {
+                    DiscordBot.LOGGER.info(msg, e);
+                }
+            }
+            case WARN -> {
+                if (e == null) {
+                    DiscordBot.LOGGER.warn(msg);
+                } else {
+                    DiscordBot.LOGGER.warn(msg, e);
+                }
+            }
+            case ERROR -> {
+                if (e == null) {
+                    DiscordBot.LOGGER.error(msg);
+                } else {
+                    DiscordBot.LOGGER.error(msg, e);
+                }
+            }
         }
     }
 }

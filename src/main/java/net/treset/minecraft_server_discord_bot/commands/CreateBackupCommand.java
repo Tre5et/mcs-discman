@@ -1,18 +1,18 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.tools.*;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class CreateBackupCommand {
     public static void handleCommand(SlashCommandEvent event) {
-        String output = "";
+        String output;
         if(DiscordTools.isModerator(event)) {
             Thread buThread = new Thread(() -> executeBackup(event));
             buThread.start();
@@ -40,7 +40,7 @@ public class CreateBackupCommand {
     }
 
     private static void executeBackup(SlashCommandEvent event) {
-        String output = "";
+        String output;
 
         if (ServerTools.isServerRunning()) ServerTools.prepareServerForBackup();
 
@@ -52,7 +52,8 @@ public class CreateBackupCommand {
         LocalDateTime now = LocalDateTime.now();
         String date = dtf.format(now);
 
-        if (FileTools.zipFile(ConfigTools.CONFIG.WORLD_PATH, ConfigTools.CONFIG.BACKUPS_PATH + date + ".zip")) {
+        try {
+            FileTools.zipFile(ConfigTools.CONFIG.WORLD_PATH, ConfigTools.CONFIG.BACKUPS_PATH + date + ".zip");
             if(!ConfigTools.CONFIG.DRIVE_UPLOAD) {
                 output = "Created backup successfully.";
                 MessageManager.sendText(output, MessageOrigin.COMMAND);
@@ -71,10 +72,11 @@ public class CreateBackupCommand {
                 output = "Failed to upload backup. The backup still exists locally but isn't accessible online.";
                 MessageManager.log("Online backup failed.", LogLevel.WARN);
             }
-        } else {
-            output = "Failed to create a backup. Try again.";
-            MessageManager.log("Local backup failed. Error creating file.", LogLevel.ERROR);
+        } catch (IOException e) {
+            output = "Failed to create backup.";
+            MessageManager.log("Local backup failed.", LogLevel.ERROR, e);
         }
+
         MessageManager.sendText(output, MessageOrigin.COMMAND);
 
         ServerTools.undoBackupPreparation();

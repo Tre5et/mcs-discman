@@ -4,6 +4,7 @@ import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 import net.treset.minecraft_server_discord_bot.tools.DataTools;
 import net.treset.minecraft_server_discord_bot.tools.ServerType;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -19,7 +20,7 @@ public class ServerDetails {
     public String url;
     public String admin;
 
-    public ServerDetails(String source) {
+    public ServerDetails(String source) throws IOException {
         if(ConfigTools.CONFIG.AUTODETECT_DETAILS) {
             this.serverType = DataTools.loadServerType();
             if (!this.serverType.isCertain()) {

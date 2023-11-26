@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
+import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.networking.NetworkingManager;
@@ -12,6 +13,9 @@ import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
 import net.treset.minecraft_server_discord_bot.tools.DriveTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.security.auth.login.LoginException;
+import java.io.IOException;
 
 public class DiscordBot {
     public static String CONFIG_FILE = "discordbot.conf";
@@ -25,9 +29,19 @@ public class DiscordBot {
 
     public static void init() {
 
-        ConfigTools.initConfig();
+        try {
+            ConfigTools.initConfig();
+        } catch (IOException e) {
+            MessageManager.log("Failed to initialize bot: Failed to load config.", LogLevel.ERROR, e);
+            return;
+        }
 
-        DiscordTools.initClient();
+        try {
+            DiscordTools.initClient();
+        } catch (LoginException | InterruptedException e) {
+            MessageManager.log("Failed to initialize bot: Failed setup discord.", LogLevel.ERROR, e);
+            return;
+        }
 
         new Thread(NetworkingManager::init).start();
 

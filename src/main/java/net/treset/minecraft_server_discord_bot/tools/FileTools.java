@@ -4,81 +4,64 @@ import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class FileTools {
-    public static String readFile(String path) {
+    public static String readFile(String path) throws IOException {
+        File myObj = new File(path);
+        Scanner myReader = new Scanner(myObj);
+        StringBuilder data = new StringBuilder();
+        while (myReader.hasNextLine()) {
+            data.append(myReader.nextLine()).append("\n");
+        }
+        myReader.close();
+        return data.toString();
+    }
+
+    public static void writeFile(String path, String data) throws IOException {
+        FileWriter writer = new FileWriter(path);
+        writer.write(data);
+        writer.close();
+    }
+
+    public static void zipFile(String sourceDirPath, String zipFilePath) throws IOException {
         try {
-            File myObj = new File(path);
-            Scanner myReader = new Scanner(myObj);
-            String data = "";
-            while (myReader.hasNextLine()) {
-                data += myReader.nextLine() + "\n";
+            Path p = Files.createFile(Paths.get(zipFilePath));
+
+            ArrayList<Exception> exceptions = new ArrayList<>();
+            try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
+                Path pp = Paths.get(sourceDirPath);
+                try (Stream<Path> files = Files.walk(pp)) {
+                    files
+                            .filter(path -> !Files.isDirectory(path))
+                            .forEach(path -> {
+                                ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+                                try {
+                                    zs.putNextEntry(zipEntry);
+                                    Files.copy(path, zs);
+                                    zs.closeEntry();
+                                } catch (IOException e) {
+                                    MessageManager.log(String.format("Unable to zip %s to %s!", sourceDirPath, zipFilePath), LogLevel.ERROR, e);
+                                    exceptions.add(e);
+                                }
+                            });
+                }
             }
-            myReader.close();
-            return data;
-        } catch (FileNotFoundException e) {
-            MessageManager.log(String.format("Unable to read file %s! -> Stacktrace.", path), LogLevel.ERROR);
-            e.printStackTrace();
-            return "ERROR";
+            if(!exceptions.isEmpty()) throw new IOException(exceptions.get(0));
+        } catch (Exception e) {
+            MessageManager.log(String.format("Encountered an unexpected exception trying to zip %s to %s!", sourceDirPath, zipFilePath), LogLevel.ERROR, e);
+            throw new IOException(e);
         }
-    }
-
-    public static void writeFile(String path, String data) {
-        try {
-            FileWriter writer = new FileWriter(path);
-            writer.write(data);
-            writer.close();
-        } catch (IOException e) {
-            MessageManager.log(String.format("Unable to write %s to %s! -> Stacktrace.", data, path), LogLevel.ERROR);
-            e.printStackTrace();
-        }
-    }
-
-    public static boolean zipFile(String sourceDirPath, String zipFilePath) {
-        AtomicBoolean operationSuccess = new AtomicBoolean(false);
-
-        Path p = null;
-        try {
-            p = Files.createFile(Paths.get(zipFilePath));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
-            Path pp = Paths.get(sourceDirPath);
-            Files.walk(pp)
-                    .filter(path -> !Files.isDirectory(path))
-                    .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-                        try {
-                            zs.putNextEntry(zipEntry);
-                            Files.copy(path, zs);
-                            zs.closeEntry();
-                            operationSuccess.set(true);
-                        } catch (IOException e) {
-                            System.err.println(e);
-                            operationSuccess.set(false);
-                        }
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        if(!operationSuccess.get()) {
-            return false;
-        }
-        return true;
     }
 
     public static boolean fileExists(String path) {
@@ -94,27 +77,13 @@ public class FileTools {
             return new File[0];
         }
 
-        return dir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.matches(pattern);
-            }
-        });
+        return dir.listFiles((dir1, name) -> name.matches(pattern));
     }
 
-    public static boolean createDir(String path) {
-        if(!dirExists(path)) {
-            return new File(path).mkdirs();
-        }
-        return true;
-    }
-
-    public static String getFileFromZip(String zipFileName, String fileName) {
+    public static String getFileFromZip(String zipFileName, String fileName) throws IOException {
         if(FileTools.fileExists(zipFileName)) {
 
-            try {
-                ZipFile zipFile = new ZipFile(zipFileName);
-
+            try(ZipFile zipFile = new ZipFile(zipFileName)) {
                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
 
                 while (entries.hasMoreElements()) {
@@ -123,8 +92,8 @@ public class FileTools {
                         InputStream stream = zipFile.getInputStream(entry);
                         StringBuilder fileContent = new StringBuilder();
                         try (Reader reader = new BufferedReader(new InputStreamReader
-                                (stream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-                            int c = 0;
+                                (stream, StandardCharsets.UTF_8))) {
+                            int c;
                             while ((c = reader.read()) != -1) {
                                 fileContent.append((char) c);
                             }
@@ -132,8 +101,6 @@ public class FileTools {
                         return fileContent.toString();
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
         return "";
