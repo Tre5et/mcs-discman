@@ -6,6 +6,7 @@ import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 
 public class MessageManager {
     private static void sendMessageToDiscord(String message) {
+        if(DiscordBot.BOT_CHANNEL == null) return;
         DiscordBot.BOT_CHANNEL.sendMessage(message).queue();
     }
 

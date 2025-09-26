@@ -26,7 +26,11 @@ dependencies {
 
     implementation 'com.google.http-client:google-http-client-gson:1.40.1'
 
-    implementation('ch.qos.logback:logback-classic:1.2.10')
+    implementation 'ch.qos.logback:logback-classic:1.5.13'
+
+    implementation 'jakarta.websocket:jakarta.websocket-client-api:2.2.0'
+    implementation 'org.java-websocket:Java-WebSocket:1.6.0'
+    implementation 'com.google.code.gson:gson:2.13.2'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
