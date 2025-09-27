@@ -1,5 +1,6 @@
 package net.treset.minecraft_server_discord_bot;
 
+import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
@@ -175,7 +176,10 @@ public class PermanentOperations {
 
     private static void executeBackup() {
         String output;
-        if (ServerTools.isServerRunning()) ServerTools.prepareServerForBackup();
+        if(!ServerTools.prepareServerForBackup()) {
+            MessageManager.sendText("**Error preparing server for auto backup.** Aborting!", MessageOrigin.SCHEDULE);
+            return;
+        }
 
         output = "Creating auto-backup.";
         MessageManager.sendText(output, MessageOrigin.SCHEDULE);
@@ -184,9 +188,9 @@ public class PermanentOperations {
         LocalDateTime now = LocalDateTime.now();
         String date = dtf.format(now);
         try {
-            FileTools.zipFile(ConfigTools.CONFIG.WORLD_PATH, ConfigTools.CONFIG.BACKUPS_PATH + date + "-auto.zip");
+            FileTools.zipFile(Config.server.backup_path, Config.server.backup_path + date + "-auto.zip");
             MessageManager.log("Local backup complete.", LogLevel.INFO);
-            if(DriveTools.uploadFile(ConfigTools.CONFIG.BACKUPS_PATH + date + "-auto.zip", date + "-auto.zip", "application/x-zip-compressed", ConfigTools.CONFIG.DRIVE_FOLDER_ID) != null) {
+            if(DriveTools.uploadFile(Config.server.backup_path + date + "-auto.zip", date + "-auto.zip", "application/x-zip-compressed", Config.drive.drive_folder_id) != null) {
                 output = "Created auto-backup successfully.";
                 MessageManager.log("Online backup complete.", LogLevel.INFO);
             } else {
@@ -199,7 +203,9 @@ public class PermanentOperations {
         }
         MessageManager.sendText(output, MessageOrigin.SCHEDULE);
 
-        ServerTools.undoBackupPreparation();
+        if(!ServerTools.undoBackupPreparation()) {
+            MessageManager.sendText("**FAILED to enable auto save after auto backup!** Please resolve manually!", MessageOrigin.SCHEDULE);
+        }
     }
 
     private static void dontCreateAutoBackup(boolean log) {

@@ -14,6 +14,8 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
+import net.treset.minecraft_server_discord_bot.DiscordBot;
+import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
@@ -23,18 +25,17 @@ import java.util.Collections;
 import java.util.List;
 
 public class DriveTools {
-    private static final String APPLICATION_NAME = "DiscordBot";
+    private static final String APPLICATION_NAME = "MCS-Discman";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
     private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE);
-    private static final String CREDENTIALS_FILE_PATH = "credentials.json";
 
     private static Drive SERVICE = null;
 
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
-        InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
+        InputStream in = new FileInputStream(Config.drive.drive_credentials_file);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
@@ -49,6 +50,11 @@ public class DriveTools {
     }
 
     public static void initDriveClient() {
+        if(!Config.drive.enabled) {
+            DiscordBot.LOGGER.info("Not creating drive client because it is not configured.");
+            return;
+        }
+
         // Build a new authorized API client service.
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -56,14 +62,14 @@ public class DriveTools {
                     .setApplicationName(APPLICATION_NAME)
                     .build();
             MessageManager.log("Drive client initialized.", LogLevel.INFO);
-        }catch (IOException | GeneralSecurityException e) {
+        } catch (IOException | GeneralSecurityException e) {
             MessageManager.log("Unable to create Drive client. Disabling drive features.", LogLevel.WARN, e);
             ConfigTools.CONFIG.DRIVE_UPLOAD = false;
         }
     }
 
     public static String uploadFile(String path, String name, String fileMIME, String folder) {
-        if(!ConfigTools.CONFIG.DRIVE_UPLOAD) return "local";
+        if(!Config.drive.enabled) return "local";
         File fileMetadata = new File();
         fileMetadata.setName(name);
         fileMetadata.setParents(Collections.singletonList(folder));

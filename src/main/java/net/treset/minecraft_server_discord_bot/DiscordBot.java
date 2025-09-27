@@ -5,16 +5,18 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.treset.minecraft_server_discord_bot.config.Config;
+import net.treset.minecraft_server_discord_bot.handlers.NotificationHandlers;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
+import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.rpc.ConnectionManager;
-import net.treset.minecraft_server_discord_bot.rpc.MessageHandler;
+import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
+import net.treset.minecraft_server_discord_bot.tools.DriveTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Objects;
 
 public class DiscordBot {
     public static String CONFIG_FILE = "discordbot.conf";
@@ -36,35 +38,26 @@ public class DiscordBot {
         }
 
         try {
-            ConnectionManager.connect();
-        } catch (IOException e) {
-            LOGGER.error("Failed to connect to the discord server.", e);
-        }
-        Runtime.getRuntime().addShutdownHook(new Thread(ConnectionManager::disconnect));
-
-        MessageHandler.addNotificationHandler(
-                "minecraft:notification/players/joined",
-                n -> System.out.println("JOINED!!!!!")
-        );
-
-        try {
-            MessageHandler.send(
-                    "minecraft:server/system_message",
-                    (r,e) -> System.out.println(Objects.equals(r, true) ? "Yay" : "Nay" + e),
-                    Map.of("message", Map.of("literal", "test3"), "overlay", false)
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        /*try {
             DiscordTools.initClient();
         } catch (LoginException | InterruptedException e) {
             MessageManager.log("Failed to initialize bot: Failed setup discord.", LogLevel.ERROR, e);
             return;
         }
 
-        new Thread(NetworkingManager::init).start();
+        try {
+            ConnectionManager.connect();
+        } catch (IOException e) {
+            LOGGER.error("Failed to connect to the discord server.", e);
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                ConnectionManager.disconnect();
+            } catch (IOException e) {
+                ConnectionManager.forceDisconnect();
+            }
+        }));
+
+        NotificationHandlers.register();
 
         DriveTools.initDriveClient();
 
@@ -74,6 +67,6 @@ public class DiscordBot {
         assert BOT_CHANNEL != null;
         MessageManager.sendText("Hi, I'm online now.", MessageOrigin.SCHEDULE);
 
-        new Thread(PermanentOperations::permanentLoop).start();*/
+        new Thread(PermanentOperations::permanentLoop).start();
     }
 }

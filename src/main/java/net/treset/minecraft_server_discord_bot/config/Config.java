@@ -11,7 +11,10 @@ public class Config {
     private static final String CONFIG_FILE = "discordbot.conf";
     private static final String DEBUG_CONFIG = "debug/discordbot.conf";
 
+    public static DiscordConfig discord;
+    public static ServerConfig server;
     public static CommunicationConfig communication;
+    public static DriveConfig drive;
 
     public static void load() throws IOException {
         String file = CONFIG_FILE;
@@ -25,7 +28,10 @@ public class Config {
 
         String config = FileTools.readFile(file);
 
+        discord = new DiscordConfig(config);
+        server = new ServerConfig(config);
         communication = new CommunicationConfig(config);
+        drive = new DriveConfig(config);
     }
 
 }

@@ -3,14 +3,15 @@ package net.treset.minecraft_server_discord_bot.commands;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.networking.ConnectionManager;
+import net.treset.minecraft_server_discord_bot.rpc.ConnectionManager;
 import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
 
+import java.io.IOException;
 import java.util.Objects;
 
 public class ConnectionCommand {
     public static void handleCommand(SlashCommandEvent event) {
-        String output = "";
+        String output;
 
         if(DiscordTools.isModerator(event)) {
             String type = Objects.requireNonNull(event.getOption("action")).getAsString();
@@ -30,26 +31,25 @@ public class ConnectionCommand {
 
     private static String getStatus() {
         if(ConnectionManager.isConnected()) {
-            return String.format("A connection is open with the id %s.", ConnectionManager.getSessionId());
-        }
-        if(ConnectionManager.isWaitingForConnection()) {
-            return "The bot is waiting for a connection.";
+            return "A connection with the server is open.";
         }
         return "No connection is open.";
     }
 
     private static String openConnection() {
-        if(ConnectionManager.isConnected() || ConnectionManager.isWaitingForConnection()) {
+        if(ConnectionManager.isConnected()) {
             return "The connection is already open. Close it first.";
         }
-        if(ConnectionManager.openConnection()) {
-            return "Connection successfully opened.";
+        try {
+            ConnectionManager.connect();
+        } catch (IOException e) {
+            return "Failed to connect to server. Try again.";
         }
-        return "Failed to open the connection. Try again.";
+        return "Connected to server.";
     }
 
     private static String closeConnection(SlashCommandEvent event) {
-        if(!ConnectionManager.isConnected() && !ConnectionManager.isWaitingForConnection()) {
+        if(!ConnectionManager.isConnected()) {
             return "No connection is open. Open one first.";
         }
 
@@ -58,9 +58,18 @@ public class ConnectionCommand {
             force = Objects.requireNonNull(event.getOption("action")).getAsBoolean();
         }
 
-        if(ConnectionManager.closeConnection(force, false)) {
-            return "Connection closed successfully.";
+        if(force) {
+            ConnectionManager.forceDisconnect();
+            return "Forcefully closed connection.";
         }
-        return "Failed to close the connection. Try again.";
+
+        try {
+            if(ConnectionManager.disconnect()) {
+                return "Connection closed successfully.";
+            }
+            return "Failed to close the connection. Try again.";
+        } catch (IOException e) {
+            return "Failed to close the connection. Try again.";
+        }
     }
 }

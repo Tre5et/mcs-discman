@@ -54,11 +54,11 @@ public class CommunicationManager {
             if(msg == null) continue;
 
             switch(msg.substring(0, 3)) {
-                case "joi" -> MessageManager.sendJoin(msg.substring(4), MessageOrigin.CLIENT);
-                case "lev" -> MessageManager.sendLeave(msg.substring(4), MessageOrigin.CLIENT);
-                case "dth" -> MessageManager.sendDeath(msg.substring(4), MessageOrigin.CLIENT);
-                case "adv" -> MessageManager.sendAdvancement(msg.substring(4), MessageOrigin.CLIENT);
-                case "txt" -> MessageManager.sendText(msg.substring(4), MessageOrigin.CLIENT);
+                case "joi" -> MessageManager.sendJoin(msg.substring(4), MessageOrigin.RPC);
+                case "lev" -> MessageManager.sendLeave(msg.substring(4), MessageOrigin.RPC);
+                case "dth" -> MessageManager.sendDeath(msg.substring(4), MessageOrigin.RPC);
+                case "adv" -> MessageManager.sendAdvancement(msg.substring(4), MessageOrigin.RPC);
+                case "txt" -> MessageManager.sendText(msg.substring(4), MessageOrigin.RPC);
                 case "cls" -> ConnectionManager.respondToClosingConnection(msg.substring(4), false);
                 case "acl" -> ConnectionManager.acceptClose();
                 case "tim" -> receiveTime(msg.substring(4));

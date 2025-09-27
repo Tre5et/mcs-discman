@@ -3,9 +3,9 @@ package net.treset.minecraft_server_discord_bot;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.treset.minecraft_server_discord_bot.commands.*;
+import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -14,7 +14,7 @@ public class SlashCommandHandler extends ListenerAdapter {
 
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
-        if(!event.getChannel().getId().equals(ConfigTools.CONFIG.MESSAGE_CHANNEL_ID)) return;
+        if(!event.getChannel().getId().equals(Config.discord.message_channel_id)) return;
 
         event.deferReply().queue();
 

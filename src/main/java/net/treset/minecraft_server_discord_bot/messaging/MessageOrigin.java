@@ -2,7 +2,7 @@ package net.treset.minecraft_server_discord_bot.messaging;
 
 public enum MessageOrigin {
     LOG_FILE("from log file"),
-    CLIENT("provided by client"),
+    RPC("provided by server management api"),
     COMMAND("from a command"),
     SCHEDULE("because of a scheduled action");
 

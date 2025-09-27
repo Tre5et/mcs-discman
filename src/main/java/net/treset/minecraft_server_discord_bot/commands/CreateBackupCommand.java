@@ -1,6 +1,7 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
@@ -42,7 +43,10 @@ public class CreateBackupCommand {
     private static void executeBackup(SlashCommandEvent event) {
         String output;
 
-        if (ServerTools.isServerRunning()) ServerTools.prepareServerForBackup();
+        if(!ServerTools.prepareServerForBackup()) {
+            event.getHook().sendMessage("Failed to prepare sever for backup, aborting!").queue();
+            return;
+        }
 
         output = "Creating backup... (this may take a few minutes)";
         event.getHook().sendMessage(output).queue();
@@ -53,8 +57,8 @@ public class CreateBackupCommand {
         String date = dtf.format(now);
 
         try {
-            FileTools.zipFile(ConfigTools.CONFIG.WORLD_PATH, ConfigTools.CONFIG.BACKUPS_PATH + date + ".zip");
-            if(!ConfigTools.CONFIG.DRIVE_UPLOAD) {
+            FileTools.zipFile(Config.server.world_path, Config.server.backup_path + date + ".zip");
+            if(!Config.drive.enabled) {
                 output = "Created backup successfully.";
                 MessageManager.sendText(output, MessageOrigin.COMMAND);
                 MessageManager.log("Local backup complete.", LogLevel.INFO);
@@ -65,7 +69,7 @@ public class CreateBackupCommand {
             MessageManager.sendText(output, MessageOrigin.COMMAND);
             MessageManager.log("Local backup complete. Uploading.", LogLevel.INFO);
 
-            if(DriveTools.uploadFile(ConfigTools.CONFIG.BACKUPS_PATH + date + ".zip", date + ".zip", "application/x-zip-compressed", ConfigTools.CONFIG.DRIVE_FOLDER_ID) != null) {
+            if(DriveTools.uploadFile(Config.server.backup_path + date + ".zip", date + ".zip", "application/x-zip-compressed", Config.drive.drive_folder_id) != null) {
                 output = "Uploaded backup successfully.";
                 MessageManager.log("Online backup complete.", LogLevel.INFO);
             } else {
@@ -79,6 +83,8 @@ public class CreateBackupCommand {
 
         MessageManager.sendText(output, MessageOrigin.COMMAND);
 
-        ServerTools.undoBackupPreparation();
+        if(!ServerTools.undoBackupPreparation()) {
+            MessageManager.sendText("**FAILED to enable auto save after backup!** Please resolve manually!", MessageOrigin.COMMAND);
+        }
     }
 }

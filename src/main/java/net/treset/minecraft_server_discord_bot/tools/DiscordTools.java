@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.SlashCommandHandler;
+import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
@@ -14,16 +15,16 @@ import java.util.Objects;
 
 public class DiscordTools {
     public static void initClient() throws LoginException, InterruptedException {
-        DiscordBot.JDA = JDABuilder.createDefault(ConfigTools.CONFIG.TOKEN)
+        DiscordBot.JDA = JDABuilder.createDefault(Config.discord.token)
                 .addEventListeners(new SlashCommandHandler())
                 .build();
 
 
         DiscordBot.JDA.awaitReady();
 
-        DiscordBot.GUILD = DiscordBot.JDA.getGuildById(ConfigTools.CONFIG.GUILD_ID);
-        DiscordBot.BOT_CHANNEL = DiscordBot.JDA.getTextChannelById(ConfigTools.CONFIG.MESSAGE_CHANNEL_ID);
-        DiscordBot.MODERATOR_ROLE = DiscordBot.JDA.getRoleById(ConfigTools.CONFIG.MODERATOR_ID);
+        DiscordBot.GUILD = DiscordBot.JDA.getGuildById(Config.discord.guild_id);
+        DiscordBot.BOT_CHANNEL = DiscordBot.JDA.getTextChannelById(Config.discord.message_channel_id);
+        DiscordBot.MODERATOR_ROLE = DiscordBot.JDA.getRoleById(Config.discord.moderator_role_id);
 
         MessageManager.log("Client initialized.", LogLevel.INFO);
     }

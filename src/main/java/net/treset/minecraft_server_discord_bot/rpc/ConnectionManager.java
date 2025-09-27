@@ -20,15 +20,36 @@ public class ConnectionManager {
         );
     }
 
-    public static void disconnect() {
+    public static boolean disconnect() throws IOException {
         if(isConnected()) {
-            WebsocketClient.getInstance().close();
+            try {
+                WebsocketClient.getInstance().closeBlocking();
+                return isConnected();
+            } catch (InterruptedException e) {
+                throw new IOException("Failed to wait for server disconnection", e);
+            }
+        }
+        return true;
+    }
+
+    public static void forceDisconnect() {
+        if(isConnected()) {
+            WebsocketClient.getInstance().closeConnection(-1, "Forced close by user");
         }
     }
 
     public static void send(String message) throws IOException {
         if(!isConnected()) connect();
-        if(!isConnected()) throw new IOException("Unable to send message, connection is closed and couldn't be opened.");
         WebsocketClient.getInstance().send(message);
+    }
+
+    public static boolean isRunning() {
+        if(isConnected()) return true;
+        try {
+            connect();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

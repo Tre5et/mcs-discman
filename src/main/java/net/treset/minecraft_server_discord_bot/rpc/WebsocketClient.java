@@ -1,6 +1,5 @@
 package net.treset.minecraft_server_discord_bot.rpc;
 
-import jakarta.websocket.*;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
@@ -14,6 +13,7 @@ import java.util.function.Consumer;
 
 public class WebsocketClient extends WebSocketClient {
     private final Consumer<String> messageHandler;
+    private boolean expectFailureOnStart = true;
 
     public WebsocketClient(String host, int port, boolean ssl, String secret, Consumer<String> messageHandler) throws IOException {
         super(
@@ -21,7 +21,10 @@ public class WebsocketClient extends WebSocketClient {
                 Map.of("Authorization", "Bearer " + secret)
         );
         try {
-            this.connectBlocking();
+            boolean connected = this.connectBlocking();
+            if(!connected) {
+                throw new IOException("Could not connect to server.");
+            }
         } catch (InterruptedException e) {
             throw new IOException("Failed to connect to Server", e);
         }
@@ -31,7 +34,8 @@ public class WebsocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        MessageManager.sendText("Connection established", MessageOrigin.CLIENT);
+        MessageManager.sendText("Connection established", MessageOrigin.RPC);
+        expectFailureOnStart = false;
     }
 
     @Override
@@ -41,13 +45,17 @@ public class WebsocketClient extends WebSocketClient {
 
     @Override
     public void onClose(int i, String s, boolean b) {
-        MessageManager.sendText("Connection closed", MessageOrigin.CLIENT);
+        if(!expectFailureOnStart) {
+            MessageManager.sendText("Connection closed", MessageOrigin.RPC);
+        }
     }
 
     @Override
     public void onError(Exception e) {
-        MessageManager.sendText("Connection error", MessageOrigin.CLIENT);
-        MessageManager.log("Error in RPC connection", LogLevel.ERROR, e);
+        if(!expectFailureOnStart) {
+            MessageManager.sendText("Connection error", MessageOrigin.RPC);
+            MessageManager.log("Error in RPC connection", LogLevel.ERROR, e);
+        }
     }
 
     private static WebSocketClient instance = null;

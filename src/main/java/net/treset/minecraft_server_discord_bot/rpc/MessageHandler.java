@@ -5,7 +5,7 @@ import net.treset.minecraft_server_discord_bot.rpc.schemas.*;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class MessageHandler {
@@ -32,19 +32,96 @@ public class MessageHandler {
         }
     }
 
-    public static int send(String method, BiConsumer<Object, RpcError> responseCallback, Object... params) throws IOException {
+    public static int send(String method, Consumer<RpcResponse> responseCallback, Object... params) throws IOException {
         int id = generateUniqueId();
-        responseHandlers.put(id, new ResponseHandler(responseCallback));
-        ConnectionManager.send(constructMessage(id, method, params));
+        responseHandlers.put(id, new ResponseHandler(method, params, responseCallback));
+        try {
+            ConnectionManager.send(constructMessage(id, method, params));
+        } catch (IOException e) {
+            responseHandlers.remove(id);
+            throw e;
+        }
         return id;
     }
 
     public static int send(String method, Object... params) throws IOException {
-        return send(method, (r,e) -> {}, params);
+        return send(method, r -> {}, params);
+    }
+
+    public static RpcResponse sendBlocking(String method, Object... params) throws IOException {
+        Object lock = new Object();
+
+        int id = generateUniqueId();
+
+        AtomicReference<RpcResponse> res = new AtomicReference<>();
+        responseHandlers.put(id, new ResponseHandler(method, params, r -> {
+            synchronized (lock) {
+                res.set(r);
+                lock.notify();
+            }
+        }));
+
+
+        synchronized (lock) {
+            try {
+                ConnectionManager.send(constructMessage(id, method, params));
+            } catch (IOException e) {
+                responseHandlers.remove(id);
+                throw e;
+            }
+            try {
+                lock.wait(10_000);
+            } catch (InterruptedException e) {
+                throw new IOException("Failed to wait for response", e);
+            }
+        }
+
+        if(res.get() == null) {
+            purgeOldResponseHandlers();
+            return RpcResponse.Timeout(id);
+        }
+
+        return res.get();
     }
 
     public static void addNotificationHandler(String method, Consumer<RpcNotification> handler) {
         notificationHandlers.put(method, handler);
+    }
+
+    public static RpcNotification awaitNotification(String method, long timeoutMs) {
+        return awaitNotification(() -> {}, method, timeoutMs);
+    }
+
+    public static RpcNotification awaitNotification(Runnable actionBefore, String method, long timeoutMs) {
+        Object lock = new Object();
+
+        AtomicReference<RpcNotification> result = new AtomicReference<>();
+        Consumer<RpcNotification> prevHandler = notificationHandlers.get(method);
+
+        addNotificationHandler(method, n -> {
+            System.out.println("Got not " + method);
+            result.set(n);
+            synchronized (lock) {
+                lock.notify();
+            }
+        });
+
+        synchronized (lock) {
+            actionBefore.run();
+            try {
+                lock.wait(timeoutMs);
+            } catch (InterruptedException e) {
+                DiscordBot.LOGGER.warn("Interrupted while waiting for notification", e);
+            }
+        }
+
+        if(result.get() == null) {
+            return null;
+        }
+
+        if(prevHandler != null) prevHandler.accept(result.get());
+        addNotificationHandler(method, prevHandler);
+        return result.get();
     }
 
     private static String constructMessage(int id, String method, Object... params) {
@@ -63,7 +140,7 @@ public class MessageHandler {
         ResponseHandler handler = responseHandlers.get(response.id());
         if(handler != null) {
             responseHandlers.remove(response.id());
-            handler.callback.accept(response.result(), response.error());
+            handler.callback.accept(response);
         } else {
             DiscordBot.LOGGER.warn("Response with no handler for id = {}; result = {}; error = {}", response.id(), response.result(), response.error());
         }
@@ -74,14 +151,15 @@ public class MessageHandler {
     private static void purgeOldResponseHandlers() {
         for(Map.Entry<Integer, ResponseHandler> entry : responseHandlers.entrySet()) {
             if(entry.getValue().timeoutTime < System.currentTimeMillis()) {
-                DiscordBot.LOGGER.warn("Response for id = {} took longer than 10 seconds, assuming lost", entry.getKey());
+                DiscordBot.LOGGER.warn("Response for id = {} took longer than 10 seconds, assuming lost, method = {}, params = {}", entry.getKey(), entry.getValue().method, entry.getValue().params);
                 responseHandlers.remove(entry.getKey());
-                entry.getValue().callback.accept(null, new RpcError(-1, "Timed out", "No response after 10 seconds"));
+                entry.getValue().callback.accept(RpcResponse.Timeout(entry.getKey()));
             }
         }
     }
 
     private static void handleNotification(RpcNotification notification) {
+        System.out.println("proc not " + notification.method());
         if(notificationHandlers.containsKey(notification.method())) {
             notificationHandlers.get(notification.method()).accept(notification);
         }
@@ -93,9 +171,13 @@ public class MessageHandler {
 
     public static class ResponseHandler {
         private final long timeoutTime = System.currentTimeMillis() + RESPONSE_TIMEOUT;
-        private final BiConsumer<Object, RpcError> callback;
+        private final String method;
+        private final Object[] params;
+        private final Consumer<RpcResponse> callback;
 
-        public ResponseHandler(BiConsumer<Object, RpcError> callback) {
+        public ResponseHandler(String method, Object[] params, Consumer<RpcResponse> callback) {
+            this.method = method;
+            this.params = params;
             this.callback = callback;
         }
     }
