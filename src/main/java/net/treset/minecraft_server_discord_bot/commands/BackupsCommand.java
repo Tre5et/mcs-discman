@@ -1,27 +1,23 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
-
-import java.io.IOException;
 
 public class BackupsCommand {
     public static void handleCommand(SlashCommandEvent event) {
-        String output;
+        String output = "";
 
-        try {
-            ConfigTools.loadDetails();
-        } catch (IOException e) {
-            MessageManager.log("Failed to update details before command.", LogLevel.WARN, e);
+        if(Config.contact.backups_location != null) {
+            output += String.format("Backups are available at **%s**. ", Config.contact.backups_location);
         }
-
-        String backupLocation = ConfigTools.DETAILS.backupLocation;
-        String admin = ConfigTools.DETAILS.admin;
-
-        if(ConfigTools.CONFIG.DRIVE_UPLOAD && !backupLocation.isEmpty()) output = String.format("Backups are available at **%s**.\nFurther backups can be requested from %s.", backupLocation, admin);
-        else output = String.format("Backups can be requested from %s.", admin);
+        if(Config.contact.admin != null) {
+            output += String.format("For more information contact **%s**.", Config.contact.admin);
+        }
+        if(output.isBlank()) {
+            output = "No information about backups is configured.";
+        }
 
         event.getHook().sendMessage(output).queue();
 

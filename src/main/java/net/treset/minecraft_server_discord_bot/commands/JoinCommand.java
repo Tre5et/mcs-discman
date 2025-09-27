@@ -1,25 +1,19 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.tools.ConfigTools;
-
-import java.io.IOException;
 
 public class JoinCommand {
     public static void handleCommand(SlashCommandEvent event) {
         String output;
 
-        try {
-            ConfigTools.loadDetails();
-        } catch (IOException e) {
-            MessageManager.log("Failed to update details before command.", LogLevel.WARN, e);
+        if(Config.contact.url != null) {
+            output = String.format("Join the server using the address **%s**. You must be member to join. Type ``/members`` for more details.", Config.contact.url);
+        } else {
+            output = "No information about how to join the server is configured.";
         }
-
-        String url = ConfigTools.DETAILS.url;
-
-        output = String.format("Join the server using the ip-adress **%s**.\nYou must be member to join. Type ``/members`` for more details.", url);
 
         event.getHook().sendMessage(output).queue();
 

@@ -1,18 +1,15 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.DiscordBot;
-import net.treset.minecraft_server_discord_bot.PermanentOperations;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
-import net.treset.minecraft_server_discord_bot.tools.MiscTools;
 import net.treset.minecraft_server_discord_bot.tools.ServerTools;
 
 public class RestartServerCommand {
     public static void handleCommand(SlashCommandEvent event) {
-        String output = "";
+        String output;
 
         if(DiscordTools.isModerator(event)) {
             if(ServerTools.isServerRunning()) {
@@ -22,22 +19,9 @@ public class RestartServerCommand {
                 event.getHook().sendMessage(output).queue();
                 MessageManager.log("Stopping server.", LogLevel.INFO);
 
-                int timeSinceStop = 0;
-                while(ServerTools.isServerRunning()) {
-
-                    MiscTools.timeout(2000);
-
-                    timeSinceStop += 2;
-
-                    if(timeSinceStop > 90) {
-                        output = "Server stop failed. Try again.";
-                        MessageManager.sendText(output, MessageOrigin.COMMAND);
-
-                        MessageManager.log("Stop timed out.", LogLevel.ERROR);
-
-                        PermanentOperations.isStopExpected = false;
-                        return;
-                    }
+                if(!ServerTools.stopServer()) {
+                    output = "Server stop failed.";
+                    MessageManager.sendText(output, MessageOrigin.COMMAND);
                 }
 
                 output = "Server stopped, restarting... (this may take a few minutes)";

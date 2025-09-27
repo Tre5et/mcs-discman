@@ -25,14 +25,11 @@ public class SlashCommandHandler extends ListenerAdapter {
             case "connection" : CompletableFuture.runAsync(() -> ConnectionCommand.handleCommand(event)); break;
             case "createbackup": CompletableFuture.runAsync(() -> CreateBackupCommand.handleCommand(event)); break;
             case "details": CompletableFuture.runAsync(() -> DetailsCommand.handleCommand(event)); break;
-            case "ingame" : CompletableFuture.runAsync(() -> IngameCommand.handleCommand(event)); break;
             case "join": CompletableFuture.runAsync(() -> JoinCommand.handleCommand(event));break;
             case "members": CompletableFuture.runAsync(() -> MembersCommand.handleCommand(event)); break;
-            case "logconsole":  CompletableFuture.runAsync(() ->LogConsoleCommand.handleCommand(event)); break;
             case "online": CompletableFuture.runAsync(() -> OnlineCommand.handleCommand(event)); break;
             case "ping": CompletableFuture.runAsync(() -> PingCommand.handleCommand(event)); break;
             case "restartserver": CompletableFuture.runAsync(() -> RestartServerCommand.handleCommand(event)); break;
-            case "runcommand": CompletableFuture.runAsync(() -> RunCommandCommand.handleCommand(event)); break;
             case "say": CompletableFuture.runAsync(() -> SayCommand.handleCommand(event)); break;
             case "startserver": CompletableFuture.runAsync(() -> StartServerCommand.handleCommand(event)); break;
             case "stopserver": CompletableFuture.runAsync(() -> StopServerCommand.handleCommand(event)); break;

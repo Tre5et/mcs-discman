@@ -15,6 +15,7 @@ public class Config {
     public static ServerConfig server;
     public static CommunicationConfig communication;
     public static DriveConfig drive;
+    public static ContactConfig contact;
 
     public static void load() throws IOException {
         String file = CONFIG_FILE;
@@ -32,6 +33,7 @@ public class Config {
         server = new ServerConfig(config);
         communication = new CommunicationConfig(config);
         drive = new DriveConfig(config);
+        contact = new ContactConfig(config);
     }
 
 }
