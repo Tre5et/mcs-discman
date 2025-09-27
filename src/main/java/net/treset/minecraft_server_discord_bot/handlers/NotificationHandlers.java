@@ -1,5 +1,6 @@
 package net.treset.minecraft_server_discord_bot.handlers;
 
+import net.treset.minecraft_server_discord_bot.PermanentOperations;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.rpc.MessageHandler;
@@ -31,16 +32,16 @@ public class NotificationHandlers {
     }
 
     private static void registerHandler(String path, String message) {
-        MessageHandler.addNotificationHandler(
-                "minecraft:notification/" + path,
-                n -> MessageManager.sendText(message, MessageOrigin.RPC)
-        );
+        registerHandler(path, r -> message);
     }
 
     private static void registerHandler(String path, Function<RpcNotification, String> handler) {
         MessageHandler.addNotificationHandler(
                 "minecraft:notification/" + path,
-                n -> MessageManager.sendText(handler.apply(n), MessageOrigin.RPC)
+                n -> {
+                    MessageManager.sendText(handler.apply(n), MessageOrigin.RPC);
+                    PermanentOperations.setSomethingHappened();
+                }
         );
     }
 }

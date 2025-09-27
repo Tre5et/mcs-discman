@@ -4,7 +4,7 @@ import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
-import net.treset.minecraft_server_discord_bot.networking.ConnectionManager;
+import net.treset.minecraft_server_discord_bot.rpc.ConnectionManager;
 import net.treset.minecraft_server_discord_bot.tools.*;
 
 import java.io.IOException;
@@ -12,119 +12,37 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class PermanentOperations {
-    private static String prevData = "";
-    private static boolean isLoggingEnabled = false;
-    private static boolean isStartLoggingEnabled = false;
-    private static boolean isJoinLoggingEnabled = false;
-    public static boolean isLoggingFull = false;
     private static boolean terminatePermanentLoop = false;
 
     public static boolean isBackupEnabled = true;
-    private static String backupHour = "01";
-    private static int backupTimeout = 1200;
-    private static boolean isLogNoBackup = true;
 
     private static boolean hasSomethingHappened = true;
     private static boolean wasBackedUpToday = false;
     private static String prevDay = "";
 
-    public static boolean isCrashCheckEnabled = false;
     public static boolean isStopExpected = false;
     private static boolean prevRunning = false;
     private static int crashedRecently = 0;
     private static int crashesInShortTime = 0;
 
-    private static int inactivityReminder = 0;
     private static int daysSinceActivity = 0;
 
     public static void setSomethingHappened() { hasSomethingHappened = true; }
 
     public static void permanentLoop() {
-        isLoggingEnabled = ConfigTools.PERMA_CONFIG.LOGGING_ENABLED;
-        isStartLoggingEnabled = ConfigTools.PERMA_CONFIG.START_LOGGING;
-        isJoinLoggingEnabled = ConfigTools.PERMA_CONFIG.JOIN_LOGGING;
-        isLoggingFull = ConfigTools.PERMA_CONFIG.FULL_LOGGING;
-        isBackupEnabled = ConfigTools.PERMA_CONFIG.BACKUP_ENABLED;
-        backupHour = ConfigTools.PERMA_CONFIG.BACKUP_HOUR;
-        backupTimeout = ConfigTools.PERMA_CONFIG.BACKUP_TIMEOUT;
-        isCrashCheckEnabled = ConfigTools.PERMA_CONFIG.CRASH_CHECK_ENABLED;
-        isLogNoBackup = ConfigTools.PERMA_CONFIG.LOG_NO_BACKUP;
-        inactivityReminder = ConfigTools.PERMA_CONFIG.INACTIVITY_REMINDER_ENABLED;
-
-        try {
-            prevData = FileTools.readFile(ConfigTools.CONFIG.LOG_PATH);
-        } catch (IOException e) {
-            MessageManager.log("Error reading log file.", LogLevel.WARN, e);
-            prevData = "";
-        }
-
         while(!terminatePermanentLoop) {
-
-            logFromFile();
-
             autoBackup();
 
             checkForCrash();
 
-            MiscTools.timeout(10000);
+            try {
+                Thread.sleep(Config.discord.update_interval * 1000L);
+            } catch (InterruptedException e) {
+                MessageManager.log("Failed to wait for permanent operations loop", LogLevel.ERROR, e);
+            }
         }
 
         terminatePermanentLoop = false;
-    }
-
-    public static void logFromFile() {
-        if (isLoggingEnabled) {
-            String data;
-            try {
-                data = FileTools.readFile(ConfigTools.CONFIG.LOG_PATH);
-            } catch (IOException e) {
-                MessageManager.log("Error reading log file.", LogLevel.WARN, e);
-                return;
-            }
-            String formattedData = data.replace(prevData, "");
-
-            if (!formattedData.isEmpty()) {
-                if (isLoggingFull) logFullConsole(formattedData);
-                else {
-                    String[] lines = formattedData.split("\\r?\\n");
-
-                    for (String line : lines) {
-                        if (isStartLoggingEnabled) logStarted(line);
-                        if (isJoinLoggingEnabled && (!ConnectionManager.isConnected() || !ConfigTools.CLIENT_CONFIG.OVERRIDE_CONSOLE_READER)) {
-                            logPlayerJoin(line);
-                            logPlayerLeave(line);
-                        }
-                    }
-                }
-                prevData = data;
-            }
-        }
-    }
-
-    private static void logFullConsole(String input) {
-        MessageManager.sendText(input, MessageOrigin.LOG_FILE);
-        MessageManager.log("Full console logged.", LogLevel.INFO);
-        hasSomethingHappened = true;
-    }
-
-    private static void logStarted(String input) {
-        if (input.contains("Done (")) {
-            MessageManager.sendStarted(MessageOrigin.LOG_FILE);
-            ConfigTools.setPlayers(new String[]{});
-            hasSomethingHappened = true;
-        }
-    }
-
-    private static void logPlayerJoin(String input) {
-        String playerName = FormatTools.findStringBetween(input, "INFO]: ", " joined the game");
-        if(!playerName.isEmpty())
-            MessageManager.sendJoin(playerName, MessageOrigin.LOG_FILE);
-    }
-
-    private static void logPlayerLeave(String input) {
-        String playerName = FormatTools.findStringBetween(input, "INFO]: ", " left the game");
-        if(!playerName.isEmpty())
-            MessageManager.sendLeave(playerName, MessageOrigin.LOG_FILE);
     }
 
     private static void autoBackup() {
@@ -132,16 +50,16 @@ public class PermanentOperations {
         DateTimeFormatter dtfH = DateTimeFormatter.ofPattern("HH");
 
         LocalDateTime now = LocalDateTime.now();
-        boolean isCorrectHour = dtfH.format(now).equals(backupHour);
+        boolean isCorrectHour = dtfH.format(now).equals(Config.server.backup_hour_formatted);
 
         if(!wasBackedUpToday && isCorrectHour) {
             if(hasSomethingHappened) {
                 daysSinceActivity = 0;
-                if(isBackupEnabled) new Thread(PermanentOperations::createAutoBackup).start();
+                if(Config.server.backup_enabled) new Thread(PermanentOperations::createAutoBackup).start();
             } else {
                 logInactivity();
-                if(isBackupEnabled) {
-                    dontCreateAutoBackup(ServerTools.isServerRunning() && isLogNoBackup);
+                if(Config.server.backup_enabled) {
+                    dontCreateAutoBackup(ServerTools.isServerRunning() && Config.server.log_no_backup);
                 }
             }
 
@@ -159,7 +77,7 @@ public class PermanentOperations {
         buThread.start();
 
         try {
-            Thread.sleep(backupTimeout * 1000L);
+            Thread.sleep(Config.server.backup_timeout * 1000L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -228,14 +146,14 @@ public class PermanentOperations {
 
         daysSinceActivity++;
 
-        if(inactivityReminder > 0 && daysSinceActivity % inactivityReminder == 0) {
+        if(Config.server.inactivity_reminder_enabled && daysSinceActivity % Config.server.inactivity_reminder == 0) {
             MessageManager.sendText(String.format("Reminder: The server hasn't been used in %s days. Consider stopping it.", daysSinceActivity), MessageOrigin.SCHEDULE);
             MessageManager.log(String.format("Inactivity reminder sent after %s days.", daysSinceActivity), LogLevel.INFO);
         }
     }
 
     private static void checkForCrash() {
-        if(!isCrashCheckEnabled) return;
+        if(!Config.server.auto_restart) return;
 
         new Thread(PermanentOperations::executeCrashHandler).start();
     }
@@ -243,7 +161,7 @@ public class PermanentOperations {
     private static void executeCrashHandler() {
         boolean running = ServerTools.isServerRunning();
         if(!running && prevRunning) {
-            ConnectionManager.closeConnection(true, true);
+            ConnectionManager.forceDisconnect();
             prevRunning = false;
             if(isStopExpected) {
                 MessageManager.log("Expected server stop detected.", LogLevel.DEBUG);
@@ -264,7 +182,11 @@ public class PermanentOperations {
 
                 double time = 0;
                 while (!ServerTools.isServerRunning()) {
-                    MiscTools.timeout(500);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        MessageManager.log("Failed to wait for server crash check", LogLevel.ERROR, e);
+                    }
                     time += .2d;
                     if (time >= 30) {
                         MessageManager.sendText("Failed to start Server, not trying again.", MessageOrigin.SCHEDULE);

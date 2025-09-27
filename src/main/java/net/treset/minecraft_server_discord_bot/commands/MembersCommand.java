@@ -34,9 +34,9 @@ public class MembersCommand {
 
     private static List<String> getMembers() {
         try {
-            RpcResponse res = MessageHandler.sendBlocking("minecraft:allowlist");
+            RpcResponse res = MessageHandler.request("minecraft:allowlist");
             try {
-                return RpcPlayer.extractPlayersFromResponse(res);
+                return RpcPlayer.fromList(res.result()).stream().map(RpcPlayer::name).toList();
             } catch (IOException e) {
                 MessageManager.log("Failed to extract members for members command", LogLevel.WARN, e);
                 return null;

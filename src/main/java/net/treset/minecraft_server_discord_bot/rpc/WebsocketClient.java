@@ -34,7 +34,7 @@ public class WebsocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        MessageManager.sendText("Connection established", MessageOrigin.RPC);
+        MessageManager.sendText("Connection to server established.", MessageOrigin.RPC);
         expectFailureOnStart = false;
     }
 
@@ -46,14 +46,14 @@ public class WebsocketClient extends WebSocketClient {
     @Override
     public void onClose(int i, String s, boolean b) {
         if(!expectFailureOnStart) {
-            MessageManager.sendText("Connection closed", MessageOrigin.RPC);
+            MessageManager.sendText("Connection to server closed.", MessageOrigin.RPC);
         }
     }
 
     @Override
     public void onError(Exception e) {
         if(!expectFailureOnStart) {
-            MessageManager.sendText("Connection error", MessageOrigin.RPC);
+            MessageManager.sendText("Server connection error.", MessageOrigin.RPC);
             MessageManager.log("Error in RPC connection", LogLevel.ERROR, e);
         }
     }

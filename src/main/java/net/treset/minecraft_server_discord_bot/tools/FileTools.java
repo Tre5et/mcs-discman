@@ -4,16 +4,13 @@ import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class FileTools {
@@ -26,12 +23,6 @@ public class FileTools {
         }
         myReader.close();
         return data.toString();
-    }
-
-    public static void writeFile(String path, String data) throws IOException {
-        FileWriter writer = new FileWriter(path);
-        writer.write(data);
-        writer.close();
     }
 
     public static void zipFile(String sourceDirPath, String zipFilePath) throws IOException {
@@ -63,47 +54,4 @@ public class FileTools {
             throw new IOException(e);
         }
     }
-
-    public static boolean fileExists(String path) {
-        return new File(path).isFile();
-    }
-    public static boolean dirExists(String path) {
-        return new File(path).isDirectory();
-    }
-
-    public static File[] findFilesMatching(String pattern, String path) {
-        File dir = new File(path);
-        if(!dir.isDirectory()) {
-            return new File[0];
-        }
-
-        return dir.listFiles((dir1, name) -> name.matches(pattern));
-    }
-
-    public static String getFileFromZip(String zipFileName, String fileName) throws IOException {
-        if(FileTools.fileExists(zipFileName)) {
-
-            try(ZipFile zipFile = new ZipFile(zipFileName)) {
-                Enumeration<? extends ZipEntry> entries = zipFile.entries();
-
-                while (entries.hasMoreElements()) {
-                    ZipEntry entry = entries.nextElement();
-                    if (!entry.isDirectory() && entry.getName().equals(fileName)) {
-                        InputStream stream = zipFile.getInputStream(entry);
-                        StringBuilder fileContent = new StringBuilder();
-                        try (Reader reader = new BufferedReader(new InputStreamReader
-                                (stream, StandardCharsets.UTF_8))) {
-                            int c;
-                            while ((c = reader.read()) != -1) {
-                                fileContent.append((char) c);
-                            }
-                        }
-                        return fileContent.toString();
-                    }
-                }
-            }
-        }
-        return "";
-    }
-
 }

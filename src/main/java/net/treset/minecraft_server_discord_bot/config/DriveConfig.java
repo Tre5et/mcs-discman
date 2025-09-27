@@ -5,7 +5,7 @@ import java.io.IOException;
 public class DriveConfig extends BaseConfig {
     public final String drive_folder_id;
     public final String drive_credentials_file;
-    public final boolean enabled;
+    public boolean enabled;
 
     public DriveConfig(String config) throws IOException {
         super(config);

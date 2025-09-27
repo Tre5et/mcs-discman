@@ -17,11 +17,6 @@ public class ServerTools {
         return ConnectionManager.isConnected();
     }
 
-    public static String runServerCommand(String command) {
-        String consoleCmd = String.format(ConfigTools.CONFIG.RUN_COMMAND, command);
-        return ExecTools.executeCommand(consoleCmd);
-    }
-
     public static void startServer() {
         ConnectionManager.forceDisconnect();
         String cmd = Config.server.start_command;
@@ -36,7 +31,7 @@ public class ServerTools {
                 try {
                     ConnectionManager.connect();
                 } catch (IOException e) {
-                    MessageManager.sendText("Failed to connect to server after starting!", MessageOrigin.RPC);
+                    MessageManager.sendText("Failed to connect to server after starting! (perhaps the server didn't start correctly?)", MessageOrigin.RPC);
                 }
             }
         }).start();
@@ -47,7 +42,7 @@ public class ServerTools {
         AtomicBoolean success2 = new AtomicBoolean(false);
         boolean success = MessageHandler.awaitNotification(() -> {
             try {
-                success2.set(MessageHandler.sendBlocking("minecraft:server/stop").isResult(true));
+                success2.set(MessageHandler.request("minecraft:server/stop").isResult(true));
             } catch (IOException e) {
                 DiscordBot.LOGGER.warn("Failed to initiate server stop!", e);
             }
@@ -68,7 +63,7 @@ public class ServerTools {
     public static boolean prepareServerForBackup() {
         if(ConnectionManager.isRunning()) {
             try {
-                RpcResponse res = MessageHandler.sendBlocking("minecraft:serversettings/autosave/set", false);
+                RpcResponse res = MessageHandler.request("minecraft:serversettings/autosave/set", false);
                 boolean success = res.isResult(false);
                 if (!success) {
                     DiscordBot.LOGGER.warn("Failed to disable saving before backup");
@@ -78,7 +73,7 @@ public class ServerTools {
                 AtomicBoolean success2 = new AtomicBoolean(false);
                 success = MessageHandler.awaitNotification(() -> {
                     try {
-                        success2.set(MessageHandler.sendBlocking("minecraft:server/save", true).isResult(true));
+                        success2.set(MessageHandler.request("minecraft:server/save", true).isResult(true));
                     } catch (IOException e) {
                         DiscordBot.LOGGER.warn("Failed to execute backup preparation", e);
                         success2.set(false);
@@ -103,7 +98,7 @@ public class ServerTools {
     public static boolean undoBackupPreparation() {
         if(ConnectionManager.isRunning()) {
             try {
-                boolean success = MessageHandler.sendBlocking("minecraft:serversettings/autosave/set", true).isResult(true);
+                boolean success = MessageHandler.request("minecraft:serversettings/autosave/set", true).isResult(true);
                 if (!success) {
                     DiscordBot.LOGGER.warn("Failed to enable saving after backup");
                     return false;

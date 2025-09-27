@@ -18,6 +18,7 @@ import net.treset.minecraft_server_discord_bot.DiscordBot;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
 import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
+import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
@@ -63,8 +64,9 @@ public class DriveTools {
                     .build();
             MessageManager.log("Drive client initialized.", LogLevel.INFO);
         } catch (IOException | GeneralSecurityException e) {
+            MessageManager.sendText("Unable to create drive client but drive features are enabled. Disabling for now. Please fix this manually.", MessageOrigin.SCHEDULE);
             MessageManager.log("Unable to create Drive client. Disabling drive features.", LogLevel.WARN, e);
-            ConfigTools.CONFIG.DRIVE_UPLOAD = false;
+            Config.drive.enabled = false;
         }
     }
 

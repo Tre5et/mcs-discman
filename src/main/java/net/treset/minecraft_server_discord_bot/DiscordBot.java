@@ -19,9 +19,6 @@ import javax.security.auth.login.LoginException;
 import java.io.IOException;
 
 public class DiscordBot {
-    public static String CONFIG_FILE = "discordbot.conf";
-    public static String DETAILS_FILE = "details.conf";
-    public static final String PLAYERS_FILE = "storage/players.storage";
     public static JDA JDA;
     public static Guild GUILD;
     public static MessageChannel BOT_CHANNEL;
@@ -44,10 +41,16 @@ public class DiscordBot {
             return;
         }
 
+        assert GUILD != null;
+        DiscordTools.upsertCommands();
+
+        assert BOT_CHANNEL != null;
+        MessageManager.sendText("Hi, I'm online now.", MessageOrigin.SCHEDULE);
+
         try {
             ConnectionManager.connect();
         } catch (IOException e) {
-            LOGGER.error("Failed to connect to the discord server.", e);
+            LOGGER.error("Failed to connect to the minecraft server.", e);
         }
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
@@ -60,12 +63,6 @@ public class DiscordBot {
         NotificationHandlers.register();
 
         DriveTools.initDriveClient();
-
-        assert GUILD != null;
-        DiscordTools.upsertCommands();
-
-        assert BOT_CHANNEL != null;
-        MessageManager.sendText("Hi, I'm online now.", MessageOrigin.SCHEDULE);
 
         new Thread(PermanentOperations::permanentLoop).start();
     }

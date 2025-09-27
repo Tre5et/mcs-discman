@@ -48,7 +48,7 @@ public class MessageHandler {
         return send(method, r -> {}, params);
     }
 
-    public static RpcResponse sendBlocking(String method, Object... params) throws IOException {
+    public static RpcResponse request(String method, Object... params) throws IOException {
         Object lock = new Object();
 
         int id = generateUniqueId();

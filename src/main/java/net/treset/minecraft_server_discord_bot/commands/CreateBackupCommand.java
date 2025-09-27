@@ -19,7 +19,7 @@ public class CreateBackupCommand {
             buThread.start();
 
             try {
-                Thread.sleep(ConfigTools.PERMA_CONFIG.BACKUP_TIMEOUT * 1000L);
+                Thread.sleep(Config.server.backup_timeout * 1000L);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

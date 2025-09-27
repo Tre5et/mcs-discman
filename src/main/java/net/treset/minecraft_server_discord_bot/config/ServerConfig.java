@@ -10,8 +10,17 @@ public class ServerConfig extends BaseConfig {
     public final String world_name;
     public final String backup_path;
     public final String start_command;
+    public final int restart_delay;
     public final int save_timeout;
     public final int stop_timeout;
+    public final int backup_hour;
+    public final String backup_hour_formatted;
+    public final boolean backup_enabled;
+    public final int backup_timeout;
+    public final boolean log_no_backup;
+    public final boolean auto_restart;
+    public final int inactivity_reminder;
+    public final boolean inactivity_reminder_enabled;
 
     public final String world_path;
 
@@ -23,8 +32,6 @@ public class ServerConfig extends BaseConfig {
         world_name = load("world_name");
         String bu_path = load("backup_path");
         start_command = load("start_command");
-        save_timeout = FormatTools.stringToInt(load("save_timeout"), 10);
-        stop_timeout = FormatTools.stringToInt(load("stop_timeout"), 30);
 
         if(srv_path == null || world_name == null || bu_path == null || start_command == null) {
             throw new IOException("Invalid server config. Options 'server_path', 'world_name', 'backup_path' and 'start_command' must all be set.");
@@ -38,5 +45,18 @@ public class ServerConfig extends BaseConfig {
         if(FormatTools.matchRegex(bu_path, Pattern.compile("(/$)", Pattern.MULTILINE)).isEmpty()) { //account for / at the end
             this.backup_path = bu_path + "/";
         } else this.backup_path = bu_path;
+
+        restart_delay = FormatTools.stringToInt(load("restart_delay"), 5);
+        save_timeout = FormatTools.stringToInt(load("save_timeout"), 10);
+        stop_timeout = FormatTools.stringToInt(load("stop_timeout"), 30);
+
+        backup_hour = FormatTools.stringToInt(load("backup_hour"));
+        backup_hour_formatted = String.format("%02d", backup_hour);
+        backup_enabled = backup_hour >= 0 && backup_hour < 24;
+        backup_timeout = FormatTools.stringToInt(load("backup_timeout"), 1200);
+        log_no_backup = FormatTools.stringToBoolean(load("log_no_backup"));
+        auto_restart = FormatTools.stringToBoolean(load("auto_restart"));
+        inactivity_reminder = FormatTools.stringToInt(load("inactivity_reminder"));
+        inactivity_reminder_enabled = inactivity_reminder > 0;
     }
 }

@@ -31,9 +31,9 @@ public class OnlineCommand {
 
     private static List<String> getPlayers() {
         try {
-            RpcResponse res = MessageHandler.sendBlocking("minecraft:players");
+            RpcResponse res = MessageHandler.request("minecraft:players");
             try {
-                return RpcPlayer.extractPlayersFromResponse(res);
+                return RpcPlayer.fromList(res.result()).stream().map(RpcPlayer::name).toList();
             } catch (IOException e) {
                 MessageManager.log("Failed to extract players for players command", LogLevel.WARN, e);
                 return null;
