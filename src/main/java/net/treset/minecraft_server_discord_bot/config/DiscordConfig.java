@@ -1,6 +1,6 @@
 package net.treset.minecraft_server_discord_bot.config;
 
-import net.treset.minecraft_server_discord_bot.tools.FormatTools;
+import net.treset.minecraft_server_discord_bot.system.Formatter;
 
 import java.io.IOException;
 
@@ -25,7 +25,7 @@ public class DiscordConfig extends BaseConfig {
             throw new IOException("Invalid discord config. Options 'token', 'guild_id', 'message_channel_id' and 'moderator_role_id' must be set.");
         }
 
-        update_interval = FormatTools.stringToInt(load("update_interval"), 10);
-        debug = FormatTools.stringToBoolean(load("debug"));
+        update_interval = Formatter.stringToInt(load("update_interval"), 10);
+        debug = Formatter.stringToBoolean(load("debug"));
     }
 }

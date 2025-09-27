@@ -1,6 +1,6 @@
 package net.treset.minecraft_server_discord_bot.config;
 
-import net.treset.minecraft_server_discord_bot.tools.FormatTools;
+import net.treset.minecraft_server_discord_bot.system.Formatter;
 
 import java.io.IOException;
 
@@ -15,10 +15,10 @@ public class CommunicationConfig extends BaseConfig {
         super(config);
 
         server_host = load("server_host");
-        server_port = FormatTools.stringToInt(load("server_port"));
+        server_port = Formatter.stringToInt(load("server_port"));
         server_secret = load("server_secret");
-        rpc_startup_delay = FormatTools.stringToInt(load("rpc_startup_delay"), 5);
-        use_ssl = FormatTools.stringToBoolean(load("use_ssl"));
+        rpc_startup_delay = Formatter.stringToInt(load("rpc_startup_delay"), 5);
+        use_ssl = Formatter.stringToBoolean(load("use_ssl"));
 
         if(server_host == null || server_port == -1 || server_secret == null) {
             throw new IOException("Invalid communication config. Options 'server_host', 'server_port' and 'server_secret' must be set.");

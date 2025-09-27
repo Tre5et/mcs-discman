@@ -1,6 +1,6 @@
 package net.treset.minecraft_server_discord_bot.config;
 
-import net.treset.minecraft_server_discord_bot.tools.FileTools;
+import net.treset.minecraft_server_discord_bot.system.FileHandler;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class Config {
             throw new FileNotFoundException("Unable to find config file " + file);
         }
 
-        String config = FileTools.readFile(file);
+        String config = FileHandler.readFile(file);
 
         discord = new DiscordConfig(config);
         server = new ServerConfig(config);

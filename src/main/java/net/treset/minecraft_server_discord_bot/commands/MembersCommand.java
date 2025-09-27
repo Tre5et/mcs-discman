@@ -2,12 +2,11 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
-import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.rpc.MessageHandler;
-import net.treset.minecraft_server_discord_bot.rpc.data.RpcPlayer;
-import net.treset.minecraft_server_discord_bot.rpc.schemas.RpcResponse;
-import net.treset.minecraft_server_discord_bot.tools.FormatTools;
+import net.treset.minecraft_server_discord_bot.logging.Logger;
+import net.treset.minecraft_server_discord_bot.server.RpcMessager;
+import net.treset.minecraft_server_discord_bot.server.data.RpcPlayer;
+import net.treset.minecraft_server_discord_bot.server.schemas.RpcResponse;
+import net.treset.minecraft_server_discord_bot.system.Formatter;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,26 +22,26 @@ public class MembersCommand {
             return;
         }
 
-        output = String.format("Current members are: **%s**.", FormatTools.formatList(members, ", "));
+        output = String.format("Current members are: **%s**.", Formatter.formatList(members, ", "));
         if(Config.contact.admin != null) {
             output += String.format("\nTo become a member contact **%s**.", Config.contact.admin);
         }
         event.getHook().sendMessage(output).queue();
 
-        MessageManager.log("Handled.", LogLevel.INFO);
+        Logger.info("Handled.");
     }
 
     private static List<String> getMembers() {
         try {
-            RpcResponse res = MessageHandler.request("minecraft:allowlist");
+            RpcResponse res = RpcMessager.request("minecraft:allowlist");
             try {
                 return RpcPlayer.fromList(res.result()).stream().map(RpcPlayer::name).toList();
             } catch (IOException e) {
-                MessageManager.log("Failed to extract members for members command", LogLevel.WARN, e);
+                Logger.warn(e, "Failed to extract members for members command");
                 return null;
             }
         } catch (IOException e) {
-            MessageManager.log("Failed to update members for members command.", LogLevel.WARN, e);
+            Logger.warn(e, "Failed to update members for members command.");
             return null;
         }
     }

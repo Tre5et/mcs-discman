@@ -1,10 +1,9 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
-import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.rpc.ConnectionManager;
-import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
+import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
+import net.treset.minecraft_server_discord_bot.logging.Logger;
+import net.treset.minecraft_server_discord_bot.server.ConnectionManager;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -13,7 +12,7 @@ public class ConnectionCommand {
     public static void handleCommand(SlashCommandEvent event) {
         String output;
 
-        if(DiscordTools.isModerator(event)) {
+        if(DiscordBot.isModerator(event)) {
             String type = Objects.requireNonNull(event.getOption("action")).getAsString();
             switch (type) {
                 case "status" -> output = getStatus();
@@ -23,7 +22,7 @@ public class ConnectionCommand {
             }
         } else {
             output = "You don't have permission to do that.";
-            MessageManager.log("Handled. No permission.", LogLevel.INFO);
+            Logger.info("Handled. No permission.");
         }
 
         event.getHook().sendMessage(output).queue();

@@ -1,4 +1,4 @@
-package net.treset.minecraft_server_discord_bot.messaging;
+package net.treset.minecraft_server_discord_bot.logging;
 
 public enum LogLevel {
     DEBUG,

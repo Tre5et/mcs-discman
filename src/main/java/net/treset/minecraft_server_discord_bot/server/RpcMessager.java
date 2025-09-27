@@ -1,14 +1,14 @@
-package net.treset.minecraft_server_discord_bot.rpc;
+package net.treset.minecraft_server_discord_bot.server;
 
-import net.treset.minecraft_server_discord_bot.DiscordBot;
-import net.treset.minecraft_server_discord_bot.rpc.schemas.*;
+import net.treset.minecraft_server_discord_bot.logging.Logger;
+import net.treset.minecraft_server_discord_bot.server.schemas.*;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-public class MessageHandler {
+public class RpcMessager {
     private static final int RESPONSE_TIMEOUT = 10_000;
     private static final Random RANDOM = new Random();
 
@@ -111,7 +111,7 @@ public class MessageHandler {
             try {
                 lock.wait(timeoutMs);
             } catch (InterruptedException e) {
-                DiscordBot.LOGGER.warn("Interrupted while waiting for notification", e);
+                Logger.warn("Interrupted while waiting for notification", e);
             }
         }
 
@@ -142,7 +142,7 @@ public class MessageHandler {
             responseHandlers.remove(response.id());
             handler.callback.accept(response);
         } else {
-            DiscordBot.LOGGER.warn("Response with no handler for id = {}; result = {}; error = {}", response.id(), response.result(), response.error());
+            Logger.warn("Response with no handler for id = %d; result = %s; error = %s", response.id(), response.result(), response.error());
         }
 
         purgeOldResponseHandlers();
@@ -151,7 +151,7 @@ public class MessageHandler {
     private static void purgeOldResponseHandlers() {
         for(Map.Entry<Integer, ResponseHandler> entry : responseHandlers.entrySet()) {
             if(entry.getValue().timeoutTime < System.currentTimeMillis()) {
-                DiscordBot.LOGGER.warn("Response for id = {} took longer than 10 seconds, assuming lost, method = {}, params = {}", entry.getKey(), entry.getValue().method, entry.getValue().params);
+                Logger.warn("Response for id = %d took longer than 10 seconds, assuming lost, method = %s, params = %s", entry.getKey(), entry.getValue().method, entry.getValue().params);
                 responseHandlers.remove(entry.getKey());
                 entry.getValue().callback.accept(RpcResponse.Timeout(entry.getKey()));
             }
@@ -166,7 +166,7 @@ public class MessageHandler {
     }
 
     private static void handleUnexpected(String content, Exception e) {
-        DiscordBot.LOGGER.warn("Unexpected RPC message: '{}'", content, e);
+        Logger.warn(e,"Unexpected RPC message: '%s'", content);
     }
 
     public static class ResponseHandler {

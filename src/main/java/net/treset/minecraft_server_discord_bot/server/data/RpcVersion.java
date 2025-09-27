@@ -1,4 +1,4 @@
-package net.treset.minecraft_server_discord_bot.rpc.data;
+package net.treset.minecraft_server_discord_bot.server.data;
 
 import java.io.IOException;
 import java.util.Map;

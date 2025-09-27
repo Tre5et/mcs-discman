@@ -1,8 +1,8 @@
-package net.treset.minecraft_server_discord_bot.rpc;
+package net.treset.minecraft_server_discord_bot.server;
 
-import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
-import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
+import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
+import net.treset.minecraft_server_discord_bot.logging.Logger;
+import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -34,7 +34,7 @@ public class WebsocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        MessageManager.sendText("Connection to server established.", MessageOrigin.RPC);
+        DiscordBot.sendText("Connection to server established.", MessageOrigin.RPC);
         expectFailureOnStart = false;
     }
 
@@ -46,15 +46,15 @@ public class WebsocketClient extends WebSocketClient {
     @Override
     public void onClose(int i, String s, boolean b) {
         if(!expectFailureOnStart) {
-            MessageManager.sendText("Connection to server closed.", MessageOrigin.RPC);
+            DiscordBot.sendText("Connection to server closed.", MessageOrigin.RPC);
         }
     }
 
     @Override
     public void onError(Exception e) {
         if(!expectFailureOnStart) {
-            MessageManager.sendText("Server connection error.", MessageOrigin.RPC);
-            MessageManager.log("Error in RPC connection", LogLevel.ERROR, e);
+            DiscordBot.sendText("Server connection error.", MessageOrigin.RPC);
+            Logger.error(e, "Error in RPC connection");
         }
     }
 

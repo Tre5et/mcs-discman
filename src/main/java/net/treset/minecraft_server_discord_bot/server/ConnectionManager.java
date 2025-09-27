@@ -1,4 +1,4 @@
-package net.treset.minecraft_server_discord_bot.rpc;
+package net.treset.minecraft_server_discord_bot.server;
 
 import net.treset.minecraft_server_discord_bot.config.Config;
 
@@ -16,7 +16,7 @@ public class ConnectionManager {
                 Config.communication.server_port,
                 Config.communication.use_ssl,
                 Config.communication.server_secret,
-                MessageHandler::handleMessage
+                RpcMessager::handleMessage
         );
     }
 

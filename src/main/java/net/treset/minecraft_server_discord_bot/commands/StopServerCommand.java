@@ -1,38 +1,37 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
-import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
-import net.treset.minecraft_server_discord_bot.rpc.ConnectionManager;
-import net.treset.minecraft_server_discord_bot.tools.DiscordTools;
-import net.treset.minecraft_server_discord_bot.tools.ServerTools;
+import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
+import net.treset.minecraft_server_discord_bot.logging.Logger;
+import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
+import net.treset.minecraft_server_discord_bot.server.ConnectionManager;
+import net.treset.minecraft_server_discord_bot.server.ServerActions;
 
 public class StopServerCommand {
     public static void handleCommand(SlashCommandEvent event) {
         String output;
 
-        if(DiscordTools.isModerator(event)) {
+        if(DiscordBot.isModerator(event)) {
             if(!ConnectionManager.isRunning()) {
                 output = "Server is already stopped.";
                 event.getHook().sendMessage(output).queue();
-                MessageManager.log("Handled. Already stopped.", LogLevel.INFO);
+                Logger.info("Handled. Already stopped.");
             } else {
                 output = "Stopping the server...";
                 event.getHook().sendMessage(output).queue();
-                MessageManager.log("Stopping server.", LogLevel.INFO);
+                Logger.info("Stopping server.");
 
-                if(!ServerTools.stopServer()) {
+                if(!ServerActions.stopServer()) {
                     output = "Server stop failed.";
-                    MessageManager.sendText(output, MessageOrigin.COMMAND);
+                    DiscordBot.sendText(output, MessageOrigin.COMMAND);
                 }
                 output = "Server stopped.";
-                MessageManager.sendText(output, MessageOrigin.COMMAND);
+                DiscordBot.sendText(output, MessageOrigin.COMMAND);
             }
         } else {
             output = "You don't have permission to do that.";
             event.getHook().sendMessage(output).queue();
-            MessageManager.log("Handled. Permission required.", LogLevel.INFO);
+            Logger.info("Handled. Permission required.");
         }
     }
 }

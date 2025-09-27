@@ -1,4 +1,4 @@
-package net.treset.minecraft_server_discord_bot.rpc.schemas;
+package net.treset.minecraft_server_discord_bot.server.schemas;
 
 import java.util.Objects;
 

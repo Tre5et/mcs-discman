@@ -1,16 +1,15 @@
-package net.treset.minecraft_server_discord_bot.handlers;
+package net.treset.minecraft_server_discord_bot.notifications;
 
 import net.treset.minecraft_server_discord_bot.PermanentOperations;
-import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.messaging.MessageOrigin;
-import net.treset.minecraft_server_discord_bot.rpc.MessageHandler;
-import net.treset.minecraft_server_discord_bot.rpc.schemas.RpcNotification;
+import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
+import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
+import net.treset.minecraft_server_discord_bot.server.RpcMessager;
+import net.treset.minecraft_server_discord_bot.server.schemas.RpcNotification;
 
 import java.util.Map;
 import java.util.function.Function;
 
 public class NotificationHandlers {
-
     public static void register() {
         registerHandler("server/started", "Server started.");
         registerHandler("server/stopping", "Server stopping...");
@@ -36,10 +35,10 @@ public class NotificationHandlers {
     }
 
     private static void registerHandler(String path, Function<RpcNotification, String> handler) {
-        MessageHandler.addNotificationHandler(
+        RpcMessager.addNotificationHandler(
                 "minecraft:notification/" + path,
                 n -> {
-                    MessageManager.sendText(handler.apply(n), MessageOrigin.RPC);
+                    DiscordBot.sendText(handler.apply(n), MessageOrigin.RPC);
                     PermanentOperations.setSomethingHappened();
                 }
         );

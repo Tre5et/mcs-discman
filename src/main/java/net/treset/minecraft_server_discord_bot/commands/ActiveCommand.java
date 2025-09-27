@@ -1,9 +1,8 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.messaging.LogLevel;
-import net.treset.minecraft_server_discord_bot.messaging.MessageManager;
-import net.treset.minecraft_server_discord_bot.rpc.ConnectionManager;
+import net.treset.minecraft_server_discord_bot.logging.Logger;
+import net.treset.minecraft_server_discord_bot.server.ConnectionManager;
 
 public class ActiveCommand {
     public static void handleCommand(SlashCommandEvent event) {
@@ -14,6 +13,6 @@ public class ActiveCommand {
 
         event.getHook().sendMessage(output).queue();
 
-        MessageManager.log(String.format("Handled: %s.", (ConnectionManager.isRunning())? "running": "not running"), LogLevel.INFO);
+        Logger.info("Handled: %s.", (ConnectionManager.isRunning())? "running": "not running");
     }
 }
