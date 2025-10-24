@@ -12,7 +12,7 @@ public class RestartServerCommand {
         String output;
 
         if(DiscordBot.isModerator(event)) {
-            if(ServerActions.isServerRunning()) {
+            if(ServerActions.isRunning()) {
                 output = "Stopping the server for a restart...";
                 event.getHook().sendMessage(output).queue();
                 Logger.info("Stopping server.");

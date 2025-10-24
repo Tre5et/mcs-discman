@@ -1,34 +1,35 @@
 package net.treset.minecraft_server_discord_bot.server.data;
 
+import com.google.gson.reflect.TypeToken;
+import dev.treset.mcdl.servermanagement.request.RpcResponse;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public record RpcPlayer(
-        String name,
-        String id
-) {
-    public static RpcPlayer from(Object o) throws IOException {
-        if(!(o instanceof Map<?,?> p)) {
-            throw new IOException("Invalid player data format: " + o);
-        }
-        if(p.containsKey("name") && p.containsKey("id")) {
-            return new RpcPlayer(p.get("name").toString(), p.get("id").toString());
-        }
-        throw new IOException("Missing fields for player: " + p);
+public class RpcPlayer {
+    private String name;
+    private String id;
+
+    public String getName() {
+        return name;
     }
 
-    public static List<RpcPlayer> fromList(Object o) throws IOException {
-        if(!(o instanceof List<?> l)) {
-            throw new IOException("Unexpected format for player response: " + o);
-        }
-
-        List<RpcPlayer> list = new ArrayList<>();
-        for(Object p : l) {
-            list.add(from(p));
-        }
-        return list;
+    public String getId() {
+        return id;
     }
 
+    public static RpcPlayer from(RpcResponse res) throws IOException {
+        if(!res.hasResult()) {
+            throw new IOException("Failed to get player: Error: " + res.error().message());
+        }
+        return res.resultAs(RpcPlayer.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<RpcPlayer> fromList(RpcResponse res) throws IOException {
+        if(!res.hasResult()) {
+            throw new IOException("Failed to get player list: Error: " + res.error().message());
+        }
+        return (List<RpcPlayer>)res.resultAs(TypeToken.getParameterized(List.class, RpcPlayer.class));
+    }
 }

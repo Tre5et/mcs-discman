@@ -10,7 +10,7 @@ public class StartServerCommand {
         String output;
 
         if(DiscordBot.isModerator(event)) {
-            if(ServerActions.isServerRunning()) {
+            if(ServerActions.isRunning()) {
                 output = "Server is already running.";
 
                 Logger.info("Handled. Already running.");

@@ -1,10 +1,10 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
+import dev.treset.mcdl.servermanagement.request.RpcResponse;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
-import net.treset.minecraft_server_discord_bot.server.RpcMessager;
+import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.server.data.RpcStatus;
-import net.treset.minecraft_server_discord_bot.server.schemas.RpcResponse;
 
 import java.io.IOException;
 
@@ -27,9 +27,9 @@ public class DetailsCommand {
 
     private static String getVersion() {
         try {
-            RpcResponse res = RpcMessager.request("minecraft:server/status");
+            RpcResponse res = ManagementClient.get().request("minecraft:server/status");
             try {
-                return RpcStatus.from(res.result()).version().name();
+                return RpcStatus.from(res).getVersion().getName();
             } catch (IOException e) {
                 Logger.warn(e, "Failed to extract version for details command.");
                 return null;

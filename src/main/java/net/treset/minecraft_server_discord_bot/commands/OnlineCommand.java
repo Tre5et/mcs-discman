@@ -1,10 +1,10 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
+import dev.treset.mcdl.servermanagement.request.RpcResponse;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
-import net.treset.minecraft_server_discord_bot.server.RpcMessager;
+import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.server.data.RpcPlayer;
-import net.treset.minecraft_server_discord_bot.server.schemas.RpcResponse;
 import net.treset.minecraft_server_discord_bot.system.Formatter;
 
 import java.io.IOException;
@@ -30,9 +30,9 @@ public class OnlineCommand {
 
     private static List<String> getPlayers() {
         try {
-            RpcResponse res = RpcMessager.request("minecraft:players");
+            RpcResponse res = ManagementClient.get().request("minecraft:players");
             try {
-                return RpcPlayer.fromList(res.result()).stream().map(RpcPlayer::name).toList();
+                return RpcPlayer.fromList(res).stream().map(RpcPlayer::getName).toList();
             } catch (IOException e) {
                 Logger.warn(e, "Failed to extract players for players command");
                 return null;

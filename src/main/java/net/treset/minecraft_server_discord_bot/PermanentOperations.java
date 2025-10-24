@@ -4,7 +4,7 @@ import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
-import net.treset.minecraft_server_discord_bot.server.ConnectionManager;
+import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
 import net.treset.minecraft_server_discord_bot.system.*;
 import net.treset.minecraft_server_discord_bot.upload.GoogleDriveClient;
@@ -61,7 +61,7 @@ public class PermanentOperations {
             } else {
                 logInactivity();
                 if(Config.server.backup_enabled) {
-                    dontCreateAutoBackup(ServerActions.isServerRunning() && Config.server.log_no_backup);
+                    dontCreateAutoBackup(ServerActions.isRunning() && Config.server.log_no_backup);
                 }
             }
 
@@ -144,7 +144,7 @@ public class PermanentOperations {
     }
 
     private static void logInactivity() {
-        if(!ServerActions.isServerRunning()) return;
+        if(!ServerActions.isRunning()) return;
 
         daysSinceActivity++;
 
@@ -161,9 +161,9 @@ public class PermanentOperations {
     }
 
     private static void executeCrashHandler() {
-        boolean running = ServerActions.isServerRunning();
+        boolean running = ServerActions.isRunning();
         if(!running && prevRunning) {
-            ConnectionManager.forceDisconnect();
+            ManagementClient.get().forceDisconnect();
             prevRunning = false;
             if(isStopExpected) {
                 Logger.debug("Expected server stop detected.");
@@ -183,7 +183,7 @@ public class PermanentOperations {
                 ServerActions.startServer();
 
                 double time = 0;
-                while (!ServerActions.isServerRunning()) {
+                while (!ServerActions.isRunning()) {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {

@@ -1,23 +1,31 @@
 package net.treset.minecraft_server_discord_bot.server;
 
+import dev.treset.mcdl.servermanagement.request.RpcResponse;
 import net.treset.minecraft_server_discord_bot.PermanentOperations;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
-import net.treset.minecraft_server_discord_bot.server.schemas.RpcResponse;
 import net.treset.minecraft_server_discord_bot.system.ConsoleHandler;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ServerActions {
-    public static boolean isServerRunning() {
-        return ConnectionManager.isConnected();
+    public static boolean isRunning() {
+        if(ManagementClient.get().isConnected()) {
+            return true;
+        }
+        try {
+            ManagementClient.get().connect();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public static void startServer() {
-        ConnectionManager.forceDisconnect();
+        ManagementClient.get().forceDisconnect();
         String cmd = Config.server.start_command;
         ConsoleHandler.executeCommand(cmd);
         new Thread(() -> {
@@ -26,9 +34,9 @@ public class ServerActions {
             } catch (InterruptedException e) {
                 Logger.error("Waiting for RPC startup after server start interrupted.");
             }
-            if(!ConnectionManager.isConnected()) {
+            if(!ManagementClient.get().isConnected()) {
                 try {
-                    ConnectionManager.connect();
+                    ManagementClient.get().connect();
                 } catch (IOException e) {
                     DiscordBot.sendText("Failed to connect to server after starting! (perhaps the server didn't start correctly?)", MessageOrigin.RPC);
                 }
@@ -38,52 +46,62 @@ public class ServerActions {
 
     public static boolean stopServer() {
         PermanentOperations.isStopExpected = true;
-        AtomicBoolean success2 = new AtomicBoolean(false);
-        boolean success = RpcMessager.awaitNotification(() -> {
-            try {
-                success2.set(RpcMessager.request("minecraft:server/stop").isResult(true));
-            } catch (IOException e) {
-                Logger.warn(e,"Failed to initiate server stop!");
-            }
-        }, "minecraft:notification/server/saved", Config.server.stop_timeout * 1000L) != null;
-        if(!success2.get()) {
-            PermanentOperations.isStopExpected = false;
-            Logger.warn("Failed to initiate server stop!");
-            return false;
-        }
-        if(!success) {
+        AtomicBoolean success = new AtomicBoolean(false);
+        try {
+            ManagementClient.get().awaitNotification(
+                    "minecraft:notification/server/saved",
+                    Config.server.stop_timeout * 1000L,
+                    () -> {
+                        try {
+                            success.set(ManagementClient.get().request("minecraft:server/stop").resultAsBoolean());
+                        } catch (IOException e) {
+                            Logger.warn(e, "Failed to initiate server stop!");
+                        }
+                    }
+            );
+        } catch (IOException e) {
             PermanentOperations.isStopExpected = false;
             Logger.warn("Failed to get server save confirmation after stopping!");
+            return false;
+        }
+        if(!success.get()) {
+            PermanentOperations.isStopExpected = false;
+            Logger.warn("Failed to initiate server stop!");
             return false;
         }
         return true;
     }
 
     public static boolean prepareServerForBackup() {
-        if(ConnectionManager.isRunning()) {
+        if(isRunning()) {
             try {
-                RpcResponse res = RpcMessager.request("minecraft:serversettings/autosave/set", false);
-                boolean success = res.isResult(false);
+                RpcResponse res = ManagementClient.get().request("minecraft:serversettings/autosave/set", false);
+                boolean success = res.resultAsBoolean();
                 if (!success) {
                     Logger.warn("Failed to disable saving before backup");
                     return false;
                 }
 
                 AtomicBoolean success2 = new AtomicBoolean(false);
-                success = RpcMessager.awaitNotification(() -> {
-                    try {
-                        success2.set(RpcMessager.request("minecraft:server/save", true).isResult(true));
-                    } catch (IOException e) {
-                        Logger.warn(e, "Failed to execute backup preparation");
-                        success2.set(false);
-                    }
-                }, "minecraft:notification/server/saved", Config.server.save_timeout * 1000L) != null;
-                if (!success2.get()) {
-                    Logger.warn("Failed to initiate save before backup");
+                try {
+                    ManagementClient.get().awaitNotification(
+                            "minecraft:notification/server/saved",
+                            Config.server.save_timeout * 1000L,
+                            () -> {
+                                try {
+                                    success2.set(ManagementClient.get().request("minecraft:server/save", true).resultAsBoolean());
+                                } catch (IOException e) {
+                                    Logger.warn(e, "Failed to execute backup preparation");
+                                    success2.set(false);
+                                }
+                            }
+                    );
+                } catch (IOException e) {
+                    Logger.warn("Failed to get save confirmation before backup");
                     return false;
                 }
-                if (!success) {
-                    Logger.warn("Failed to get save confirmation before backup");
+                if (!success2.get()) {
+                    Logger.warn("Failed to initiate save before backup");
                     return false;
                 }
             } catch (IOException e) {
@@ -95,9 +113,9 @@ public class ServerActions {
     }
 
     public static boolean undoBackupPreparation() {
-        if(ConnectionManager.isRunning()) {
+        if(isRunning()) {
             try {
-                boolean success = RpcMessager.request("minecraft:serversettings/autosave/set", true).isResult(true);
+                boolean success = ManagementClient.get().request("minecraft:serversettings/autosave/set", true).resultAsBoolean();
                 if (!success) {
                     Logger.warn("Failed to enable saving after backup");
                     return false;

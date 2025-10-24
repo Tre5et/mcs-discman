@@ -14,6 +14,7 @@ repositories {
     maven {
         url "https://repo.spongepowered.org/maven/"
     }
+    mavenLocal()
 }
 
 dependencies {
@@ -31,6 +32,8 @@ dependencies {
     implementation 'jakarta.websocket:jakarta.websocket-client-api:2.2.0'
     implementation 'org.java-websocket:Java-WebSocket:1.6.0'
     implementation 'com.google.code.gson:gson:2.13.2'
+
+    implementation 'dev.treset.mcdl:mcdl-server-management:2.4.0-beta.3'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'

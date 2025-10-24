@@ -1,46 +1,40 @@
 package net.treset.minecraft_server_discord_bot.notifications;
 
+import dev.treset.mcdl.servermanagement.ManagementHandler;
 import net.treset.minecraft_server_discord_bot.PermanentOperations;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
-import net.treset.minecraft_server_discord_bot.server.RpcMessager;
-import net.treset.minecraft_server_discord_bot.server.schemas.RpcNotification;
-
-import java.util.Map;
-import java.util.function.Function;
+import net.treset.minecraft_server_discord_bot.server.ManagementClient;
+import net.treset.minecraft_server_discord_bot.server.data.RpcAdvancement;
+import net.treset.minecraft_server_discord_bot.server.data.RpcDeath;
+import net.treset.minecraft_server_discord_bot.server.data.RpcPlayer;
 
 public class NotificationHandlers {
+
     public static void register() {
-        registerHandler("server/started", "Server started.");
-        registerHandler("server/stopping", "Server stopping...");
-        registerHandler("server/stopped", "Server stopped.");
+        ManagementHandler handler = ManagementClient.get();
 
-        registerHandler("players/joined", n -> getPlayerName(n) + " joined the game.");
-        registerHandler("players/left", n -> getPlayerName(n) + " left the game.");
-    }
+        handler.addNotificationHandler("minecraft:notification/server/started", () -> send("Server started."));
+        handler.addNotificationHandler("minecraft:notification/server/stopping", () -> send("Server stopping..."));
+        handler.addNotificationHandler("minecraft:notification/server/stopped", () -> send("Server stopped."));
 
-    private static String getPlayerName(RpcNotification notification) {
-        if(notification.params().size() == 1
-                && notification.params().get(0) instanceof Map<?, ?> map
-        ) {
-            if(map.containsKey("name")) {
-                return map.get("name").toString();
-            }
-        }
-        return "Unknown player";
-    }
-
-    private static void registerHandler(String path, String message) {
-        registerHandler(path, r -> message);
-    }
-
-    private static void registerHandler(String path, Function<RpcNotification, String> handler) {
-        RpcMessager.addNotificationHandler(
-                "minecraft:notification/" + path,
-                n -> {
-                    DiscordBot.sendText(handler.apply(n), MessageOrigin.RPC);
-                    PermanentOperations.setSomethingHappened();
-                }
+        handler.addNotificationHandler("minecraft:notification/players/joined", RpcPlayer.class,
+                p -> send(p.getName() + " joined the game.")
         );
+        handler.addNotificationHandler("minecraft:notification/players/left", RpcPlayer.class,
+                p -> send(p.getName() + " left the game.")
+        );
+
+        handler.addNotificationHandler("discman:notification/players/death", RpcDeath.class,
+                d -> { if(d.getMessage() != null) send(d.getMessage().getLiteral() + "."); }
+        );
+        handler.addNotificationHandler("discman:notification/players/advancement", RpcAdvancement.class,
+                d -> { if(d.getMessage() != null) send(d.getMessage().getLiteral() + "."); }
+        );
+    }
+
+    private static void send(String message) {
+        DiscordBot.sendText(message, MessageOrigin.RPC);
+        PermanentOperations.setSomethingHappened();
     }
 }

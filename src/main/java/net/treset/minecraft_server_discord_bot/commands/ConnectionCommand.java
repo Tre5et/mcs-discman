@@ -3,7 +3,7 @@ package net.treset.minecraft_server_discord_bot.commands;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
-import net.treset.minecraft_server_discord_bot.server.ConnectionManager;
+import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -29,18 +29,18 @@ public class ConnectionCommand {
     }
 
     private static String getStatus() {
-        if(ConnectionManager.isConnected()) {
+        if(ManagementClient.get().isConnected()) {
             return "A connection with the server is open.";
         }
         return "No connection is open.";
     }
 
     private static String openConnection() {
-        if(ConnectionManager.isConnected()) {
+        if(ManagementClient.get().isConnected()) {
             return "The connection is already open. Close it first.";
         }
         try {
-            ConnectionManager.connect();
+            ManagementClient.get().connect();
         } catch (IOException e) {
             return "Failed to connect to server. Try again.";
         }
@@ -48,7 +48,7 @@ public class ConnectionCommand {
     }
 
     private static String closeConnection(SlashCommandEvent event) {
-        if(!ConnectionManager.isConnected()) {
+        if(!ManagementClient.get().isConnected()) {
             return "No connection is open. Open one first.";
         }
 
@@ -58,15 +58,13 @@ public class ConnectionCommand {
         }
 
         if(force) {
-            ConnectionManager.forceDisconnect();
+            ManagementClient.get().forceDisconnect();
             return "Forcefully closed connection.";
         }
 
         try {
-            if(ConnectionManager.disconnect()) {
-                return "Connection closed successfully.";
-            }
-            return "Failed to close the connection. Try again.";
+            ManagementClient.get().disconnect();
+            return "Connection closed successfully.";
         } catch (IOException e) {
             return "Failed to close the connection. Try again.";
         }

@@ -1,22 +1,25 @@
 package net.treset.minecraft_server_discord_bot.server.data;
 
-import java.io.IOException;
-import java.util.Map;
+import dev.treset.mcdl.servermanagement.request.RpcResponse;
 
-public record RpcStatus(
-        boolean started,
-        RpcVersion version
-) {
-    public static RpcStatus from(Object o) throws IOException {
-        if(!(o instanceof Map<?,?> m)) {
-            throw new IOException("Invalid status data format: " + o);
+import java.io.IOException;
+
+public class RpcStatus {
+    boolean started;
+    RpcVersion version;
+
+    public boolean isStarted() {
+        return started;
+    }
+
+    public RpcVersion getVersion() {
+        return version;
+    }
+
+    public static RpcStatus from(RpcResponse res) throws IOException {
+        if(!res.hasResult()) {
+            throw new IOException("Failed to get status: Error: " + res.error().message());
         }
-        if(m.containsKey("started") && m.get("started") instanceof Boolean && m.containsKey("version")) {
-            return new RpcStatus(
-                    (boolean)m.get("started"),
-                    RpcVersion.from(m.get("version"))
-            );
-        }
-        throw new IOException("Missing fields for status: " + m);
+        return res.resultAs(RpcStatus.class);
     }
 }

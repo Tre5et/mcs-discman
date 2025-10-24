@@ -6,7 +6,7 @@ import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.notifications.NotificationHandlers;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
-import net.treset.minecraft_server_discord_bot.server.ConnectionManager;
+import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.upload.GoogleDriveClient;
 
 import java.io.IOException;
@@ -33,15 +33,15 @@ public class  Main {
         DiscordBot.sendText("Hi, I'm online now.", MessageOrigin.SCHEDULE);
 
         try {
-            ConnectionManager.connect();
+            ManagementClient.init();
         } catch (IOException e) {
             Logger.info(e, "Failed to connect to the minecraft server. It may not be running.");
         }
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                ConnectionManager.disconnect();
+                ManagementClient.get().disconnect();
             } catch (IOException e) {
-                ConnectionManager.forceDisconnect();
+                ManagementClient.get().forceDisconnect();
             }
         }));
 
