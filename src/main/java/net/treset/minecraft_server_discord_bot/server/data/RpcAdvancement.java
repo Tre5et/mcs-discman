@@ -1,41 +1,14 @@
 package net.treset.minecraft_server_discord_bot.server.data;
 
 
+import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
 
-public class RpcAdvancement {
-    private RpcPlayer player;
-    private RpcText message;
-    private String identifier;
-    private RpcText title;
-    private RpcText description;
-    private RpcText toast;
-    private Integer color;
-
-    public RpcPlayer getPlayer() {
-        return player;
-    }
-
-    public RpcText getMessage() {
-        return message;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public RpcText getTitle() {
-        return title;
-    }
-
-    public RpcText getDescription() {
-        return description;
-    }
-
-    public RpcText getToast() {
-        return toast;
-    }
-
-    public Integer getColor() {
-        return color;
-    }
-}
+public record RpcAdvancement(
+        RpcPlayer player,
+        RpcText message,
+        String identifier,
+        RpcText title,
+        RpcText description,
+        RpcText toast,
+        Integer color
+) {}

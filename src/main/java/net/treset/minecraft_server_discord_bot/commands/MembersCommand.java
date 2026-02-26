@@ -1,11 +1,11 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
-import dev.treset.mcdl.servermanagement.request.RpcResponse;
+import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
+import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
-import net.treset.minecraft_server_discord_bot.server.data.RpcPlayer;
 import net.treset.minecraft_server_discord_bot.system.Formatter;
 
 import java.io.IOException;
@@ -33,15 +33,9 @@ public class MembersCommand {
 
     private static List<String> getMembers() {
         try {
-            RpcResponse res = ManagementClient.get().request("minecraft:allowlist");
-            try {
-                return RpcPlayer.fromList(res).stream().map(RpcPlayer::getName).toList();
-            } catch (IOException e) {
-                Logger.warn(e, "Failed to extract members for members command");
-                return null;
-            }
+            return ManagementClient.get().request(RpcMethods.Allowlist.GET).stream().map(RpcPlayer::name).toList();
         } catch (IOException e) {
-            Logger.warn(e, "Failed to update members for members command.");
+            Logger.warn(e, "Failed to get members for members command", e);
             return null;
         }
     }

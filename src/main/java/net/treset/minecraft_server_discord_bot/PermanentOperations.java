@@ -4,12 +4,11 @@ import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
+import net.treset.minecraft_server_discord_bot.server.BackupHandler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
 import net.treset.minecraft_server_discord_bot.system.*;
-import net.treset.minecraft_server_discord_bot.upload.GoogleDriveClient;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -73,59 +72,13 @@ public class PermanentOperations {
         if(!dtfD.format(now).equals(prevDay)) changeDay();
     }
 
+    private static final DateTimeFormatter backupNameFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static void createAutoBackup() {
-
-        Thread buThread = new Thread(PermanentOperations::executeBackup);
-        buThread.start();
-
-        try {
-            Thread.sleep(Config.server.backup_timeout * 1000L);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        if(buThread.isAlive() || buThread.isInterrupted()) {
-            Logger.error("Error creating auto backup. Timed out.");
-            DiscordBot.sendText("Failed to create auto backup.", MessageOrigin.SCHEDULE);
-
-            buThread.interrupt();
-
-            ServerActions.undoBackupPreparation();
-        }
-    }
-
-    private static void executeBackup() {
-        String output;
-        if(!ServerActions.prepareServerForBackup()) {
-            DiscordBot.sendText("**Error preparing server for auto backup.** Aborting!", MessageOrigin.SCHEDULE);
-            return;
-        }
-
-        output = "Creating auto-backup.";
-        DiscordBot.sendText(output, MessageOrigin.SCHEDULE);
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDateTime now = LocalDateTime.now();
-        String date = dtf.format(now);
-        try {
-            FileHandler.zipFile(Config.server.backup_path, Config.server.backup_path + date + "-auto.zip");
-            Logger.info("Local backup complete.");
-            if(GoogleDriveClient.uploadFile(Config.server.backup_path + date + "-auto.zip", date + "-auto.zip", "application/x-zip-compressed", Config.drive.drive_folder_id) != null) {
-                output = "Created auto-backup successfully.";
-                Logger.info("Online backup complete.");
-            } else {
-                output = "Created local auto-backup successfully.";
-                Logger.warn("Error creating online backup. Unable to upload file.");
-            }
-        } catch (IOException e) {
-            output = "Failed to create auto-backup.";
-            Logger.error(e, "Error Zipping backup file.");
-        }
-        DiscordBot.sendText(output, MessageOrigin.SCHEDULE);
-
-        if(!ServerActions.undoBackupPreparation()) {
-            DiscordBot.sendText("**FAILED to enable auto save after auto backup!** Please resolve manually!", MessageOrigin.SCHEDULE);
-        }
+        new Thread(() -> BackupHandler.execute(
+                BackupHandler.Mode.WHILE_RUNNING,
+                t -> backupNameFormatter.format(t) + ".zip",
+                m -> DiscordBot.sendText(m, MessageOrigin.SCHEDULE)
+        )).start();
     }
 
     private static void dontCreateAutoBackup(boolean log) {

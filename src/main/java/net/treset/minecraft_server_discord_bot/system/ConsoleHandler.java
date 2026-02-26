@@ -3,35 +3,14 @@ package net.treset.minecraft_server_discord_bot.system;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
 import java.io.*;
+import java.util.List;
 
 public class ConsoleHandler {
-    public static String executeCommand(String command) {
-        StringBuilder output = new StringBuilder();
-
-        File tempScript = createTempScript(command);
-
-        try {
-            ProcessBuilder pb = new ProcessBuilder();
-            pb.command("sh", tempScript.toString());
-
-            Process p = pb.start();
-
-            BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-            String line;
-            while ((line = reader.readLine())!= null) {
-                output.append(line).append("\n");
-            }
-
-            int exitCode = p.waitFor();
-            assert exitCode == 0;
-
-        } catch (Exception e) {
-            Logger.error(e, "Unable to execute command \"%s\". -> Stacktrace.", command);
-        }
-
-        return output.toString();
+    public static Process startProcess(List<String> command, String wd) throws IOException {
+        ProcessBuilder pb = new ProcessBuilder();
+        pb.command(command);
+        pb.directory(new File(wd));
+        return pb.start();
     }
 
     public static File createTempScript(String com) {

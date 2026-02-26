@@ -35,14 +35,16 @@ public class FileHandler {
                     files
                             .filter(path -> !Files.isDirectory(path))
                             .forEach(path -> {
-                                ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-                                try {
-                                    zs.putNextEntry(zipEntry);
-                                    Files.copy(path, zs);
-                                    zs.closeEntry();
-                                } catch (IOException e) {
-                                    Logger.error(e, "Unable to zip %s to %s!", sourceDirPath, zipFilePath);
-                                    exceptions.add(e);
+                                if(!path.getFileName().toString().equals("session.lock")) {
+                                    ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+                                    try {
+                                        zs.putNextEntry(zipEntry);
+                                        Files.copy(path, zs);
+                                        zs.closeEntry();
+                                    } catch (IOException e) {
+                                        Logger.error(e, "Unable to zip %s to %s!", sourceDirPath, zipFilePath);
+                                        exceptions.add(e);
+                                    }
                                 }
                             });
                 }

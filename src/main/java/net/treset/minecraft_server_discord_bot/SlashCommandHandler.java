@@ -32,6 +32,7 @@ public class SlashCommandHandler extends ListenerAdapter {
             case "say": CompletableFuture.runAsync(() -> SayCommand.handleCommand(event)); break;
             case "startserver": CompletableFuture.runAsync(() -> StartServerCommand.handleCommand(event)); break;
             case "stopserver": CompletableFuture.runAsync(() -> StopServerCommand.handleCommand(event)); break;
+            case "runcommand": CompletableFuture.runAsync(() -> RunCommandCommand.handleCommand(event)); break;
             default:
                 event.getHook().sendMessage("Sorry, I don't know that :worried:").queue();
                 Logger.warn("Unable to handle command \"%s\". Unknown.", event.getName());

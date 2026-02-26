@@ -73,6 +73,8 @@ public class DiscordBot {
                 .addOption(OptionType.STRING, "message", "The message the bot will say.", true).queue();
         GUILD.upsertCommand("startserver", "Start the server! [Moderator only]").queue();
         GUILD.upsertCommand("stopserver", "Start the server! [Moderator only]").queue();
+        GUILD.upsertCommand("runcommand", "Run a command on the server! [Moderator only]")
+                .addOption(OptionType.STRING, "command", "The command to run.", true).queue();
 
         Logger.info("Commands enabled.");
     }
