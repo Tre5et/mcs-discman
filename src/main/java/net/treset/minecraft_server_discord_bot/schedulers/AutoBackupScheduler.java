@@ -1,8 +1,9 @@
-package net.treset.minecraft_server_discord_bot.server;
+package net.treset.minecraft_server_discord_bot.schedulers;
 
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.logging.OutputConsumer;
+import net.treset.minecraft_server_discord_bot.server.BackupHandler;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -19,12 +20,9 @@ public class AutoBackupScheduler {
     private static ScheduledFuture<?> task = null;
     private static boolean eventSinceLastBackup = true;
 
-    public static void eventOccurred() {
-        eventSinceLastBackup = false;
-    }
-
     public static void scheduleNext(OutputConsumer outputConsumer) {
-        if(task != null) task.cancel(true);
+        if(task != null) task.cancel(false);
+        task = null;
         if(Config.get().backup == null || Config.get().backup.auto == null) {
             return;
         }
@@ -59,5 +57,9 @@ public class AutoBackupScheduler {
             }
             scheduleNext(outputConsumer);
         }).start();
+    }
+
+    static {
+        EventScheduler.onEvent(t -> eventSinceLastBackup = true);
     }
 }

@@ -14,7 +14,7 @@ public class ManagementClient {
     public static void init() {
         if(handler != null) {
             try {
-                handler.disconnect();
+                if(handler.isConnected()) handler.disconnect();
             } catch (IOException e) {
                 Logger.warn(e, "Failed to disconnect from old handler, forcing");
                 handler.forceDisconnect();

@@ -4,7 +4,7 @@ import dev.treset.mcdl.servermanagement.ManagementHandler;
 import dev.treset.mcdl.servermanagement.vanilla.RpcNotifications;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
-import net.treset.minecraft_server_discord_bot.server.AutoBackupScheduler;
+import net.treset.minecraft_server_discord_bot.schedulers.EventScheduler;
 import net.treset.minecraft_server_discord_bot.server.DiscmanRpcNotifications;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
@@ -24,6 +24,6 @@ public class NotificationHandlers {
 
     private static void send(String message) {
         DiscordBot.sendText(message, MessageOrigin.RPC);
-        AutoBackupScheduler.eventOccurred();
+        EventScheduler.eventOccurred();
     }
 }

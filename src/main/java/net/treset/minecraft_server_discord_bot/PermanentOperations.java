@@ -39,17 +39,6 @@ public class PermanentOperations {
         terminatePermanentLoop = false;
     }
 
-    private static void logInactivity() {
-        if(!ServerActions.isRunning()) return;
-
-        daysSinceActivity++;
-
-        if(Config.get().inactivity != null && daysSinceActivity % Config.get().inactivity.interval == 0) {
-            DiscordBot.sendText(String.format("Reminder: The server hasn't been used in %s days. Consider stopping it.", daysSinceActivity), MessageOrigin.SCHEDULE);
-            Logger.info("Inactivity reminder sent after %s days.", daysSinceActivity);
-        }
-    }
-
     private static void checkForCrash() {
         if(Config.get().crash == null) return;
 

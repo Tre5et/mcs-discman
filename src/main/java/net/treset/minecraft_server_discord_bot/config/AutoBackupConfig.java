@@ -25,7 +25,7 @@ public class AutoBackupConfig extends Validatable {
     public BackupCondition createIf = BackupCondition.event;
 
     public LocalDateTime getNext() {
-        LocalDateTime time = LocalDateTime.now();
+        LocalDateTime time = LocalDateTime.now().plusMinutes(1);
         int i = 0;
         while(!minute.contains(time.getMinute())) {
             time = time.plusMinutes(1);
