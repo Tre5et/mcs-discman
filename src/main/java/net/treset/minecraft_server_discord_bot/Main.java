@@ -39,6 +39,6 @@ public class  Main {
             }
         }));
 
-        new Thread(PermanentOperations::permanentLoop).start();
+        //new Thread(PermanentOperations::permanentLoop).start();
     }
 }

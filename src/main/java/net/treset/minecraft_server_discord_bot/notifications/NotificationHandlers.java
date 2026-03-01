@@ -14,7 +14,7 @@ public class NotificationHandlers {
         ManagementHandler handler = ManagementClient.get();
 
         //handler.addNotificationMethod(RpcNotifications.Server.started(() -> send("Server started.")));
-        handler.addNotificationMethod(RpcNotifications.Server.stopping(() -> send("Server stopping...")));
+        //handler.addNotificationMethod(RpcNotifications.Server.stopping(CrashHandler::processStopping));
 
         handler.addNotificationMethod(RpcNotifications.Players.joined(p -> send(p.name() + " joined the game.")));
         handler.addNotificationMethod(RpcNotifications.Players.left(p -> send(p.name() + " left the game.")));

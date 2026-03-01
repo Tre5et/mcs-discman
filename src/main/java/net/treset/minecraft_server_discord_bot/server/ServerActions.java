@@ -4,7 +4,6 @@ import dev.treset.mcdl.servermanagement.exception.RpcCommunicationException;
 import dev.treset.mcdl.servermanagement.exception.RpcConnectionException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.RpcNotifications;
-import net.treset.minecraft_server_discord_bot.PermanentOperations;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
@@ -129,7 +128,7 @@ public class ServerActions {
     }
 
     public static void stopServer() throws ServerOperationException {
-        PermanentOperations.isStopExpected = true;
+        CrashHandler.expectStop();
         AtomicBoolean success = new AtomicBoolean(false);
         try {
             ManagementClient.get().awaitNotification(
@@ -144,11 +143,11 @@ public class ServerActions {
                     Config.get().server.stopTimeout * 1000L
             );
         } catch (IOException e) {
-            PermanentOperations.isStopExpected = false;
+            CrashHandler.unexpectStop();
             throw new ServerOperationException("Failed to confirm server stop!", e);
         }
         if(!success.get()) {
-            PermanentOperations.isStopExpected = false;
+            CrashHandler.unexpectStop();
             throw new ServerOperationException("Failed to initiate server stop!");
         }
     }

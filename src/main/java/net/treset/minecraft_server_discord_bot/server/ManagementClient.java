@@ -12,6 +12,7 @@ public class ManagementClient {
     private static boolean initialized = false;
 
     public static void init() {
+        CrashHandler.expectStop();
         if(handler != null) {
             try {
                 if(handler.isConnected()) handler.disconnect();
@@ -26,6 +27,8 @@ public class ManagementClient {
                 Config.get().server.ssl,
                 Config.get().server.secret
         );
+        CrashHandler.unexpectStop();
+        handler.onClose((a,b,c) -> CrashHandler.processStopping());
         try {
             handler.connect();
         } catch (IOException ignored) {}
