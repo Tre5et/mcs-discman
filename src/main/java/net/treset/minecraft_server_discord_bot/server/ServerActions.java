@@ -9,11 +9,9 @@ import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
-import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.system.ConsoleHandler;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -34,14 +32,13 @@ public class ServerActions {
         }
     }
 
-    public static void startServer() {
+    public static void startServerAsync() {
         if(ManagementClient.get().isConnected()) {
             ManagementClient.get().forceDisconnect();
         }
-        String cmd = Config.server.start_command;
-        // TODO: get correct command
+
         try {
-            ConsoleHandler.startProcess(List.of("cmd.exe", "/k", "start", "D:\\Hannes\\Coding\\gits\\mcs-discman-client\\gradlew.bat", "runServer"), "D:\\Hannes\\Coding\\gits\\mcs-discman-client\\");
+            ConsoleHandler.startProcess(Config.get().server.startCommand, Config.get().server.commandDirectory);
         } catch (IOException e) {
             DiscordBot.sendText("Failed to execute server start", MessageOrigin.RPC);
         }
@@ -54,8 +51,22 @@ public class ServerActions {
         }).start();
     }
 
+    public static void startServer() throws ServerOperationException {
+        if(ManagementClient.get().isConnected()) {
+            ManagementClient.get().forceDisconnect();
+        }
+
+        try {
+            ConsoleHandler.startProcess(Config.get().server.startCommand, Config.get().server.commandDirectory);
+        } catch (IOException e) {
+            DiscordBot.sendText("Failed to execute server start", MessageOrigin.RPC);
+        }
+
+        awaitServerStarted();
+    }
+
     public static void awaitServerStarted() throws ServerOperationException {
-        long timeout = Config.communication.rpc_startup_delay * 1000L;
+        long timeout = Config.get().server.startTimeout * 1000L;
         try {
             repeatTryConnect(timeout, 1000L);
         } catch (RpcConnectionException e) {
@@ -117,7 +128,7 @@ public class ServerActions {
         }
     }
 
-    public static boolean stopServer() {
+    public static void stopServer() throws ServerOperationException {
         PermanentOperations.isStopExpected = true;
         AtomicBoolean success = new AtomicBoolean(false);
         try {
@@ -127,21 +138,18 @@ public class ServerActions {
                         try {
                             success.set(ManagementClient.get().request(RpcMethods.Server.STOP));
                         } catch (IOException e) {
-                            Logger.warn(e, "Failed to initiate server stop!");
+                            throw new ServerOperationException("Failed to initiate server stop", e);
                         }
                     },
-                    Config.server.stop_timeout * 1000L
+                    Config.get().server.stopTimeout * 1000L
             );
         } catch (IOException e) {
             PermanentOperations.isStopExpected = false;
-            Logger.warn("Failed to get server save confirmation after stopping!");
-            return false;
+            throw new ServerOperationException("Failed to confirm server stop!", e);
         }
         if(!success.get()) {
             PermanentOperations.isStopExpected = false;
-            Logger.warn("Failed to initiate server stop!");
-            return false;
+            throw new ServerOperationException("Failed to initiate server stop!");
         }
-        return true;
     }
 }

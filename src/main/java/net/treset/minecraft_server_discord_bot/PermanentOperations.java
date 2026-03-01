@@ -4,13 +4,8 @@ import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
-import net.treset.minecraft_server_discord_bot.server.BackupHandler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
-import net.treset.minecraft_server_discord_bot.system.*;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class PermanentOperations {
     private static boolean terminatePermanentLoop = false;
@@ -32,12 +27,10 @@ public class PermanentOperations {
 
     public static void permanentLoop() {
         while(!terminatePermanentLoop) {
-            autoBackup();
-
             checkForCrash();
 
             try {
-                Thread.sleep(Config.discord.update_interval * 1000L);
+                Thread.sleep(Config.get().discord.updateInterval * 1000L);
             } catch (InterruptedException e) {
                 Logger.error(e, "Failed to wait for permanent operations loop");
             }
@@ -46,69 +39,19 @@ public class PermanentOperations {
         terminatePermanentLoop = false;
     }
 
-    private static void autoBackup() {
-        //auto-backup
-        DateTimeFormatter dtfH = DateTimeFormatter.ofPattern("HH");
-
-        LocalDateTime now = LocalDateTime.now();
-        boolean isCorrectHour = dtfH.format(now).equals(Config.server.backup_hour_formatted);
-
-        if(!wasBackedUpToday && isCorrectHour) {
-            if(hasSomethingHappened) {
-                daysSinceActivity = 0;
-                if(Config.server.backup_enabled) new Thread(PermanentOperations::createAutoBackup).start();
-            } else {
-                logInactivity();
-                if(Config.server.backup_enabled) {
-                    dontCreateAutoBackup(ServerActions.isRunning() && Config.server.log_no_backup);
-                }
-            }
-
-            wasBackedUpToday = true;
-            hasSomethingHappened = false;
-        }
-
-        DateTimeFormatter dtfD = DateTimeFormatter.ofPattern("dd");
-        if(!dtfD.format(now).equals(prevDay)) changeDay();
-    }
-
-    private static final DateTimeFormatter backupNameFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static void createAutoBackup() {
-        new Thread(() -> BackupHandler.execute(
-                BackupHandler.Mode.WHILE_RUNNING,
-                t -> backupNameFormatter.format(t) + ".zip",
-                m -> DiscordBot.sendText(m, MessageOrigin.SCHEDULE)
-        )).start();
-    }
-
-    private static void dontCreateAutoBackup(boolean log) {
-        if(log) {
-            String output = "Not creating a auto-backup because nothing happened today.";
-            DiscordBot.sendText(output, MessageOrigin.SCHEDULE);
-        }
-        Logger.info("Not necessary to create backup.");
-    }
-
-    private static void changeDay() {
-        DateTimeFormatter dtfD = DateTimeFormatter.ofPattern("dd");
-        wasBackedUpToday = false;
-        prevDay = dtfD.format(LocalDateTime.now());
-        Logger.debug("Day changed.");
-    }
-
     private static void logInactivity() {
         if(!ServerActions.isRunning()) return;
 
         daysSinceActivity++;
 
-        if(Config.server.inactivity_reminder_enabled && daysSinceActivity % Config.server.inactivity_reminder == 0) {
+        if(Config.get().inactivity != null && daysSinceActivity % Config.get().inactivity.interval == 0) {
             DiscordBot.sendText(String.format("Reminder: The server hasn't been used in %s days. Consider stopping it.", daysSinceActivity), MessageOrigin.SCHEDULE);
             Logger.info("Inactivity reminder sent after %s days.", daysSinceActivity);
         }
     }
 
     private static void checkForCrash() {
-        if(!Config.server.auto_restart) return;
+        if(Config.get().crash == null) return;
 
         new Thread(PermanentOperations::executeCrashHandler).start();
     }
@@ -133,7 +76,7 @@ public class PermanentOperations {
                 crashedRecently = 60; //600 sec * 0.1 loops per second
                 crashesInShortTime++;
 
-                ServerActions.startServer();
+                ServerActions.startServerAsync();
 
                 double time = 0;
                 while (!ServerActions.isRunning()) {

@@ -32,16 +32,14 @@ public class DiscordBot {
     }
 
     public static void initClient() throws LoginException, InterruptedException {
-        JDA = JDABuilder.createDefault(Config.discord.token)
+        JDA = JDABuilder.createDefault(Config.get().discord.token)
                 .addEventListeners(new SlashCommandHandler())
                 .build();
-
-
         JDA.awaitReady();
 
-        GUILD = JDA.getGuildById(Config.discord.guild_id);
-        BOT_CHANNEL = JDA.getTextChannelById(Config.discord.message_channel_id);
-        MODERATOR_ROLE = JDA.getRoleById(Config.discord.moderator_role_id);
+        GUILD = JDA.getGuildById(Config.get().discord.guildId);
+        BOT_CHANNEL = JDA.getTextChannelById(Config.get().discord.messageChannelId);
+        MODERATOR_ROLE = JDA.getRoleById(Config.get().discord.moderatorRoleId);
 
         Logger.info("Client initialized.");
     }
@@ -51,7 +49,11 @@ public class DiscordBot {
         GUILD.upsertCommand("autobackup", "Toggle auto-backup! [Moderator only]")
                 .addOption(OptionType.BOOLEAN, "state", "The state the auto-backup should be in.", true).queue();
         GUILD.upsertCommand("backups", "See where to find backups!").queue();
-        GUILD.upsertCommand("createbackup", "Create a backup! [Moderator only]").queue();
+        GUILD.upsertCommand("createbackup", "Create a backup! [Moderator only]").addOptions(
+                new OptionData(OptionType.STRING, "mode", "The backup mode to use.", true)
+                        .addChoice("restart", "restart").addChoice("while running", "while-running"),
+                new OptionData(OptionType.BOOLEAN, "skip-notify", "Don't notify the players and create the backup instantly")
+        ).queue();
         GUILD.upsertCommand("connection", "Manage connection to server mod! [Moderator only]").addOptions(
                 new OptionData(OptionType.STRING, "action", "The thing to do.", true)
                         .addChoice("status", "status").addChoice("open", "open").addChoice("close", "close")
@@ -75,6 +77,7 @@ public class DiscordBot {
         GUILD.upsertCommand("stopserver", "Start the server! [Moderator only]").queue();
         GUILD.upsertCommand("runcommand", "Run a command on the server! [Moderator only]")
                 .addOption(OptionType.STRING, "command", "The command to run.", true).queue();
+        GUILD.upsertCommand("reloadconfig", "Reloads the configuration from a file! [Moderator only]").queue();
 
         Logger.info("Commands enabled.");
     }

@@ -50,7 +50,7 @@ public class Logger {
         String msg = origin + ": " + message;
         switch(level) {
             case DEBUG -> {
-                if(Config.discord.debug) {
+                if(Config.get().discord.debug) {
                     if (e == null) {
                         LOGGER.debug(msg);
                     } else {

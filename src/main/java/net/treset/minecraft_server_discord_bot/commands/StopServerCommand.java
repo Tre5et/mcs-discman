@@ -2,34 +2,30 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
+import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
-import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
 
 public class StopServerCommand {
     public static void handleCommand(SlashCommandEvent event) {
-        String output;
-
         if(DiscordBot.isModerator(event)) {
             if(!ServerActions.isRunning()) {
-                output = "Server is already stopped.";
-                event.getHook().sendMessage(output).queue();
+                event.getHook().sendMessage("Server is already stopped.").queue();
                 Logger.info("Handled. Already stopped.");
             } else {
-                output = "Stopping the server...";
-                event.getHook().sendMessage(output).queue();
+                event.getHook().sendMessage("Stopping the server...").queue();
                 Logger.info("Stopping server.");
 
-                if(!ServerActions.stopServer()) {
-                    output = "Server stop failed.";
-                    DiscordBot.sendText(output, MessageOrigin.COMMAND);
+                try {
+                    ServerActions.stopServer();
+                } catch (ServerOperationException e) {
+                    Logger.error(e, "Failed to stop server");
+                    event.getHook().sendMessage("Failed to stop server.").queue();
                 }
-                output = "Server stopped.";
-                DiscordBot.sendText(output, MessageOrigin.COMMAND);
+                event.getHook().sendMessage("Server stopped.").queue();
             }
         } else {
-            output = "You don't have permission to do that.";
-            event.getHook().sendMessage(output).queue();
+            event.getHook().sendMessage("You don't have permission to do that.").queue();
             Logger.info("Handled. Permission required.");
         }
     }

@@ -2,9 +2,9 @@ package net.treset.minecraft_server_discord_bot.notifications;
 
 import dev.treset.mcdl.servermanagement.ManagementHandler;
 import dev.treset.mcdl.servermanagement.vanilla.RpcNotifications;
-import net.treset.minecraft_server_discord_bot.PermanentOperations;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
+import net.treset.minecraft_server_discord_bot.server.AutoBackupScheduler;
 import net.treset.minecraft_server_discord_bot.server.DiscmanRpcNotifications;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
@@ -13,7 +13,7 @@ public class NotificationHandlers {
     public static void register() {
         ManagementHandler handler = ManagementClient.get();
 
-        handler.addNotificationMethod(RpcNotifications.Server.started(() -> send("Server started.")));
+        //handler.addNotificationMethod(RpcNotifications.Server.started(() -> send("Server started.")));
         handler.addNotificationMethod(RpcNotifications.Server.stopping(() -> send("Server stopping...")));
 
         handler.addNotificationMethod(RpcNotifications.Players.joined(p -> send(p.name() + " joined the game.")));
@@ -24,6 +24,6 @@ public class NotificationHandlers {
 
     private static void send(String message) {
         DiscordBot.sendText(message, MessageOrigin.RPC);
-        PermanentOperations.setSomethingHappened();
+        AutoBackupScheduler.eventOccurred();
     }
 }

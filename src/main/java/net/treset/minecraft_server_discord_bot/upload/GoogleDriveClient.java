@@ -35,7 +35,7 @@ public class GoogleDriveClient {
 
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
-        InputStream in = new FileInputStream(Config.drive.drive_credentials_file);
+        InputStream in = new FileInputStream(Config.get().backup.upload.googleDrive.credentialsFile);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
@@ -50,7 +50,8 @@ public class GoogleDriveClient {
     }
 
     public static void init() {
-        if(!Config.drive.enabled) {
+        SERVICE = null;
+        if(Config.get().backup == null || Config.get().backup.upload == null || Config.get().backup.upload.googleDrive == null) {
             Logger.info("Not creating drive client because it is not configured.");
             return;
         }
@@ -65,12 +66,12 @@ public class GoogleDriveClient {
         } catch (IOException | GeneralSecurityException e) {
             DiscordBot.sendText("Unable to create drive client but drive features are enabled. Disabling for now. Please fix this manually.", MessageOrigin.SCHEDULE);
             Logger.warn(e, "Unable to create Drive client. Disabling drive features.");
-            Config.drive.enabled = false;
+            Config.get().backup.upload.googleDrive = null;
         }
     }
 
     public static String uploadFile(String path, String name, String fileMIME, String folder) {
-        if(!Config.drive.enabled) return "local";
+        if(Config.get().backup.upload.googleDrive != null || SERVICE == null) return null;
         File fileMetadata = new File();
         fileMetadata.setName(name);
         fileMetadata.setParents(Collections.singletonList(folder));

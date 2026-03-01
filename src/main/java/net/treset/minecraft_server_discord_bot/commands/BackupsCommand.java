@@ -8,11 +8,11 @@ public class BackupsCommand {
     public static void handleCommand(SlashCommandEvent event) {
         String output = "";
 
-        if(Config.contact.backups_location != null) {
-            output += String.format("Backups are available at **%s**. ", Config.contact.backups_location);
+        if(Config.get().backup.publicLocation != null) {
+            output += String.format("Backups are available at **%s**. ", Config.get().backup.publicLocation);
         }
-        if(Config.contact.admin != null) {
-            output += String.format("For more information contact **%s**.", Config.contact.admin);
+        if(Config.get().discord.admin != null) {
+            output += String.format("For more information contact **%s**.", Config.get().discord.admin);
         }
         if(output.isBlank()) {
             output = "No information about backups is configured.";

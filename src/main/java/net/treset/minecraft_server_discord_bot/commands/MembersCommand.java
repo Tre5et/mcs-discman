@@ -23,8 +23,8 @@ public class MembersCommand {
         }
 
         output = members.isEmpty() ? "There are no current members." : String.format("Current members are: **%s**.", Formatter.formatList(members, ", "));
-        if(Config.contact.admin != null) {
-            output += String.format("\nTo become a member contact **%s**.", Config.contact.admin);
+        if(Config.get().discord.admin != null) {
+            output += String.format("\nTo become a member contact **%s**.", Config.get().discord.admin);
         }
         event.getHook().sendMessage(output).queue();
 

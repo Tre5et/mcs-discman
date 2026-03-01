@@ -13,7 +13,7 @@ public class SlashCommandHandler extends ListenerAdapter {
 
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
-        if(!event.getChannel().getId().equals(Config.discord.message_channel_id)) return;
+        if(!event.getChannel().getId().equals(Config.get().discord.messageChannelId)) return;
 
         event.deferReply().queue();
 
@@ -33,6 +33,7 @@ public class SlashCommandHandler extends ListenerAdapter {
             case "startserver": CompletableFuture.runAsync(() -> StartServerCommand.handleCommand(event)); break;
             case "stopserver": CompletableFuture.runAsync(() -> StopServerCommand.handleCommand(event)); break;
             case "runcommand": CompletableFuture.runAsync(() -> RunCommandCommand.handleCommand(event)); break;
+            case "reloadconfig": CompletableFuture.runAsync(() -> ReloadConfigCommand.handleCommand(event)); break;
             default:
                 event.getHook().sendMessage("Sorry, I don't know that :worried:").queue();
                 Logger.warn("Unable to handle command \"%s\". Unknown.", event.getName());
