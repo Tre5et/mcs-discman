@@ -8,7 +8,6 @@ import net.treset.minecraft_server_discord_bot.schedulers.AutoBackupScheduler;
 import net.treset.minecraft_server_discord_bot.schedulers.EventScheduler;
 import net.treset.minecraft_server_discord_bot.schedulers.InactivityScheduler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
-import net.treset.minecraft_server_discord_bot.upload.GoogleDriveClient;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
@@ -66,7 +65,6 @@ public class Config {
 
         ManagementClient.init();
         NotificationHandlers.register();
-        GoogleDriveClient.init();
         AutoBackupScheduler.scheduleNext(OutputConsumer.all(MessageOrigin.SCHEDULE));
         InactivityScheduler.scheduleNext(EventScheduler.getLastEventTimestamp());
     }

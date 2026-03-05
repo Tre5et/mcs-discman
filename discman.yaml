@@ -1,0 +1,59 @@
+discord:
+  token: secret
+  guildId:
+  messageChannelId:
+  moderatorRoleId:
+  updateInterval:
+  debug: false
+  admin:
+
+server:
+  host: localhost
+  port: 25569
+  secret:
+  ssl: false
+  worldPath:
+  startCommand: ["start", "command"]
+  commandDirectory:
+
+  restartDelay: 5
+  saveTimeout: 100
+  stopTimeout: 100
+  startTimeout: 1000
+
+  url:
+
+backup:
+  path:
+  timeout: 1200
+  auto:
+    hour:
+      - 02
+    restartMode: never
+  notifyIf: restartAndNotEmpty
+  notifyAt:
+    - 25
+    - 20
+    - 15
+    - 10
+    - 5
+    - 4
+    - 3
+    - 2
+    - 1
+  publicLocation: https://drive.google.com/folder
+  upload:
+    googleDrive:
+      folderId:
+      credentialsFile: credentials.json
+
+inactivity:
+  interval: 5
+
+crash:
+  maxRetries: 5
+  recentTimeout: 3600
+
+
+
+

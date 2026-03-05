@@ -6,6 +6,7 @@ import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 import net.treset.minecraft_server_discord_bot.server.BackupHandler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
+import net.treset.minecraft_server_discord_bot.upload.UploadService;
 
 import java.time.Duration;
 
@@ -23,6 +24,13 @@ public class BackupConfig extends Validatable {
 
     public List<Duration> notificationOffsets() {
         return notifyAt.stream().map(s -> Duration.of(s, ChronoUnit.SECONDS)).toList();
+    }
+
+    public UploadService uploadService() {
+        if(upload != null) {
+            return upload.service();
+        }
+        return null;
     }
 
     @Override

@@ -5,12 +5,14 @@ import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.RpcNotifications;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
+import net.treset.minecraft_server_discord_bot.exception.UploadException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.logging.OutputConsumer;
 import net.treset.minecraft_server_discord_bot.logging.OutputType;
 import net.treset.minecraft_server_discord_bot.system.FileHandler;
-import net.treset.minecraft_server_discord_bot.upload.GoogleDriveClient;
+import net.treset.minecraft_server_discord_bot.upload.UploadService;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -59,14 +61,17 @@ public class BackupHandler {
             }
             return;
         }
-        if(Config.get().backup.upload == null || Config.get().backup.upload.googleDrive == null) {
+        if(Config.get().backup.uploadService() == null) {
             outputConsumer.accept(OutputType.ALL, "Created backup successfully. Upload is disabled.");
         } else {
-            outputConsumer.accept(OutputType.ALL, "Created backup successfully. Uploading to Google Drive... (this may take a few minutes)");
+            UploadService service = Config.get().backup.uploadService();
+            outputConsumer.accept(OutputType.ALL, "Created backup successfully. Uploading to " + service.name() + "... (this may take a few minutes)");
             new Thread(() -> {
-                if(GoogleDriveClient.uploadFile(Config.get().backup.path + fileName, fileName, "application/x-zip-compressed", Config.get().backup.upload.googleDrive.folderId) != null) {
+                try {
+                    service.upload(new File(Config.get().backup.path + fileName), fileName, "application/x-zip-compressed");
                     outputConsumer.accept(OutputType.ALL, "Uploaded backup successfully.");
-                } else {
+                } catch (UploadException e){
+                    Logger.error(e, "Failed to upload backup with service %s.", service.name());
                     outputConsumer.accept(OutputType.ALL, "Failed to upload backup. The local backup was created successfully.");
                 }
             }).start();

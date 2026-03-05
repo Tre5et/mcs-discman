@@ -1,10 +1,11 @@
 package net.treset.minecraft_server_discord_bot.config;
 
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
+import net.treset.minecraft_server_discord_bot.upload.UploadService;
 
 import java.util.List;
 
-public class UploadConfig extends Validatable {
+public class UploadConfig extends Validatable implements UploadServiceConfig {
     public GoogleDriveConfig googleDrive;
 
     @Override
@@ -14,9 +15,17 @@ public class UploadConfig extends Validatable {
 
     @Override
     public void validate() throws ConfigException {
-        requireAny(p(googleDrive, "googleDrive"));
+        requireExactly(1, p(googleDrive, "googleDrive"));
         if(googleDrive != null) {
             googleDrive.validate();
         }
+    }
+
+    @Override
+    public UploadService service() {
+        if(googleDrive != null && googleDrive.service() != null) {
+            return googleDrive.service();
+        }
+        return null;
     }
 }

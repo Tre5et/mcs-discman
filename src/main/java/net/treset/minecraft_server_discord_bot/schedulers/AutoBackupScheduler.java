@@ -42,6 +42,7 @@ public class AutoBackupScheduler {
             return;
         }
         if(!Config.get().backup.auto.createIf.shouldCreate(eventSinceLastBackup)) {
+            eventSinceLastBackup = false;
             return;
         }
 
