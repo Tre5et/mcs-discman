@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class Validatable {
+public abstract class ValidatableConfig {
     public abstract List<String> prefix();
-    public abstract void validate() throws ConfigException;
+    public abstract void validate(Config config) throws ConfigException;
 
     public void require(Boolean value, String name) throws ConfigException {
         if(value != true) {

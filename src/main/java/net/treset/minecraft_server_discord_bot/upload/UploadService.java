@@ -1,6 +1,6 @@
 package net.treset.minecraft_server_discord_bot.upload;
 
-import net.treset.minecraft_server_discord_bot.config.GoogleDriveConfig;
+import net.treset.minecraft_server_discord_bot.config.backup.GoogleDriveConfig;
 import net.treset.minecraft_server_discord_bot.exception.UploadException;
 
 import java.io.File;

@@ -1,7 +1,9 @@
-package net.treset.minecraft_server_discord_bot.config;
+package net.treset.minecraft_server_discord_bot.config.backup;
 
 import dev.treset.mcdl.servermanagement.exception.RpcCommunicationException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
+import net.treset.minecraft_server_discord_bot.config.Config;
+import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 import net.treset.minecraft_server_discord_bot.server.BackupHandler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
@@ -14,7 +16,7 @@ import java.time.Month;
 import java.util.List;
 import java.util.function.Function;
 
-public class AutoBackupConfig extends Validatable {
+public class AutoBackupConfig extends ValidatableConfig {
     public List<Integer> hour = List.of(0);
     public List<Integer> minute = List.of(0);
     public List<DayOfWeek> day = List.of();
@@ -64,7 +66,7 @@ public class AutoBackupConfig extends Validatable {
     }
 
     @Override
-    public void validate() throws ConfigException {
+    public void validate(Config newConfig) throws ConfigException {
 
     }
 

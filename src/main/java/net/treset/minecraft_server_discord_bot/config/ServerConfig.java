@@ -4,7 +4,7 @@ import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 
 import java.util.List;
 
-public class ServerConfig extends Validatable {
+public class ServerConfig extends ValidatableConfig {
     public String host;
     public int port;
     public String secret;
@@ -25,7 +25,7 @@ public class ServerConfig extends Validatable {
     }
 
     @Override
-    public void validate() throws ConfigException {
+    public void validate(Config newConfig) throws ConfigException {
         require(host, "host");
         require(port, "port");
         require(secret, "secret");

@@ -25,7 +25,6 @@ server:
 
 backup:
   path:
-  timeout: 1200
   auto:
     hour:
       - 02

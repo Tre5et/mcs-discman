@@ -1,5 +1,7 @@
-package net.treset.minecraft_server_discord_bot.config;
+package net.treset.minecraft_server_discord_bot.config.backup;
 
+import net.treset.minecraft_server_discord_bot.config.Config;
+import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 import net.treset.minecraft_server_discord_bot.exception.UploadException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -9,7 +11,7 @@ import net.treset.minecraft_server_discord_bot.upload.UploadService;
 import java.io.File;
 import java.util.List;
 
-public class GoogleDriveConfig extends Validatable implements UploadServiceConfig {
+public class GoogleDriveConfig extends ValidatableConfig implements UploadServiceConfig {
     public String folderId;
     public File credentialsFile;
 
@@ -21,7 +23,7 @@ public class GoogleDriveConfig extends Validatable implements UploadServiceConfi
     }
 
     @Override
-    public void validate() throws ConfigException {
+    public void validate(Config newConfig) throws ConfigException {
         requireAllOrNone(p(folderId, "folderId"), p(credentialsFile, "credentialsFile"));
         try {
             uploadService = UploadService.googleDrive(this);

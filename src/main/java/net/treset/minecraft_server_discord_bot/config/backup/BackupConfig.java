@@ -1,7 +1,9 @@
-package net.treset.minecraft_server_discord_bot.config;
+package net.treset.minecraft_server_discord_bot.config.backup;
 
 import dev.treset.mcdl.servermanagement.exception.RpcCommunicationException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
+import net.treset.minecraft_server_discord_bot.config.Config;
+import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 import net.treset.minecraft_server_discord_bot.server.BackupHandler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
@@ -14,7 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.BiFunction;
 
-public class BackupConfig extends Validatable {
+public class BackupConfig extends ValidatableConfig {
     public String path;
     public List<Integer> notifyAt = List.of(300, 60, 30, 15, 10, 5, 4, 3, 2, 1);
     public NotifyCondition notifyIf = NotifyCondition.restartAndNotEmpty;
@@ -39,13 +41,13 @@ public class BackupConfig extends Validatable {
     }
 
     @Override
-    public void validate() throws ConfigException {
+    public void validate(Config newConfig) throws ConfigException {
         require(path, "path");
         if(auto != null) {
-            auto.validate();
+            auto.validate(newConfig);
         }
         if(upload != null) {
-            upload.validate();
+            upload.validate(newConfig);
         }
     }
 

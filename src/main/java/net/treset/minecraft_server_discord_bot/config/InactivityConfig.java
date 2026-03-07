@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-public class InactivityConfig extends Validatable {
+public class InactivityConfig extends ValidatableConfig {
     public int interval;
     public List<Integer> schedule = List.of();
 
@@ -35,7 +35,7 @@ public class InactivityConfig extends Validatable {
     }
 
     @Override
-    public void validate() throws ConfigException {
+    public void validate(Config newConfig) throws ConfigException {
         requireExactly(1, p(interval, "interval"), p(schedule, "schedule"));
     }
 }

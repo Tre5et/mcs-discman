@@ -4,7 +4,7 @@ import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 
 import java.util.List;
 
-public class CrashConfig extends Validatable {
+public class CrashConfig extends ValidatableConfig {
     public int maxRetries = 5;
     public int recentTimeout = 3600;
 
@@ -14,7 +14,7 @@ public class CrashConfig extends Validatable {
     }
 
     @Override
-    public void validate() throws ConfigException {
+    public void validate(Config newConfig) throws ConfigException {
 
     }
 }

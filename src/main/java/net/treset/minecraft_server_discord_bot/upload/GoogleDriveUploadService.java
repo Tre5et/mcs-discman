@@ -13,7 +13,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
-import net.treset.minecraft_server_discord_bot.config.GoogleDriveConfig;
+import net.treset.minecraft_server_discord_bot.config.backup.GoogleDriveConfig;
 import net.treset.minecraft_server_discord_bot.exception.UploadException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
