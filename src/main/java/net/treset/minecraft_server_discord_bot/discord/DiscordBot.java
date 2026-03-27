@@ -39,7 +39,7 @@ public class DiscordBot {
 
         GUILD = JDA.getGuildById(Config.get().discord.guildId);
         BOT_CHANNEL = JDA.getTextChannelById(Config.get().discord.messageChannelId);
-        MODERATOR_ROLE = JDA.getRoleById(Config.get().discord.moderatorRoleId);
+        MODERATOR_ROLE = JDA.getRoleById(Config.get().discord.roles.get("moderator"));
 
         Logger.info("Client initialized.");
     }

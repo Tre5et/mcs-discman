@@ -10,7 +10,6 @@ public class DiscordConfig extends ValidatableConfig {
     public String guildId;
     public String messageChannelId;
     public Map<String, String> roles;
-    public String moderatorRoleId;
     public int updateInterval = 10;
     public boolean debug = false;
     public String admin;

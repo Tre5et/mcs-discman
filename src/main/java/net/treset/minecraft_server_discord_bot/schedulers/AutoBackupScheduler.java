@@ -38,26 +38,28 @@ public class AutoBackupScheduler {
     }
 
     public static void createAuto(OutputConsumer outputConsumer) {
-        if(Config.get().backup == null) {
-            return;
-        }
-        if(!Config.get().backup.auto.createIf.shouldCreate(eventSinceLastBackup)) {
-            eventSinceLastBackup = false;
-            return;
-        }
-
-        BackupHandler.Mode mode = Config.get().backup.auto.restartMode.mode();
-
-        BackupHandler.execute(mode, t -> backupNameFormatter.format(t) + "-auto", outputConsumer, false);
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Logger.warn(e, "Unable to wait before scheduling next backup");
+        try {
+            if (Config.get().backup == null) {
+                return;
             }
-            scheduleNext(outputConsumer);
-        }).start();
+            if (!Config.get().backup.auto.createIf.shouldCreate(eventSinceLastBackup)) {
+                return;
+            }
+            eventSinceLastBackup = false;
+
+            BackupHandler.Mode mode = Config.get().backup.auto.restartMode.mode();
+
+            BackupHandler.execute(mode, t -> backupNameFormatter.format(t) + "-auto", outputConsumer, false);
+        } finally {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Logger.warn(e, "Unable to wait before scheduling next backup");
+                }
+                scheduleNext(outputConsumer);
+            }).start();
+        }
     }
 
     static {
