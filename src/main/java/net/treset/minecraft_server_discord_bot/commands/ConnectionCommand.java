@@ -1,72 +1,71 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
-import net.treset.minecraft_server_discord_bot.logging.Logger;
+import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Supplier;
 
-public class ConnectionCommand {
-    public static void handleCommand(SlashCommandEvent event) {
+public class ConnectionCommand extends Command<FunctionConfig.Connection> {
+    public ConnectionCommand(Supplier<FunctionConfig.Connection> configSupplier) {
+        super(configSupplier);
+    }
+
+    @Override
+    protected void process(SlashCommandEvent event, FunctionConfig.Connection function) {
         String output;
-
-        if(DiscordBot.isModerator(event)) {
-            String type = Objects.requireNonNull(event.getOption("action")).getAsString();
-            switch (type) {
-                case "status" -> output = getStatus();
-                case "open" -> output = openConnection();
-                case "close" -> output = closeConnection(event);
-                default -> output = "not found";
-            }
-        } else {
-            output = "You don't have permission to do that.";
-            Logger.info("Handled. No permission.");
+        String type = Objects.requireNonNull(event.getOption("action")).getAsString();
+        switch (type) {
+            case "status" -> output = getStatus(function);
+            case "open" -> output = openConnection(function);
+            case "close" -> output = closeConnection(event, function);
+            default -> output = function.messageUnknownAction.get();
         }
 
         event.getHook().sendMessage(output).queue();
     }
 
-    private static String getStatus() {
+    private static String getStatus(FunctionConfig.Connection function) {
         if(ManagementClient.get().isConnected()) {
-            return "A connection with the server is open.";
+            return function.messageStatusOpen.get();
         }
-        return "No connection is open.";
+        return function.messageStatusClosed.get();
     }
 
-    private static String openConnection() {
+    private static String openConnection(FunctionConfig.Connection function) {
         if(ManagementClient.get().isConnected()) {
-            return "The connection is already open. Close it first.";
+            return function.messageOpenAlreadyOpen.get();
         }
         try {
             ManagementClient.get().connect();
         } catch (IOException e) {
-            return "Failed to connect to server. Try again.";
+            return function.messageOpenFailed.get();
         }
-        return "Connected to server.";
+        return function.messageOpenSuccess.get();
     }
 
-    private static String closeConnection(SlashCommandEvent event) {
+    private static String closeConnection(SlashCommandEvent event, FunctionConfig.Connection function) {
         if(!ManagementClient.get().isConnected()) {
-            return "No connection is open. Open one first.";
+            return function.messageCloseNoConnection.get();
         }
 
         boolean force = false;
-        if(event.getOption("action") != null) {
-            force = Objects.requireNonNull(event.getOption("action")).getAsBoolean();
+        if(event.getOption("force") != null) {
+            force = Objects.requireNonNull(event.getOption("force")).getAsBoolean();
         }
 
         if(force) {
             ManagementClient.get().forceDisconnect();
-            return "Forcefully closed connection.";
+            return function.messageCloseForced.get();
         }
 
         try {
             ManagementClient.get().disconnect();
-            return "Connection closed successfully.";
+            return function.messageCloseSuccess.get();
         } catch (IOException e) {
-            return "Failed to close the connection. Try again.";
+            return function.messageCloseFailed.get();
         }
     }
 }

@@ -2,22 +2,22 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
+import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
-import net.treset.minecraft_server_discord_bot.logging.Logger;
+import java.util.function.Supplier;
 
-public class ReloadConfigCommand {
-    public static void handleCommand(SlashCommandEvent event) {
-        if(DiscordBot.isModerator(event)) {
-            try {
-                Config.load();
-                event.getHook().sendMessage("Reloaded config.").queue();
-            } catch (ConfigException e) {
-                event.getHook().sendMessage("Failed to reload config.").queue();
-            }
-        } else {
-            event.getHook().sendMessage("You don't have permission to do that.").queue();
-            Logger.info("Handled.");
+public class ReloadConfigCommand extends Command<FunctionConfig.Reload> {
+    public ReloadConfigCommand(Supplier<FunctionConfig.Reload> configSupplier) {
+        super(configSupplier);
+    }
+
+    @Override
+    protected void process(SlashCommandEvent event, FunctionConfig.Reload function) {
+        try {
+            Config.load();
+            event.getHook().sendMessage(function.messageReloaded.get()).queue();
+        } catch (ConfigException e) {
+            event.getHook().sendMessage(function.messageFailed.get()).queue();
         }
     }
 }

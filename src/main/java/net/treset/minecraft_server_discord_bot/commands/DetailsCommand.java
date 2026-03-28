@@ -4,21 +4,30 @@ import dev.treset.mcdl.servermanagement.exception.RpcCommunicationException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcVersion;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
-public class DetailsCommand {
-    public static void handleCommand(SlashCommandEvent event) {
+import java.util.function.Supplier;
+
+public class DetailsCommand extends Command<FunctionConfig.Details> {
+    public DetailsCommand(Supplier<FunctionConfig.Details> configSupplier) {
+        super(configSupplier);
+    }
+
+    @Override
+    protected void process(SlashCommandEvent event, FunctionConfig.Details function) {
         String output;
 
         String version = getVersion();
         if(version == null) {
-            output = "Failed to get details!";
+            output = function.messageFailed.get();
             event.getHook().sendMessage(output).queue();
             return;
         }
 
-        output = String.format("The server is running version **%s**.",  version);
+        output = function.messageVersion.get(new MessageTemplates.DetailsContext(version));
         event.getHook().sendMessage(output).queue();
 
         Logger.info("Handled.");

@@ -1,23 +1,22 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
+import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
-public class SayCommand {
-    public static void handleCommand(SlashCommandEvent event) {
+public class SayCommand extends Command<FunctionConfig.Say> {
+    public SayCommand(Supplier<FunctionConfig.Say> configSupplier) {
+        super(configSupplier);
+    }
+
+    @Override
+    protected void process(SlashCommandEvent event, FunctionConfig.Say function) {
         String message = Objects.requireNonNull(event.getOption("message")).getAsString();
-        if(DiscordBot.isModerator(event)) {
-            event.getHook().sendMessage(message).queue();
+        event.getHook().sendMessage(message).queue();
 
-            Logger.info("Handled. Said \"%s\".", message);
-        } else {
-            String output = "You don't have permission to do that.";
-            event.getHook().sendMessage(output).queue();
-
-            Logger.info("Handled. Permission required to say \"%s\".", message);
-        }
+        Logger.info("Handled. Said \"%s\".", message);
     }
 }

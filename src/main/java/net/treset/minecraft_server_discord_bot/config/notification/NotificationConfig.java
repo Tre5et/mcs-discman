@@ -1,28 +1,32 @@
 package net.treset.minecraft_server_discord_bot.config.notification;
 
+import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
+import net.treset.minecraft_server_discord_bot.config.message.Message;
+import net.treset.minecraft_server_discord_bot.config.message.MessageTemplate;
+import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
+import net.treset.minecraft_server_discord_bot.server.data.RpcAdvancement;
+import net.treset.minecraft_server_discord_bot.server.data.RpcDeath;
+import net.treset.minecraft_server_discord_bot.upload.UploadService;
 
-import java.util.ArrayList;
+import java.time.Duration;
 import java.util.List;
 
-public abstract class NotificationConfig<C extends NotificationContextTemplate> extends ValidatableConfig {
+public abstract class NotificationConfig<C> extends ValidatableConfig {
     public NotificationCondition discord;
     public NotificationCondition game;
-    public String message;
-    public transient String formattableMessage;
-    public transient List<String> formatKeys;
+    public Message<C> message;
 
     public NotificationConfig(NotificationCondition discord, NotificationCondition game, String message) {
         this.discord = discord;
         this.game = game;
-        this.message = message;
+        this.message = new Message<>(message);
     }
 
-    public String message(NotificationContext<C> context) {
-        Object[] values = formatKeys.stream().map(context::value).toArray(String[]::new);
-        return String.format(formattableMessage, values);
+    public String message(C source) {
+        return message.get(source);
     }
 
     @Override
@@ -30,47 +34,18 @@ public abstract class NotificationConfig<C extends NotificationContextTemplate> 
         return List.of("notification");
     }
 
-    public void validate(Config config, C template) throws ConfigException {
-        if(message == null || !message.contains("{")) {
-            formattableMessage = message;
-            formatKeys = List.of();
-            return;
-        }
-
-        StringBuilder messageFormat = new StringBuilder();
-        formatKeys = new ArrayList<>();
-        int i = 0;
-        while(i >= 0) {
-            int startIndex = message.indexOf('{', i);
-            if(startIndex < 0) {
-                messageFormat.append(message, i, message.length());
-                break;
-            }
-            if(startIndex > 0 && message.charAt(startIndex-1) == '\\') continue;
-            int endIndex = message.indexOf('}', startIndex);
-            if(endIndex < 0) {
-                throw new ConfigException("Message format replacement is not closed");
-            }
-            String key = message.substring(startIndex+1, endIndex);
-            if(!template.hasKey(key)) {
-                throw new ConfigException("Key '" + key + "' is defined in notification message but is not supported. Supported are '" + String.join(", ", template.availableKeys()) + "'.");
-            }
-            messageFormat.append(message, i, startIndex);
-            messageFormat.append("%s");
-            formatKeys.add(message.substring(startIndex+1, endIndex));
-            i = endIndex + 1;
-        }
-        formattableMessage = messageFormat.toString();
+    public void validate(Config config, MessageTemplate<C> template) throws ConfigException {
+        message.validate(template);
     }
 
-    public static class DateTime extends NotificationConfig<NotificationContextTemplate.DateTime> {
+    public static class DateTime extends NotificationConfig<Object> {
         public DateTime(NotificationCondition discord, NotificationCondition game, String message) {
             super(discord, game, message);
         }
 
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.DateTime());
+            super.validate(config, MessageTemplates.DATE_TIME);
         }
     }
 
@@ -98,47 +73,47 @@ public abstract class NotificationConfig<C extends NotificationContextTemplate> 
         }
     }
 
-    public static class Joined extends NotificationConfig<NotificationContextTemplate.Player> {
+    public static class Joined extends NotificationConfig<RpcPlayer> {
         public Joined() {
             super(NotificationCondition.always, NotificationCondition.never, "{name} joined the game.");
         }
 
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.Player());
+            super.validate(config, MessageTemplates.PLAYER);
         }
     }
 
-    public static class Left extends NotificationConfig<NotificationContextTemplate.Player> {
+    public static class Left extends NotificationConfig<RpcPlayer> {
         public Left() {
             super(NotificationCondition.always, NotificationCondition.never, "{name} left the game.");
         }
 
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.Player());
+            super.validate(config, MessageTemplates.PLAYER);
         }
     }
 
-    public static class Advancement extends NotificationConfig<NotificationContextTemplate.Advancement> {
+    public static class Advancement extends NotificationConfig<RpcAdvancement> {
         public Advancement() {
             super(NotificationCondition.always, NotificationCondition.never, "{message}.");
         }
 
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.Advancement());
+            super.validate(config, MessageTemplates.ADVANCEMENT);
         }
     }
 
-    public static class Death extends NotificationConfig<NotificationContextTemplate.Death> {
+    public static class Death extends NotificationConfig<RpcDeath> {
         public Death() {
             super(NotificationCondition.always, NotificationCondition.never, "{message}.");
         }
 
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.Death());
+            super.validate(config, MessageTemplates.DEATH);
         }
     }
 
@@ -178,59 +153,59 @@ public abstract class NotificationConfig<C extends NotificationContextTemplate> 
         }
     }
 
-    public static class BackupUploading extends NotificationConfig<NotificationContextTemplate.UploadService> {
+    public static class BackupUploading extends NotificationConfig<UploadService> {
 
         public BackupUploading() {
             super(NotificationCondition.always, NotificationCondition.always, "Uploading backup to {service}...");
         }
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.UploadService());
+            super.validate(config, MessageTemplates.UPLOAD_SERVICE);
         }
 
     }
 
-    public static class BackupUploadFailed extends NotificationConfig<NotificationContextTemplate.UploadService> {
+    public static class BackupUploadFailed extends NotificationConfig<UploadService> {
         public BackupUploadFailed() {
             super(NotificationCondition.always, NotificationCondition.always, "Failed to upload backup to {service}. The local backup was created.");
         }
 
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.UploadService());
+            super.validate(config, MessageTemplates.UPLOAD_SERVICE);
         }
     }
 
-    public static class BackupWhileRunningAnnouncement extends NotificationConfig<NotificationContextTemplate.Countdown> {
+    public static class BackupWhileRunningAnnouncement extends NotificationConfig<Duration> {
         public BackupWhileRunningAnnouncement() {
-            super(NotificationCondition.never, NotificationCondition.always, "Creating backup in {timeRemaining}.");
+            super(NotificationCondition.never, NotificationCondition.always, "Creating backup in {duration}.");
         }
 
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.Countdown());
+            super.validate(config, MessageTemplates.DURATION);
         }
     }
 
-    public static class BackupRestartAnnouncement extends NotificationConfig<NotificationContextTemplate.Countdown> {
+    public static class BackupRestartAnnouncement extends NotificationConfig<Duration> {
         public BackupRestartAnnouncement() {
-            super(NotificationCondition.never, NotificationCondition.always, "Restarting server in in {timeRemaining}.");
+            super(NotificationCondition.never, NotificationCondition.always, "Restarting server in in {duration}.");
         }
 
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.Countdown());
+            super.validate(config, MessageTemplates.DURATION);
         }
     }
 
-    public static class BackupAnnouncing extends NotificationConfig<NotificationContextTemplate.Countdown> {
+    public static class BackupAnnouncing extends NotificationConfig<Duration> {
         public BackupAnnouncing() {
-            super(NotificationCondition.never, NotificationCondition.always, "Announcing backup to players (performing in {timeRemaining}).");
+            super(NotificationCondition.never, NotificationCondition.always, "Announcing backup to players (performing in {duration}).");
         }
 
         @Override
         public void validate(Config config) throws ConfigException {
-            super.validate(config, new NotificationContextTemplate.Countdown());
+            super.validate(config, MessageTemplates.DURATION);
         }
     }
 

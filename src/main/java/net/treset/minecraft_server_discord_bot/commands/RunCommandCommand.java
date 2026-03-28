@@ -1,7 +1,8 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
+import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.DiscmanRpcMethods;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
@@ -9,39 +10,41 @@ import net.treset.minecraft_server_discord_bot.server.data.RpcCommand;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Supplier;
 
-public class RunCommandCommand {
-    public static void handleCommand(SlashCommandEvent event) {
+public class RunCommandCommand extends Command<FunctionConfig.RunCommand> {
+    public RunCommandCommand(Supplier<FunctionConfig.RunCommand> configSupplier) {
+        super(configSupplier);
+    }
+
+    @Override
+    protected void process(SlashCommandEvent event, FunctionConfig.RunCommand function) {
         String cmd = Objects.requireNonNull(event.getOption("command")).getAsString();
 
-        if(DiscordBot.isModerator(event)) {
-            try {
-                RpcCommand res = ManagementClient.get().request(DiscmanRpcMethods.Server.COMMAND_RUN, cmd);
-                switch (res.status()) {
-                    case SUCCESS -> {
-                        Logger.info("Handled. Success: \"%s\" -> \"%s\"", cmd, res.message().literal());
-                        event.getHook().sendMessage(String.format("Success: %s", res.message().literal())).queue();
-                    }
-                    case FAILURE -> {
-                        Logger.info("Handled. Failure: \"%s\" -> \"%s\"", cmd, res.message().literal());
-                        event.getHook().sendMessage(String.format("Invalid command: %s", res.message().literal())).queue();
-                    }
-                    case NO_RESPONSE -> {
-                        Logger.info("Handled. Unknown: \"%s\" -> \"%s\"", cmd, res.message().literal());
-                        event.getHook().sendMessage(String.format("Ran: %s", res.message().literal())).queue();
-                    }
-                    default -> {
-                        Logger.warn("Failed to parse command result: \"%s\" -> \"s\"", cmd, res);
-                        event.getHook().sendMessage("Failed to run command.").queue();
-                    }
+        try {
+            RpcCommand res = ManagementClient.get().request(DiscmanRpcMethods.Server.COMMAND_RUN, cmd);
+            MessageTemplates.RunCommandContext context = new MessageTemplates.RunCommandContext(cmd, res.message().literal());
+            switch (res.status()) {
+                case SUCCESS -> {
+                    Logger.info("Handled. Success: \"%s\" -> \"%s\"", cmd, res.message().literal());
+                    event.getHook().sendMessage(function.messageSuccess.get(context)).queue();
                 }
-            } catch (IOException e) {
-                Logger.warn(e, "Failed to request command execution: \"%s\"", cmd);
-                event.getHook().sendMessage("Failed to request command execution.").queue();
+                case FAILURE -> {
+                    Logger.info("Handled. Failure: \"%s\" -> \"%s\"", cmd, res.message().literal());
+                    event.getHook().sendMessage(function.messageInvalid.get(context)).queue();
+                }
+                case NO_RESPONSE -> {
+                    Logger.info("Handled. Unknown: \"%s\" -> \"%s\"", cmd, res.message().literal());
+                    event.getHook().sendMessage(function.messageNoResponse.get(context)).queue();
+                }
+                default -> {
+                    Logger.warn("Failed to parse command result: \"%s\" -> \"s\"", cmd, res);
+                    event.getHook().sendMessage(function.messageFailed.get()).queue();
+                }
             }
-        } else {
-            Logger.info("Handled. Permission denied for command \"%s\".", cmd);
-            event.getHook().sendMessage("You don't have permission to do that.").queue();
+        } catch (IOException e) {
+            Logger.warn(e, "Failed to request command execution: \"%s\"", cmd);
+            event.getHook().sendMessage(function.messageRequestFailed.get()).queue();
         }
     }
 }

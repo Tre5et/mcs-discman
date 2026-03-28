@@ -2,20 +2,35 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.config.Config;
+import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
-public class BackupsCommand {
-    public static void handleCommand(SlashCommandEvent event) {
-        String output = "";
+import java.util.function.Supplier;
+
+public class BackupsCommand extends Command<FunctionConfig.Backups> {
+    public BackupsCommand(Supplier<FunctionConfig.Backups> configSupplier) {
+        super(configSupplier);
+    }
+
+    @Override
+    protected void process(SlashCommandEvent event, FunctionConfig.Backups function) {
+        String output;
+        MessageTemplates.BackupsContext context = new MessageTemplates.BackupsContext(
+                Config.get().backup.publicLocation,
+                Config.get().discord.admin
+        );
 
         if(Config.get().backup.publicLocation != null) {
-            output += String.format("Backups are available at **%s**. ", Config.get().backup.publicLocation);
-        }
-        if(Config.get().discord.admin != null) {
-            output += String.format("For more information contact **%s**.", Config.get().discord.admin);
-        }
-        if(output.isBlank()) {
-            output = "No information about backups is configured.";
+            if(Config.get().discord.admin != null) {
+                output = function.messageLocationAndAdmin.get(context);
+            } else {
+                output = function.messageLocation.get(context);
+            }
+        } else if(Config.get().discord.admin != null) {
+            output = function.messageAdmin.get(context);
+        } else {
+            output = function.messageNone.get();
         }
 
         event.getHook().sendMessage(output).queue();

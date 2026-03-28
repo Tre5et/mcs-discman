@@ -2,50 +2,52 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
+import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
 
-public class RestartServerCommand {
-    public static void handleCommand(SlashCommandEvent event) {
-        if(DiscordBot.isModerator(event)) {
-            if(ServerActions.isRunning()) {
-                event.getHook().sendMessage("Stopping the server for a restart...").queue();
-                Logger.info("Stopping server.");
+import java.util.function.Supplier;
 
-                try {
-                    ServerActions.stopServer();
-                } catch (ServerOperationException e) {
-                    Logger.error(e, "Failed to stop server for restart");
-                    event.getHook().sendMessage("Server stop failed.").queue();
-                    return;
-                }
+public class RestartServerCommand extends Command<FunctionConfig.Restart> {
+    public RestartServerCommand(Supplier<FunctionConfig.Restart> configSupplier) {
+        super(configSupplier);
+    }
 
-                event.getHook().sendMessage("Server stopped, restarting... (this may take a few minutes)").queue();
+    @Override
+    protected void process(SlashCommandEvent event, FunctionConfig.Restart function) {
+        if(ServerActions.isRunning()) {
+            event.getHook().sendMessage(function.messageStopping.get()).queue();
+            Logger.info("Stopping server.");
 
-                Logger.info("Stopped server.");
-                try {
-                    Thread.sleep(Config.get().server.restartDelay * 1000L);
-                } catch (InterruptedException e) {
-                    Logger.error(e, "Failed to wait for restart delay");
-                }
-
-            } else {
-                event.getHook().sendMessage("Restarting... (this may take a few minutes)").queue();
-            }
             try {
-                ServerActions.startServer();
-                event.getHook().sendMessage("Server restarted!").queue();
+                ServerActions.stopServer();
             } catch (ServerOperationException e) {
-                event.getHook().sendMessage("Failed to restart server").queue();
-                Logger.error(e, "Failed to restart server");
+                Logger.error(e, "Failed to stop server for restart");
+                event.getHook().sendMessage(function.messageStopFailed.get()).queue();
+                return;
             }
 
-            Logger.info("Handled. Restarted.");
+            event.getHook().sendMessage(function.messageStopped.get()).queue();
+
+            Logger.info("Stopped server.");
+            try {
+                Thread.sleep(Config.get().server.restartDelay * 1000L);
+            } catch (InterruptedException e) {
+                Logger.error(e, "Failed to wait for restart delay");
+            }
+
         } else {
-            event.getHook().sendMessage("You don't have permission to do that.").queue();
-            Logger.info("Handled. Permission required.");
+            event.getHook().sendMessage(function.messageRestarting.get()).queue();
         }
+        try {
+            ServerActions.startServer();
+            event.getHook().sendMessage(function.messageRestarted.get()).queue();
+        } catch (ServerOperationException e) {
+            event.getHook().sendMessage(function.messageRestartFailed.get()).queue();
+            Logger.error(e, "Failed to restart server");
+        }
+
+        Logger.info("Handled. Restarted.");
     }
 }

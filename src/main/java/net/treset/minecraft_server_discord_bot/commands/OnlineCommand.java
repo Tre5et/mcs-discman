@@ -3,25 +3,43 @@ package net.treset.minecraft_server_discord_bot.commands;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.system.Formatter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Supplier;
 
-public class OnlineCommand {
-    public static void handleCommand(SlashCommandEvent event) {
+public class OnlineCommand extends Command<FunctionConfig.Online> {
+    public OnlineCommand(Supplier<FunctionConfig.Online> configSupplier) {
+        super(configSupplier);
+    }
+
+    @Override
+    protected void process(SlashCommandEvent event, FunctionConfig.Online function) {
         String output;
 
         List<String> players = getPlayers();
         if(players == null) {
-            output = "Failed to get players!";
+            output = function.messageFailed.get();
             event.getHook().sendMessage(output).queue();
             return;
         }
 
-        output = String.format("There %s online%s", (players.size() == 1) ? "is **1** player" : "are **" + players.size() + "** players",  (players.isEmpty()) ? "." : ":**\n" + Formatter.formatList(players, "\n") + "**");
+        if (players.isEmpty()) {
+            output = function.messageNoPlayers.get();
+        } else {
+            MessageTemplates.OnlineContext context = new MessageTemplates.OnlineContext(
+                    Formatter.formatList(players, "\n"),
+                    players.size()
+            );
+            output = players.size() == 1
+                    ? function.messageSinglePlayer.get(context)
+                    : function.messageMultiplePlayers.get(context);
+        }
 
         event.getHook().sendMessage(output).queue();
 

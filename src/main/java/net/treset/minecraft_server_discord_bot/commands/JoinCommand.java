@@ -2,16 +2,25 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.config.Config;
+import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
-public class JoinCommand {
-    public static void handleCommand(SlashCommandEvent event) {
+import java.util.function.Supplier;
+
+public class JoinCommand extends Command<FunctionConfig.Join> {
+    public JoinCommand(Supplier<FunctionConfig.Join> configSupplier) {
+        super(configSupplier);
+    }
+
+    @Override
+    protected void process(SlashCommandEvent event, FunctionConfig.Join function) {
         String output;
 
         if(Config.get().server.url != null) {
-            output = String.format("Join the server using the address **%s**. You must be member to join. Type ``/members`` for more details.", Config.get().server.url);
+            output = function.messageJoin.get(new MessageTemplates.JoinContext(Config.get().server.url));
         } else {
-            output = "No information about how to join the server is configured.";
+            output = function.messageMissingInfo.get();
         }
 
         event.getHook().sendMessage(output).queue();
