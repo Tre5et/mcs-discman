@@ -1,0 +1,486 @@
+discord:
+  token: # REQUIRED: Discord bot token
+  guild: # REQUIRED: Discord guild/server ID
+  channels:
+    default: # REQUIRED: default Discord channel ID
+  roles:
+    moderator: # REQUIRED: moderator Discord role ID
+  debug: false
+  admin: # OPTIONAL: admin contact (for member/backups messages)
+
+commands:
+  messageUnknown: This command is not supported.
+  messageDenied: You are not allowed to do that.
+  messageDisabled: This command is not enabled.
+
+  active:
+    enabled: true
+    allowedRoles: # optional; leave empty to allow all roles
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageActive: The server is running
+    messageInactive: The server is not running
+
+  backups:
+    enabled: true
+    allowedRoles: # optional; leave empty to allow all roles
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageLocationAndAdmin: Backups are available at **{location}**. For more information contact **{admin}**.
+    messageLocation: Backups are available at **{location}**.
+    messageAdmin: For more information contact **{admin}**.
+    messageNone: No information about backups is configured.
+
+  connection:
+    enabled: true
+    allowedRoles:
+      - moderator
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageStatusOpen: A connection with the server is open.
+    messageStatusClosed: No connection is open.
+    messageOpenAlreadyOpen: The connection is already open. Close it first.
+    messageOpenFailed: Failed to connect to server. Try again.
+    messageOpenSuccess: Connected to server.
+    messageCloseNoConnection: No connection is open. Open one first.
+    messageCloseForced: Forcefully closed connection.
+    messageCloseSuccess: Connection closed successfully.
+    messageCloseFailed: Failed to close the connection. Try again.
+    messageUnknownAction: Action not found.
+
+  createBackup:
+    enabled: true
+    allowedRoles:
+      - moderator
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageInvalidMode: Invalid mode
+
+  details:
+    enabled: true
+    allowedRoles: # optional; leave empty to allow all roles
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageFailed: Failed to get details!
+    messageVersion: The server is running version **{version}**.
+
+  join:
+    enabled: true
+    allowedRoles: # optional; leave empty to allow all roles
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageJoin: Join the server using the address **{url}**. You must be member to join. Type ``/members`` for more details.
+    messageMissingInfo: No information about how to join the server is configured.
+
+  members:
+    enabled: true
+    allowedRoles: # optional; leave empty to allow all roles
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageFailed: Failed to get members!
+    messageNoMembers: There are no current members.
+    messageMembers: >-
+      Current members are: **{list}**.
+    messageContactAdmin: To become a member contact **{admin}**.
+
+  online:
+    enabled: true
+    allowedRoles: # optional; leave empty to allow all roles
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageFailed: Failed to get players!
+    messageNoPlayers: There are no players online.
+    messageSinglePlayer: |-
+      There is **1** player online:**
+      {list}**
+    messageMultiplePlayers: |-
+      There are **{count}** players online:**
+      {list}**
+
+  ping:
+    enabled: true
+    allowedRoles:
+      - moderator
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messagePong: Pong!
+
+  reload:
+    enabled: true
+    allowedRoles:
+      - moderator
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageReloaded: Reloaded config.
+    messageFailed: Failed to reload config.
+
+  restart:
+    enabled: true
+    allowedRoles:
+      - moderator
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageStopping: Stopping the server for a restart...
+    messageStopFailed: Server stop failed.
+    messageStopped: Server stopped, restarting... (this may take a few minutes)
+    messageRestarting: Restarting... (this may take a few minutes)
+    messageRestarted: Server restarted!
+    messageRestartFailed: Failed to restart server
+
+  runCommand:
+    enabled: true
+    allowedRoles:
+      - moderator
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageSuccess: >-
+      Success: {response}
+    messageInvalid: >-
+      Invalid command: {response}
+    messageNoResponse: >-
+      Ran: {response}
+    messageFailed: Failed to run command.
+    messageRequestFailed: Failed to request command execution.
+
+  say:
+    enabled: true
+    allowedRoles:
+      - moderator
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+
+  start:
+    enabled: true
+    allowedRoles:
+      - moderator
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageAlreadyRunning: Server is already running.
+    messageStarting: Starting the server... (this may take a few minutes)
+    messageStarted: Started!
+    messageStartFailed: Failed to start server
+
+  stop:
+    enabled: true
+    allowedRoles:
+      - moderator
+    allowedChannels:
+      - default
+    messageDisabled: # optional; falls back to commands.messageDisabled
+    messageDenied: # optional; falls back to commands.messageDenied
+    messageAlreadyStopped: Server is already stopped.
+    messageStopping: Stopping the server...
+    messageStopFailed: Failed to stop server.
+    messageStopped: Server stopped.
+
+events:
+  online:
+    discord: always
+    game: never
+    message: Hi, I'm online now.
+    channels:
+      - default
+  joined:
+    discord: always
+    game: never
+    message: >-
+      {name} joined the game.
+    channels:
+      - default
+  left:
+    discord: always
+    game: never
+    message: >-
+      {name} left the game.
+    channels:
+      - default
+  advancement:
+    discord: always
+    game: never
+    message: >-
+      {message}.
+    channels:
+      - default
+  death:
+    discord: always
+    game: never
+    message: >-
+      {message}.
+    channels:
+      - default
+  started:
+    discord: never
+    game: never
+    message: Server started.
+    channels:
+      - default
+  startFailed:
+    discord: always
+    game: never
+    message: Failed to start server.
+    channels:
+      - default
+  stopping:
+    discord: never
+    game: never
+    message: Server is stopping...
+    channels:
+      - default
+  stopped:
+    discord: never
+    game: never
+    message: Server stopped.
+    channels:
+      - default
+  backupNotConfigured:
+    discord: always
+    game: always
+    message: Backup is not configured.
+    channels:
+      - default
+  backupPreparationFailed:
+    discord: always
+    game: always
+    message: Failed to prepare for backup. Aborting!
+    channels:
+      - default
+  backupPreparationUndoFailed:
+    discord: always
+    game: always
+    message: Failed to undo backup preparation. The server may not save correctly!
+    channels:
+      - default
+  backupStarted:
+    discord: always
+    game: always
+    message: Creating backup...
+    channels:
+      - default
+  backupCompleted:
+    discord: always
+    game: always
+    message: Backup created.
+    channels:
+      - default
+  backupFailed:
+    discord: always
+    game: always
+    message: Failed to create backup!
+    channels:
+      - default
+  backupCreatedLocal:
+    discord: always
+    game: always
+    message: Created backup successfully. Upload is disabled.
+    channels:
+      - default
+  backupUploading:
+    discord: always
+    game: always
+    message: Uploading backup to {service}...
+    channels:
+      - default
+  backupUploadFailed:
+    discord: always
+    game: always
+    message: Failed to upload backup to {service}. The local backup was created.
+    channels:
+      - default
+  backupWhileRunningAnnouncement:
+    discord: never
+    game: always
+    message: Creating backup in {duration}.
+    channels:
+      - default
+  backupRestartAnnouncement:
+    discord: never
+    game: always
+    message: Restarting server in {duration}.
+    channels:
+      - default
+  backupAnnouncing:
+    discord: always
+    game: never
+    message: Announcing backup to players (performing in {duration}).
+    channels:
+      - default
+  backupAutosaveDisabled:
+    discord: never
+    game: always
+    message: Disabled autosave for backup.
+    channels:
+      - default
+  backupAutosaveEnabled:
+    discord: never
+    game: always
+    message: Enabled autosave after backup.
+    channels:
+      - default
+  backupSaving:
+    discord: never
+    game: always
+    message: Saving before backup...
+    channels:
+      - default
+  backupSaved:
+    discord: never
+    game: always
+    message: Save complete.
+    channels:
+      - default
+  backupServerStarting:
+    discord: always
+    game: never
+    message: Starting server after backup...
+    channels:
+      - default
+  backupServerStarted:
+    discord: always
+    game: always
+    message: Started server after backup.
+    channels:
+      - default
+  backupServerStopping:
+    discord: always
+    game: never
+    message: Stopping server for backup...
+    channels:
+      - default
+  backupServerStopped:
+    discord: always
+    game: never
+    message: Stopped server for backup.
+    channels:
+      - default
+  inactive:
+    discord: always
+    game: never
+    message: The server has been inactive for {duration}. Consider stopping it.
+    channels:
+      - default
+  crashDetected:
+    discord: always
+    game: never
+    message: Unexpected server stop detected. Confirming server has stopped...
+    channels:
+      - default
+  crashConfirmed:
+    discord: always
+    game: never
+    message: Unexpected stop confirmed.
+    channels:
+      - default
+  crashTooMany:
+    discord: always
+    game: never
+    message: Too many crashes recently. Not attempting to restart.
+    channels:
+      - default
+  crashRestarting:
+    discord: always
+    game: never
+    message: Attempting to restart server...
+    channels:
+      - default
+  crashRestartFailed:
+    discord: always
+    game: never
+    message: Failed to restart server after crash.
+    channels:
+      - default
+  crashStarted:
+    discord: always
+    game: never
+    message: Restarted server after crash.
+    channels:
+      - default
+
+server:
+  host: # REQUIRED: server management host
+  port: # REQUIRED: server management port
+  secret: # REQUIRED: server management secret
+  ssl: false
+  worldPath: # REQUIRED: path to the Minecraft world folder
+  startCommand: # REQUIRED: command array, e.g. ["/bin/sh", "-c", "./gradlew runServer"]
+  commandDirectory: .
+  restartDelay: 5
+  saveTimeout: 10
+  stopTimeout: 30
+  startTimeout: 600
+  url: # OPTIONAL: public join address/URL for the join command
+
+backup:
+  path: # REQUIRED: local backup output directory
+  notifyAt:
+    - 300
+    - 60
+    - 30
+    - 15
+    - 10
+    - 5
+    - 4
+    - 3
+    - 2
+    - 1
+  notifyIf: restartAndNotEmpty
+  publicLocation: # OPTIONAL: public backup location shown by /backups
+  auto:
+    hour:
+      - 0
+    minute:
+      - 0
+    day:
+      # - MONDAY
+    dayOfMonth:
+      # - 1
+    dayOfYear:
+      # - 1
+    dayInterval: 0
+    restartMode: never
+    createIf: event
+  upload:
+    googleDrive:
+      folderId: # OPTIONAL: Google Drive folder ID
+      credentialsFile: # OPTIONAL: path to Google credentials file
+
+# Configure either interval OR schedule (not both) when enabling inactivity checks.
+inactivity:
+  interval: 0
+  schedule:
+    # - 7
+
+crash:
+  maxRetries: 5
+  recentTimeout: 3600
+
+
+
+

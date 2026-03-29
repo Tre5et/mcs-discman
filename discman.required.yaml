@@ -1,0 +1,15 @@
+discord:
+  token: # REQUIRED: Discord bot token
+  guild: # REQUIRED: Discord guild/server ID
+  channels:
+    default: # REQUIRED: default Discord channel ID
+  roles:
+    moderator: # REQUIRED: moderator Discord role ID
+
+server:
+  host: # REQUIRED: server management host
+  port: # REQUIRED: server management port
+  secret: # REQUIRED: server management secret
+  worldPath: # REQUIRED: path to the Minecraft world folder
+  startCommand: # REQUIRED: command array, e.g. ["java", "-jar", "server.jar"]
+

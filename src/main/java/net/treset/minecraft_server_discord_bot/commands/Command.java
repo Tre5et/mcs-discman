@@ -23,12 +23,12 @@ public abstract class Command<C extends CommandConfig> {
             return;
         }
         if (!config.enabled) {
-            event.getHook().sendMessage(config.disabledMessage.get()).queue();
+            event.getHook().sendMessage(config.messageDisabled.get()).queue();
             Logger.info("Handled. Disabled.");
             return;
         }
         if (!config.isAllowed(Objects.requireNonNull(event.getMember()))) {
-            event.getHook().sendMessage(config.deniedMessage.get()).queue();
+            event.getHook().sendMessage(config.messageDenied.get()).queue();
             Logger.info("Handled. Permission required.");
             return;
         }

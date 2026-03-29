@@ -20,8 +20,8 @@ public abstract class CommandConfig extends ValidatableConfig {
     public boolean enabled;
     public List<String> allowedRoles;
     public List<String> allowedChannels = List.of("default");
-    public Message.Default disabledMessage;
-    public Message.Default deniedMessage;
+    public Message.Default messageDisabled;
+    public Message.Default messageDenied;
     public transient Set<Role> allowedJdaRoles;
     public transient Set<MessageChannel> allowedJdaChannels;
     
@@ -78,10 +78,10 @@ public abstract class CommandConfig extends ValidatableConfig {
                 .map(c -> newConfig.discord.jdaChannels.get(c))
                 .collect(Collectors.toSet());
 
-        if(disabledMessage == null) disabledMessage = newConfig.commands.messageDisabled;
-        disabledMessage.validate();
-        if(deniedMessage == null) deniedMessage = newConfig.commands.messageDenied;
-        deniedMessage.validate();
+        if(messageDisabled == null) messageDisabled = newConfig.commands.messageDisabled;
+        messageDisabled.validate();
+        if(messageDenied == null) messageDenied = newConfig.commands.messageDenied;
+        messageDenied.validate();
     }
     
     public Command<?> validateAndGet(Config newConfig) throws ConfigException {
@@ -196,6 +196,9 @@ public abstract class CommandConfig extends ValidatableConfig {
         public void validate(Config newConfig) throws ConfigException {
             super.validate(newConfig);
             messageInvalidMode.validate();
+            if(newConfig.backup == null) {
+                this.enabled = false;
+            }
         }
     }
 
