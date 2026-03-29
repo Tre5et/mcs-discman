@@ -1,7 +1,8 @@
 package net.treset.minecraft_server_discord_bot.config;
 
 import net.treset.minecraft_server_discord_bot.config.backup.BackupConfig;
-import net.treset.minecraft_server_discord_bot.config.function.FunctionsConfig;
+import net.treset.minecraft_server_discord_bot.config.function.CommandsConfig;
+import net.treset.minecraft_server_discord_bot.config.event.EventsConfig;
 import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 import net.treset.minecraft_server_discord_bot.logging.OutputConsumer;
@@ -19,8 +20,8 @@ import java.io.File;
 
 public class Config {
     public DiscordConfig discord = new DiscordConfig();
-    public FunctionsConfig functions = new FunctionsConfig();
-    public NotificationsConfig notifications = new NotificationsConfig();
+    public CommandsConfig commands = new CommandsConfig();
+    public EventsConfig events = new EventsConfig();
     public ServerConfig server = new ServerConfig();
     public BackupConfig backup;
     public InactivityConfig inactivity;
@@ -53,8 +54,8 @@ public class Config {
         }
 
         newConfig.discord.validate(newConfig);
-        newConfig.functions.validate(newConfig);
-        newConfig.notifications.validate(newConfig);
+        newConfig.commands.validate(newConfig);
+        newConfig.events.validate(newConfig);
         newConfig.server.validate(newConfig);
 
         if(newConfig.backup != null) {

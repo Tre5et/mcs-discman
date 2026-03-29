@@ -4,20 +4,20 @@ import dev.treset.mcdl.servermanagement.exception.RpcCommunicationException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcVersion;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
 import java.util.function.Supplier;
 
-public class DetailsCommand extends Command<FunctionConfig.Details> {
-    public DetailsCommand(Supplier<FunctionConfig.Details> configSupplier) {
+public class DetailsCommand extends Command<CommandConfig.Details> {
+    public DetailsCommand(Supplier<CommandConfig.Details> configSupplier) {
         super(configSupplier);
     }
 
     @Override
-    protected void process(SlashCommandEvent event, FunctionConfig.Details function) {
+    protected void process(SlashCommandEvent event, CommandConfig.Details function) {
         String output;
 
         String version = getVersion();

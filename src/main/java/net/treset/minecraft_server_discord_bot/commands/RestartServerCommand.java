@@ -2,20 +2,20 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
 
 import java.util.function.Supplier;
 
-public class RestartServerCommand extends Command<FunctionConfig.Restart> {
-    public RestartServerCommand(Supplier<FunctionConfig.Restart> configSupplier) {
+public class RestartServerCommand extends Command<CommandConfig.Restart> {
+    public RestartServerCommand(Supplier<CommandConfig.Restart> configSupplier) {
         super(configSupplier);
     }
 
     @Override
-    protected void process(SlashCommandEvent event, FunctionConfig.Restart function) {
+    protected void process(SlashCommandEvent event, CommandConfig.Restart function) {
         if(ServerActions.isRunning()) {
             event.getHook().sendMessage(function.messageStopping.get()).queue();
             Logger.info("Stopping server.");

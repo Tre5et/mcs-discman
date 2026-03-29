@@ -1,20 +1,20 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
 
 import java.util.function.Supplier;
 
-public class StopServerCommand extends Command<FunctionConfig.Stop> {
-    public StopServerCommand(Supplier<FunctionConfig.Stop> configSupplier) {
+public class StopServerCommand extends Command<CommandConfig.Stop> {
+    public StopServerCommand(Supplier<CommandConfig.Stop> configSupplier) {
         super(configSupplier);
     }
 
     @Override
-    protected void process(SlashCommandEvent event, FunctionConfig.Stop function) {
+    protected void process(SlashCommandEvent event, CommandConfig.Stop function) {
         if(!ServerActions.isRunning()) {
             event.getHook().sendMessage(function.messageAlreadyStopped.get()).queue();
             Logger.info("Handled. Already stopped.");

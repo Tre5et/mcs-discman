@@ -1,20 +1,20 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
 import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class ConnectionCommand extends Command<FunctionConfig.Connection> {
-    public ConnectionCommand(Supplier<FunctionConfig.Connection> configSupplier) {
+public class ConnectionCommand extends Command<CommandConfig.Connection> {
+    public ConnectionCommand(Supplier<CommandConfig.Connection> configSupplier) {
         super(configSupplier);
     }
 
     @Override
-    protected void process(SlashCommandEvent event, FunctionConfig.Connection function) {
+    protected void process(SlashCommandEvent event, CommandConfig.Connection function) {
         String output;
         String type = Objects.requireNonNull(event.getOption("action")).getAsString();
         switch (type) {
@@ -27,14 +27,14 @@ public class ConnectionCommand extends Command<FunctionConfig.Connection> {
         event.getHook().sendMessage(output).queue();
     }
 
-    private static String getStatus(FunctionConfig.Connection function) {
+    private static String getStatus(CommandConfig.Connection function) {
         if(ManagementClient.get().isConnected()) {
             return function.messageStatusOpen.get();
         }
         return function.messageStatusClosed.get();
     }
 
-    private static String openConnection(FunctionConfig.Connection function) {
+    private static String openConnection(CommandConfig.Connection function) {
         if(ManagementClient.get().isConnected()) {
             return function.messageOpenAlreadyOpen.get();
         }
@@ -46,7 +46,7 @@ public class ConnectionCommand extends Command<FunctionConfig.Connection> {
         return function.messageOpenSuccess.get();
     }
 
-    private static String closeConnection(SlashCommandEvent event, FunctionConfig.Connection function) {
+    private static String closeConnection(SlashCommandEvent event, CommandConfig.Connection function) {
         if(!ManagementClient.get().isConnected()) {
             return function.messageCloseNoConnection.get();
         }

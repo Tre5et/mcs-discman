@@ -3,7 +3,7 @@ package net.treset.minecraft_server_discord_bot.commands;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
@@ -13,13 +13,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class OnlineCommand extends Command<FunctionConfig.Online> {
-    public OnlineCommand(Supplier<FunctionConfig.Online> configSupplier) {
+public class OnlineCommand extends Command<CommandConfig.Online> {
+    public OnlineCommand(Supplier<CommandConfig.Online> configSupplier) {
         super(configSupplier);
     }
 
     @Override
-    protected void process(SlashCommandEvent event, FunctionConfig.Online function) {
+    protected void process(SlashCommandEvent event, CommandConfig.Online function) {
         String output;
 
         List<String> players = getPlayers();

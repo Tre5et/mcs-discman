@@ -1,6 +1,7 @@
-package net.treset.minecraft_server_discord_bot.config.notification;
+package net.treset.minecraft_server_discord_bot.config.event;
 
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
 import net.treset.minecraft_server_discord_bot.config.message.Message;
@@ -13,13 +14,18 @@ import net.treset.minecraft_server_discord_bot.upload.UploadService;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public abstract class NotificationConfig<C> extends ValidatableConfig {
-    public NotificationCondition discord;
-    public NotificationCondition game;
+public abstract class EventConfig<C> extends ValidatableConfig {
+    public EventCondition discord;
+    public EventCondition game;
     public Message<C> message;
+    public List<String> channels = List.of("default");
 
-    public NotificationConfig(NotificationCondition discord, NotificationCondition game, String message) {
+    public transient Set<MessageChannel> jdaChannels;
+
+    public EventConfig(EventCondition discord, EventCondition game, String message) {
         this.discord = discord;
         this.game = game;
         this.message = new Message<>(message);
@@ -29,6 +35,12 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
         return message.get(source);
     }
 
+    public String sendToDiscord(C source) {
+        String result = message(source);
+        jdaChannels.forEach(c -> c.sendMessage(result).queue());
+        return result;
+    }
+
     @Override
     public List<String> prefix() {
         return List.of("notification");
@@ -36,11 +48,28 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
 
     public void validate(Config config, MessageTemplate<C> template) throws ConfigException {
         message.validate(template);
+
+        for(String c : channels) {
+            if(!config.discord.jdaChannels.containsKey(c)) {
+                throw new ConfigException("Channel '" + c + "' is referenced in an event but is not defined in 'discord.channels'.");
+            }
+        }
+        jdaChannels = channels.stream()
+                .map(c -> config.discord.jdaChannels.get(c))
+                .collect(Collectors.toSet());
     }
 
-    public static class DateTime extends NotificationConfig<Object> {
-        public DateTime(NotificationCondition discord, NotificationCondition game, String message) {
+    public static class DateTime extends EventConfig<Object> {
+        public DateTime(EventCondition discord, EventCondition game, String message) {
             super(discord, game, message);
+        }
+
+        public String message() {
+            return message(null);
+        }
+
+        public String sendToDiscord() {
+            return sendToDiscord(null);
         }
 
         @Override
@@ -49,33 +78,39 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
         }
     }
 
-    public static class Always extends NotificationConfig.DateTime {
+    public static class Always extends EventConfig.DateTime {
         public Always(String message) {
-            super(NotificationCondition.always, NotificationCondition.always, message);
+            super(EventCondition.always, EventCondition.always, message);
         }
     }
 
-    public static class Never extends NotificationConfig.DateTime{
+    public static class Never extends EventConfig.DateTime{
         public Never(String message) {
-            super(NotificationCondition.never, NotificationCondition.never, message);
+            super(EventCondition.never, EventCondition.never, message);
         }
     }
 
-    public static class AlwaysAndNever extends NotificationConfig.DateTime {
+    public static class AlwaysAndNever extends EventConfig.DateTime {
         public AlwaysAndNever(String message) {
-            super(NotificationCondition.always, NotificationCondition.never, message);
+            super(EventCondition.always, EventCondition.never, message);
         }
     }
 
-    public static class NeverAndAlways extends NotificationConfig.DateTime {
+    public static class NeverAndAlways extends EventConfig.DateTime {
         public NeverAndAlways(String message) {
-            super(NotificationCondition.always, NotificationCondition.never, message);
+            super(EventCondition.always, EventCondition.never, message);
         }
     }
 
-    public static class Joined extends NotificationConfig<RpcPlayer> {
+    public static class Online extends AlwaysAndNever {
+        public Online() {
+            super("Hi, I'm online now.");
+        }
+    }
+
+    public static class Joined extends EventConfig<RpcPlayer> {
         public Joined() {
-            super(NotificationCondition.always, NotificationCondition.never, "{name} joined the game.");
+            super(EventCondition.always, EventCondition.never, "{name} joined the game.");
         }
 
         @Override
@@ -84,9 +119,9 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
         }
     }
 
-    public static class Left extends NotificationConfig<RpcPlayer> {
+    public static class Left extends EventConfig<RpcPlayer> {
         public Left() {
-            super(NotificationCondition.always, NotificationCondition.never, "{name} left the game.");
+            super(EventCondition.always, EventCondition.never, "{name} left the game.");
         }
 
         @Override
@@ -95,9 +130,9 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
         }
     }
 
-    public static class Advancement extends NotificationConfig<RpcAdvancement> {
+    public static class Advancement extends EventConfig<RpcAdvancement> {
         public Advancement() {
-            super(NotificationCondition.always, NotificationCondition.never, "{message}.");
+            super(EventCondition.always, EventCondition.never, "{message}.");
         }
 
         @Override
@@ -106,9 +141,9 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
         }
     }
 
-    public static class Death extends NotificationConfig<RpcDeath> {
+    public static class Death extends EventConfig<RpcDeath> {
         public Death() {
-            super(NotificationCondition.always, NotificationCondition.never, "{message}.");
+            super(EventCondition.always, EventCondition.never, "{message}.");
         }
 
         @Override
@@ -153,10 +188,10 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
         }
     }
 
-    public static class BackupUploading extends NotificationConfig<UploadService> {
+    public static class BackupUploading extends EventConfig<UploadService> {
 
         public BackupUploading() {
-            super(NotificationCondition.always, NotificationCondition.always, "Uploading backup to {service}...");
+            super(EventCondition.always, EventCondition.always, "Uploading backup to {service}...");
         }
         @Override
         public void validate(Config config) throws ConfigException {
@@ -165,9 +200,9 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
 
     }
 
-    public static class BackupUploadFailed extends NotificationConfig<UploadService> {
+    public static class BackupUploadFailed extends EventConfig<UploadService> {
         public BackupUploadFailed() {
-            super(NotificationCondition.always, NotificationCondition.always, "Failed to upload backup to {service}. The local backup was created.");
+            super(EventCondition.always, EventCondition.always, "Failed to upload backup to {service}. The local backup was created.");
         }
 
         @Override
@@ -176,9 +211,9 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
         }
     }
 
-    public static class BackupWhileRunningAnnouncement extends NotificationConfig<Duration> {
+    public static class BackupWhileRunningAnnouncement extends EventConfig<Duration> {
         public BackupWhileRunningAnnouncement() {
-            super(NotificationCondition.never, NotificationCondition.always, "Creating backup in {duration}.");
+            super(EventCondition.never, EventCondition.always, "Creating backup in {duration}.");
         }
 
         @Override
@@ -187,9 +222,9 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
         }
     }
 
-    public static class BackupRestartAnnouncement extends NotificationConfig<Duration> {
+    public static class BackupRestartAnnouncement extends EventConfig<Duration> {
         public BackupRestartAnnouncement() {
-            super(NotificationCondition.never, NotificationCondition.always, "Restarting server in in {duration}.");
+            super(EventCondition.never, EventCondition.always, "Restarting server in in {duration}.");
         }
 
         @Override
@@ -198,9 +233,9 @@ public abstract class NotificationConfig<C> extends ValidatableConfig {
         }
     }
 
-    public static class BackupAnnouncing extends NotificationConfig<Duration> {
+    public static class BackupAnnouncing extends EventConfig<Duration> {
         public BackupAnnouncing() {
-            super(NotificationCondition.never, NotificationCondition.always, "Announcing backup to players (performing in {duration}).");
+            super(EventCondition.never, EventCondition.always, "Announcing backup to players (performing in {duration}).");
         }
 
         @Override

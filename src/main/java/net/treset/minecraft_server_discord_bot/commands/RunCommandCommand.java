@@ -1,7 +1,7 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.DiscmanRpcMethods;
@@ -12,13 +12,13 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class RunCommandCommand extends Command<FunctionConfig.RunCommand> {
-    public RunCommandCommand(Supplier<FunctionConfig.RunCommand> configSupplier) {
+public class RunCommandCommand extends Command<CommandConfig.RunCommand> {
+    public RunCommandCommand(Supplier<CommandConfig.RunCommand> configSupplier) {
         super(configSupplier);
     }
 
     @Override
-    protected void process(SlashCommandEvent event, FunctionConfig.RunCommand function) {
+    protected void process(SlashCommandEvent event, CommandConfig.RunCommand function) {
         String cmd = Objects.requireNonNull(event.getOption("command")).getAsString();
 
         try {

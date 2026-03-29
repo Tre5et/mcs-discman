@@ -1,24 +1,23 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 
 public interface Commands {
-    Command<FunctionConfig.Active> ACTIVE = new ActiveCommand(() -> Config.get().functions.active);
-    Command<FunctionConfig.AutoBackup> AUTOBACKUP = new AutoBackupCommand(() -> Config.get().functions.autoBackup);
-    Command<FunctionConfig.Backups> BACKUPS = new BackupsCommand(() -> Config.get().functions.backups);
-    Command<FunctionConfig.Connection> CONNECTION = new ConnectionCommand(() -> Config.get().functions.connection);
-    Command<FunctionConfig.CreateBackup> CREATE_BACKUP = new CreateBackupCommand(() -> Config.get().functions.createBackup);
-    Command<FunctionConfig.Details> DETAILS = new DetailsCommand(() -> Config.get().functions.details);
-    Command<FunctionConfig.Join> JOIN = new JoinCommand(() -> Config.get().functions.join);
-    Command<FunctionConfig.Members> MEMBERS = new MembersCommand(() -> Config.get().functions.members);
-    Command<FunctionConfig.Online> ONLINE = new OnlineCommand(() -> Config.get().functions.online);
-    Command<FunctionConfig.Ping> PING = new PingCommand(() -> Config.get().functions.ping);
-    Command<FunctionConfig.Reload> RELOAD = new ReloadConfigCommand(() -> Config.get().functions.reload);
-    Command<FunctionConfig.Restart> RESTART = new RestartServerCommand(() -> Config.get().functions.restart);
-    Command<FunctionConfig.RunCommand> RUN_COMMAND = new RunCommandCommand(() -> Config.get().functions.runCommand);
-    Command<FunctionConfig.Say> SAY = new SayCommand(() -> Config.get().functions.say);
-    Command<FunctionConfig.Start> START = new StartServerCommand(() -> Config.get().functions.start);
-    Command<FunctionConfig.Stop> STOP = new StopServerCommand(() -> Config.get().functions.stop);
+    Command<CommandConfig.Active> ACTIVE = new ActiveCommand(() -> Config.get().commands.active);
+    Command<CommandConfig.Backups> BACKUPS = new BackupsCommand(() -> Config.get().commands.backups);
+    Command<CommandConfig.Connection> CONNECTION = new ConnectionCommand(() -> Config.get().commands.connection);
+    Command<CommandConfig.CreateBackup> CREATE_BACKUP = new CreateBackupCommand(() -> Config.get().commands.createBackup);
+    Command<CommandConfig.Details> DETAILS = new DetailsCommand(() -> Config.get().commands.details);
+    Command<CommandConfig.Join> JOIN = new JoinCommand(() -> Config.get().commands.join);
+    Command<CommandConfig.Members> MEMBERS = new MembersCommand(() -> Config.get().commands.members);
+    Command<CommandConfig.Online> ONLINE = new OnlineCommand(() -> Config.get().commands.online);
+    Command<CommandConfig.Ping> PING = new PingCommand(() -> Config.get().commands.ping);
+    Command<CommandConfig.Reload> RELOAD = new ReloadConfigCommand(() -> Config.get().commands.reload);
+    Command<CommandConfig.Restart> RESTART = new RestartServerCommand(() -> Config.get().commands.restart);
+    Command<CommandConfig.RunCommand> RUN_COMMAND = new RunCommandCommand(() -> Config.get().commands.runCommand);
+    Command<CommandConfig.Say> SAY = new SayCommand(() -> Config.get().commands.say);
+    Command<CommandConfig.Start> START = new StartServerCommand(() -> Config.get().commands.start);
+    Command<CommandConfig.Stop> STOP = new StopServerCommand(() -> Config.get().commands.stop);
 }
 

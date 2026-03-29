@@ -4,7 +4,7 @@ import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.config.function.FunctionConfig;
+import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
@@ -14,13 +14,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class MembersCommand extends Command<FunctionConfig.Members> {
-    public MembersCommand(Supplier<FunctionConfig.Members> configSupplier) {
+public class MembersCommand extends Command<CommandConfig.Members> {
+    public MembersCommand(Supplier<CommandConfig.Members> configSupplier) {
         super(configSupplier);
     }
 
     @Override
-    protected void process(SlashCommandEvent event, FunctionConfig.Members function) {
+    protected void process(SlashCommandEvent event, CommandConfig.Members function) {
         String output;
 
         List<String> members = getMembers();

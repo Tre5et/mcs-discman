@@ -2,10 +2,8 @@ package net.treset.minecraft_server_discord_bot;
 
 import net.dv8tion.jda.api.JDA;
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
-import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
 import java.io.IOException;
@@ -22,14 +20,7 @@ public class  Main {
             System.exit(1);
         }
 
-        try {
-            DiscordBot.initialize();
-        } catch (IOException e) {
-            Logger.error(e, "Failed to initialize discord client.");
-            System.exit(2);
-        }
-
-        DiscordBot.sendText("Hi, I'm online now.", MessageOrigin.SCHEDULE);
+        Config.get().events.online.sendToDiscord();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
