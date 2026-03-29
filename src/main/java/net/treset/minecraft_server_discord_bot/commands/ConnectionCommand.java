@@ -2,6 +2,7 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.server.CrashHandler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
 import java.io.IOException;
@@ -56,6 +57,7 @@ public class ConnectionCommand extends Command<CommandConfig.Connection> {
             force = Objects.requireNonNull(event.getOption("force")).getAsBoolean();
         }
 
+        CrashHandler.expectStop();
         if(force) {
             ManagementClient.get().forceDisconnect();
             return function.messageCloseForced.get();
@@ -65,6 +67,7 @@ public class ConnectionCommand extends Command<CommandConfig.Connection> {
             ManagementClient.get().disconnect();
             return function.messageCloseSuccess.get();
         } catch (IOException e) {
+            CrashHandler.unexpectStop();
             return function.messageCloseFailed.get();
         }
     }

@@ -18,10 +18,4 @@ public class DiscordBot {
 
         Logger.info("Client initialized.");
     }
-
-    public static void sendText(String text, MessageOrigin org) {
-        //TODO: remove sendMessageToDiscord(text);
-
-        Logger.info("Sent message \"%s\" %s.", text, org.getMessage());
-    }
 }

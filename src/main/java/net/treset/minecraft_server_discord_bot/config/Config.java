@@ -3,9 +3,7 @@ package net.treset.minecraft_server_discord_bot.config;
 import net.treset.minecraft_server_discord_bot.config.backup.BackupConfig;
 import net.treset.minecraft_server_discord_bot.config.function.CommandsConfig;
 import net.treset.minecraft_server_discord_bot.config.event.EventsConfig;
-import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
-import net.treset.minecraft_server_discord_bot.logging.OutputConsumer;
 import net.treset.minecraft_server_discord_bot.notifications.NotificationHandlers;
 import net.treset.minecraft_server_discord_bot.schedulers.AutoBackupScheduler;
 import net.treset.minecraft_server_discord_bot.schedulers.EventScheduler;
@@ -72,7 +70,7 @@ public class Config {
 
         ManagementClient.init();
         NotificationHandlers.register();
-        AutoBackupScheduler.scheduleNext(OutputConsumer.all(MessageOrigin.SCHEDULE));
+        AutoBackupScheduler.scheduleNext();
         InactivityScheduler.scheduleNext(EventScheduler.getLastEventTimestamp());
     }
 }

@@ -5,9 +5,8 @@ import dev.treset.mcdl.servermanagement.exception.RpcConnectionException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.RpcNotifications;
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
-import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
+import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.system.ConsoleHandler;
 
 import java.io.IOException;
@@ -39,13 +38,16 @@ public class ServerActions {
         try {
             ConsoleHandler.startProcess(Config.get().server.startCommand, Config.get().server.commandDirectory);
         } catch (IOException e) {
-            DiscordBot.sendText("Failed to execute server start", MessageOrigin.RPC);
+            Logger.warn(e, "Failed to execute server start command.");
+            Config.get().events.startFailed.send();
+            return;
         }
         new Thread(() -> {
             try {
                 awaitServerStarted();
             } catch (ServerOperationException e) {
-                DiscordBot.sendText("Failed to start server.", MessageOrigin.RPC);
+                Logger.warn(e, "Failed to confirm server start.");
+                Config.get().events.startFailed.send();
             }
         }).start();
     }
@@ -58,7 +60,7 @@ public class ServerActions {
         try {
             ConsoleHandler.startProcess(Config.get().server.startCommand, Config.get().server.commandDirectory);
         } catch (IOException e) {
-            DiscordBot.sendText("Failed to execute server start", MessageOrigin.RPC);
+            throw new ServerOperationException("Failed to execute server start", e);
         }
 
         awaitServerStarted();

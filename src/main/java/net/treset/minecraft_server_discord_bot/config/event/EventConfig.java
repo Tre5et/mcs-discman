@@ -1,6 +1,9 @@
 package net.treset.minecraft_server_discord_bot.config.event;
 
+import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
+import dev.treset.mcdl.servermanagement.vanilla.types.RpcMessage;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
+import dev.treset.mcdl.servermanagement.vanilla.types.RpcSystemMessage;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
@@ -8,6 +11,8 @@ import net.treset.minecraft_server_discord_bot.config.message.Message;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplate;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
+import net.treset.minecraft_server_discord_bot.logging.Logger;
+import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.server.data.RpcAdvancement;
 import net.treset.minecraft_server_discord_bot.server.data.RpcDeath;
 import net.treset.minecraft_server_discord_bot.upload.UploadService;
@@ -35,10 +40,31 @@ public abstract class EventConfig<C> extends ValidatableConfig {
         return message.get(source);
     }
 
-    public String sendToDiscord(C source) {
+    public void send(C source, EventDiscordOutput output, boolean success) {
         String result = message(source);
-        jdaChannels.forEach(c -> c.sendMessage(result).queue());
-        return result;
+        if(discord.shouldSend(success)) {
+            output.output(result, jdaChannels);
+        }
+        if(game.shouldSend(success) && ManagementClient.get() != null && ManagementClient.get().isConnected()) {
+            ManagementClient.get().send(
+                    RpcMethods.Server.SYSTEM_MESSAGE,
+                    new RpcSystemMessage(null, false, new RpcMessage(null, null, "[Discman] " + result)),
+                    r -> {},
+                    e -> Logger.warn(e, "Failed to send message '%s' to server", result)
+            );
+        }
+    }
+
+    public void send(C source, EventDiscordOutput output) {
+        send(source, output, true);
+    }
+
+    public void send(C source, boolean success) {
+        send(source, new EventDiscordOutput.Message());
+    }
+
+    public void send(C source) {
+        send(source, true);
     }
 
     @Override
@@ -68,8 +94,20 @@ public abstract class EventConfig<C> extends ValidatableConfig {
             return message(null);
         }
 
-        public String sendToDiscord() {
-            return sendToDiscord(null);
+        public void send(EventDiscordOutput output, boolean success) {
+            send(null, output, success);
+        }
+
+        public void send(EventDiscordOutput output) {
+            send(output, true);
+        }
+
+        public void send(boolean success) {
+            send(new EventDiscordOutput.Message(), success);
+        }
+
+        public void send() {
+            send(true);
         }
 
         @Override
@@ -98,7 +136,7 @@ public abstract class EventConfig<C> extends ValidatableConfig {
 
     public static class NeverAndAlways extends EventConfig.DateTime {
         public NeverAndAlways(String message) {
-            super(EventCondition.always, EventCondition.never, message);
+            super(EventCondition.never, EventCondition.always, message);
         }
     }
 
@@ -158,6 +196,12 @@ public abstract class EventConfig<C> extends ValidatableConfig {
         }
     }
 
+    public static class StartFailed extends AlwaysAndNever {
+        public StartFailed() {
+            super("Failed to start server.");
+        }
+    }
+
     public static class Stopping extends Never {
         public Stopping() {
             super("Server is stopping...");
@@ -167,6 +211,36 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public static class Stopped extends Never {
         public Stopped() {
             super("Server stopped.");
+        }
+    }
+
+    public static class BackupNotConfigured extends Always {
+        public BackupNotConfigured() {
+            super("Backup is not configured.");
+        }
+    }
+
+    public static class BackupPreparationFailed extends Always {
+        public BackupPreparationFailed() {
+            super("Failed to prepare for backup. Aborting!");
+        }
+    }
+
+    public static class BackupPreparationUndoFailed extends Always {
+        public BackupPreparationUndoFailed() {
+            super("Failed to undo backup preparation. The server may not save correctly!");
+        }
+    }
+
+    public static class BackupServerStarting extends AlwaysAndNever {
+        public BackupServerStarting() {
+            super("Starting server after backup...");
+        }
+    }
+
+    public static class BackupServerStarted extends Always {
+        public BackupServerStarted() {
+            super("Started server after backup.");
         }
     }
 
@@ -185,6 +259,12 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public static class BackupFailed extends Always {
         public BackupFailed() {
             super("Failed to create backup!");
+        }
+    }
+
+    public static class BackupUploadDisabled extends Always {
+        public BackupUploadDisabled() {
+            super("Created backup successfully. Upload is disabled.");
         }
     }
 
@@ -224,7 +304,7 @@ public abstract class EventConfig<C> extends ValidatableConfig {
 
     public static class BackupRestartAnnouncement extends EventConfig<Duration> {
         public BackupRestartAnnouncement() {
-            super(EventCondition.never, EventCondition.always, "Restarting server in in {duration}.");
+            super(EventCondition.never, EventCondition.always, "Restarting server in {duration}.");
         }
 
         @Override
@@ -235,7 +315,7 @@ public abstract class EventConfig<C> extends ValidatableConfig {
 
     public static class BackupAnnouncing extends EventConfig<Duration> {
         public BackupAnnouncing() {
-            super(EventCondition.never, EventCondition.always, "Announcing backup to players (performing in {duration}).");
+            super(EventCondition.always, EventCondition.never, "Announcing backup to players (performing in {duration}).");
         }
 
         @Override
@@ -265,6 +345,64 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public static class BackupSaved extends NeverAndAlways {
         public BackupSaved() {
             super("Save complete.");
+        }
+    }
+
+    public static class BackupServerStopping extends AlwaysAndNever {
+        public BackupServerStopping() {
+            super("Stopping server for backup...");
+        }
+    }
+    public static class BackupServerStopped extends AlwaysAndNever {
+        public BackupServerStopped() {
+            super("Stopped server for backup.");
+        }
+    }
+
+    public static class Inactive extends EventConfig<Duration> {
+        public Inactive() {
+            super(EventCondition.always, EventCondition.never, "The server has been inactive for {duration}. Consider stopping it.");
+        }
+
+        @Override
+        public void validate(Config config) throws ConfigException {
+            message.validate(MessageTemplates.DURATION);
+        }
+    }
+
+    public static class CrashDetected extends AlwaysAndNever {
+        public CrashDetected() {
+            super("Unexpected server stop detected. Confirming server has stopped...");
+        }
+    }
+
+    public static class CrashConfirmed extends AlwaysAndNever {
+        public CrashConfirmed() {
+            super("Unexpected stop confirmed.");
+        }
+    }
+
+    public static class CrashTooMany extends AlwaysAndNever {
+        public CrashTooMany() {
+            super("Too many crashes recently. Not attempting to restart.");
+        }
+    }
+
+    public static class CrashRestarting extends AlwaysAndNever {
+        public CrashRestarting() {
+            super("Attempting to restart server...");
+        }
+    }
+
+    public static class CrashRestartFailed extends AlwaysAndNever {
+        public CrashRestartFailed() {
+            super("Failed to restart server after crash.");
+        }
+    }
+
+    public static class CrashStarted extends AlwaysAndNever {
+        public CrashStarted() {
+            super("Restarted server after crash.");
         }
     }
 }

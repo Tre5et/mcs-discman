@@ -1,8 +1,6 @@
 package net.treset.minecraft_server_discord_bot.schedulers;
 
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
-import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -26,7 +24,7 @@ public class InactivityScheduler {
         long until = Duration.between(LocalDateTime.now(), nextTimeEventTimestamp).getSeconds();
 
         task = scheduler.schedule(() -> {
-            DiscordBot.sendText("The server has been inactive for " + Duration.between(lastActivityTime, LocalDateTime.now()).toDays() + " day. Consider stopping it.", MessageOrigin.SCHEDULE);
+            Config.get().events.inactive.send(Duration.between(lastActivityTime, LocalDateTime.now()));
             scheduleNext(lastActivityTime);
         }, until, TimeUnit.SECONDS);
     }

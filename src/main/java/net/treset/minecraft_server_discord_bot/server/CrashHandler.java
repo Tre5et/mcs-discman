@@ -4,8 +4,6 @@ import dev.treset.mcdl.servermanagement.exception.RpcCommunicationException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.RpcNotifications;
 import net.treset.minecraft_server_discord_bot.config.Config;
-import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
-import net.treset.minecraft_server_discord_bot.discord.MessageOrigin;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
@@ -42,7 +40,7 @@ public class CrashHandler {
             return;
         }
         LocalDateTime crashTime = LocalDateTime.now();
-        DiscordBot.sendText("Unexpected stop detected, confirming server has stopped...", MessageOrigin.SCHEDULE);
+        Config.get().events.crashDetected.send();
         while(ServerActions.isRunning()) {
             try {
                 ManagementClient.get().awaitNotification(
@@ -58,14 +56,14 @@ public class CrashHandler {
                 Logger.warn(e, "Failed to wait for crash stop");
             }
         }
-        DiscordBot.sendText("Unexpected stop confirmed.", MessageOrigin.SCHEDULE);
+        Config.get().events.crashConfirmed.send();
         lastCrashes = lastCrashes.stream().filter(t -> Duration.between(t, crashTime).toSeconds() <= Config.get().crash.recentTimeout).collect(Collectors.toCollection(ArrayList::new));
         lastCrashes.add(crashTime);
         if(lastCrashes.size() > Config.get().crash.maxRetries) {
-            DiscordBot.sendText("Too many crashes recently, not attempting to restart.", MessageOrigin.SCHEDULE);
+            Config.get().events.crashTooMany.send();
             return;
         }
-        DiscordBot.sendText("Attempting to restart server...", MessageOrigin.SCHEDULE);
+        Config.get().events.crashRestarting.send();
         try {
             Thread.sleep(Config.get().server.restartDelay * 1000L);
         } catch (InterruptedException e) {
@@ -75,11 +73,11 @@ public class CrashHandler {
             ServerActions.startServer();
         } catch (ServerOperationException e) {
             Logger.error(e, "Failed to start server after crash");
-            DiscordBot.sendText("Failed to restart server after crash.", MessageOrigin.SCHEDULE);
+            Config.get().events.crashRestartFailed.send();
             handlingStop.set(false);
             return;
         }
-        DiscordBot.sendText("Started server after crash.", MessageOrigin.SCHEDULE);
+        Config.get().events.crashStarted.send();
         handlingStop.set(false);
     }
 }

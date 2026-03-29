@@ -20,7 +20,7 @@ public class  Main {
             System.exit(1);
         }
 
-        Config.get().events.online.sendToDiscord();
+        Config.get().events.online.send();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {

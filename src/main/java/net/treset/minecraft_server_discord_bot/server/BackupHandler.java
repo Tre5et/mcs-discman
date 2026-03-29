@@ -4,11 +4,11 @@ import dev.treset.mcdl.servermanagement.exception.RpcCommunicationException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.RpcNotifications;
 import net.treset.minecraft_server_discord_bot.config.Config;
+import net.treset.minecraft_server_discord_bot.config.event.EventConfig;
+import net.treset.minecraft_server_discord_bot.config.event.EventDiscordOutput;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
 import net.treset.minecraft_server_discord_bot.exception.UploadException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
-import net.treset.minecraft_server_discord_bot.logging.OutputConsumer;
-import net.treset.minecraft_server_discord_bot.logging.OutputType;
 import net.treset.minecraft_server_discord_bot.system.FileHandler;
 import net.treset.minecraft_server_discord_bot.upload.UploadService;
 
@@ -23,69 +23,69 @@ import java.util.List;
 import java.util.function.Function;
 
 public class BackupHandler {
-    public static void execute(Mode backupMode, Function<TemporalAccessor, String> nameProvider, OutputConsumer outputConsumer, boolean skipNotifications) {
+    public static void execute(Mode backupMode, Function<TemporalAccessor, String> nameProvider, EventDiscordOutput output, boolean skipNotifications) {
         if(Config.get().backup == null) {
-            outputConsumer.accept(OutputType.IMPORTANT, "Backup is not configured");
+            Config.get().events.backupNotConfigured.send(output);
             return;
         }
 
-        Mode mode = skipNotifications ? backupMode : sendNotifications(backupMode, outputConsumer);
+        Mode mode = skipNotifications ? backupMode : sendNotifications(backupMode, output);
 
         try {
-            prepare(mode, outputConsumer);
+            prepare(mode, output);
         } catch (ServerOperationException e) {
-            outputConsumer.accept(OutputType.IMPORTANT, "Failed to prepare server for backup, aborting!");
             Logger.error(e, "Failed to prepare server for backup");
+            Config.get().events.backupPreparationFailed.send(output);
             try {
-                undoPrepare(mode, outputConsumer);
+                undoPrepare(mode, output);
             } catch (ServerOperationException e1) {
-                outputConsumer.accept(OutputType.IMPORTANT, e1.getMessage());
                 Logger.error(e1, "Failed to undo backup preparation after preparation fail");
+                Config.get().events.backupPreparationUndoFailed.send(output);
             }
             return;
         }
-        outputConsumer.accept(OutputType.ALL, "Creating backup...");
+        Config.get().events.backupStarted.send(output);
 
         String fileName = nameProvider.apply(LocalDateTime.now()) + ".zip";
 
         try {
             FileHandler.zipFile(Config.get().server.worldPath, Config.get().backup.path + fileName);
         } catch (IOException e) {
-            outputConsumer.accept(OutputType.IMPORTANT, "Failed to create local backup. The backup was not created.");
             Logger.error(e, "Failed to create backup");
+            Config.get().events.backupFailed.send(output);
             try {
-                undoPrepare(mode, outputConsumer);
+                undoPrepare(mode, output);
             } catch (ServerOperationException e1) {
-                outputConsumer.accept(OutputType.IMPORTANT, e1.getMessage());
                 Logger.error(e1, "Failed to undo backup preparation after fail");
+                Config.get().events.backupPreparationUndoFailed.send(output);
             }
             return;
         }
         if(Config.get().backup.uploadService() == null) {
-            outputConsumer.accept(OutputType.ALL, "Created backup successfully. Upload is disabled.");
+            Config.get().events.backupCreatedLocal.send(output);
         } else {
             UploadService service = Config.get().backup.uploadService();
-            outputConsumer.accept(OutputType.ALL, "Created backup successfully. Uploading to " + service.name() + "... (this may take a few minutes)");
+            Config.get().events.backupUploading.send(service, output);
             new Thread(() -> {
                 try {
                     service.upload(new File(Config.get().backup.path + fileName), fileName, "application/x-zip-compressed");
-                    outputConsumer.accept(OutputType.ALL, "Uploaded backup successfully.");
+                    Config.get().events.backupCompleted.send(output);
                 } catch (UploadException e){
                     Logger.error(e, "Failed to upload backup with service %s.", service.name());
-                    outputConsumer.accept(OutputType.ALL, "Failed to upload backup. The local backup was created successfully.");
+                    Config.get().events.backupUploadFailed.send(service, output);
                 }
             }).start();
         }
 
         try {
-            undoPrepare(mode, outputConsumer);
+            undoPrepare(mode, output);
         } catch (ServerOperationException e1) {
-            outputConsumer.accept(OutputType.IMPORTANT, e1.getMessage());
             Logger.error(e1, "Failed to undo backup preparation after success");
+            Config.get().events.backupPreparationUndoFailed.send(output);
         }
     }
 
-    private static Mode sendNotifications(Mode mode, OutputConsumer outputConsumer) {
+    private static Mode sendNotifications(Mode mode, EventDiscordOutput output) {
         if(!Config.get().backup.notifyIf.shouldNotify(mode)) {
             return mode;
         }
@@ -96,64 +96,64 @@ public class BackupHandler {
         }
         List<Duration> sortedDurations = durations.stream().sorted(Comparator.reverseOrder()).toList();
 
-        outputConsumer.accept(OutputType.META, "Notifying players about backup (will take " + durationString(sortedDurations.get(0)) + ")");
-        List<NamedDelay> delays = new ArrayList<>(sortedDurations.size());
+        Config.get().events.backupAnnouncing.send(sortedDurations.get(0), output);
+        List<DurationDelay> delays = new ArrayList<>(sortedDurations.size());
         for(int i = 0; i < sortedDurations.size() - 1; i++) {
-            delays.add(new NamedDelay(durationString(sortedDurations.get(i)), sortedDurations.get(i).toMillis() - sortedDurations.get(i+1).toMillis()));
+            delays.add(new DurationDelay(sortedDurations.get(i), sortedDurations.get(i).toMillis() - sortedDurations.get(i+1).toMillis()));
         }
-        delays.add(new NamedDelay(durationString(sortedDurations.get(sortedDurations.size()-1)), sortedDurations.get(sortedDurations.size()-1).toMillis()));
+        delays.add(new DurationDelay(sortedDurations.get(sortedDurations.size()-1), sortedDurations.get(sortedDurations.size()-1).toMillis()));
 
-        String prefix = mode == Mode.RESTART ? "Restarting server" : "Creating backup";
-        for(NamedDelay delay : delays) {
-            outputConsumer.accept(OutputType.PLAYERS, String.format("%s in %s...", prefix, delay.name()));
+        EventConfig<Duration> announcement = mode == Mode.RESTART ? Config.get().events.backupRestartAnnouncement : Config.get().events.backupWhileRunningAnnouncement;
+        for(DurationDelay delay : delays) {
+            announcement.send(delay.total, output);
             try {
-                Thread.sleep(delay.delayMs());
+                Thread.sleep(delay.untilNext());
             } catch (InterruptedException e) {
-                outputConsumer.accept(OutputType.IMPORTANT, "Failed to wait between notifications");
                 Logger.error("Failed to wait between notifications", e);
             }
         }
         return mode;
     }
 
-    private static void prepare(Mode mode, OutputConsumer outputConsumer) throws ServerOperationException {
+    private static void prepare(Mode mode, EventDiscordOutput output) throws ServerOperationException {
         switch (mode) {
-            case RESTART -> stopServer(outputConsumer);
-            case WHILE_RUNNING -> disableAutoSaveServer(outputConsumer);
+            case RESTART -> stopServer(output);
+            case WHILE_RUNNING -> disableAutoSaveServer(output);
         }
     }
 
-    private static void undoPrepare(Mode mode, OutputConsumer outputConsumer) throws ServerOperationException {
+    private static void undoPrepare(Mode mode, EventDiscordOutput output) throws ServerOperationException {
         switch (mode) {
-            case RESTART -> startServer(outputConsumer);
-            case WHILE_RUNNING -> enableAutoSaveServer(outputConsumer);
+            case RESTART -> startServer(output);
+            case WHILE_RUNNING -> enableAutoSaveServer(output);
         }
     }
 
-    private static void stopServer(OutputConsumer outputConsumer) throws ServerOperationException {
+    private static void stopServer(EventDiscordOutput output) throws ServerOperationException {
         if(!ServerActions.isRunning()) {
             return;
         }
-        outputConsumer.accept(OutputType.ALL, "Stopping for backup...");
+        Config.get().events.backupServerStopping.send(output);
         ServerActions.stopServer();
         try {
             Thread.sleep(Config.get().server.restartDelay * 1000L);
         } catch (InterruptedException e) {
             throw new ServerOperationException("Failed to wait after stopping server");
         }
+        Config.get().events.backupServerStopped.send(output);
     }
 
-    private static void disableAutoSaveServer(OutputConsumer outputConsumer) throws ServerOperationException {
+    private static void disableAutoSaveServer(EventDiscordOutput output) throws ServerOperationException {
         if(!ServerActions.isRunning()) {
             return;
         }
         try {
-            outputConsumer.accept(OutputType.PLAYERS, "Disabled autosave for backup");
+            Config.get().events.backupAutosaveDisabled.send(output);
             Boolean autosave = ManagementClient.get().request(RpcMethods.ServerSettings.AUTOSAVE_SET, false);
             if(autosave != false) {
                 throw new ServerOperationException("Failed to disable autosave: response: " + autosave + "; expected: false");
             }
-            outputConsumer.accept(OutputType.PLAYERS, "Saving before backup...");
+            Config.get().events.backupSaving.send(output);
             ManagementClient.get().awaitNotification(
                     RpcNotifications.Server.saved(),
                     () -> {
@@ -164,22 +164,22 @@ public class BackupHandler {
                     },
                     Config.get().server.saveTimeout * 1000L
             );
-            outputConsumer.accept(OutputType.PLAYERS, "Save completed");
+            Config.get().events.backupSaved.send(output);
         } catch (RpcCommunicationException e) {
             throw new ServerOperationException("Failed to disable autosave", e);
         }
     }
 
-    private static void startServer(OutputConsumer outputConsumer) throws ServerOperationException {
+    private static void startServer(EventDiscordOutput output) throws ServerOperationException {
         if(ServerActions.isRunning()) {
             Logger.warn("Server is already running after backup with stop");
         }
-        outputConsumer.accept(OutputType.META, "Starting server after backup...");
+        Config.get().events.backupServerStarting.send(output);
         ServerActions.startServer();
-        outputConsumer.accept(OutputType.META, "Started server after backup");
+        Config.get().events.backupServerStarted.send(output);
     }
 
-    private static void enableAutoSaveServer(OutputConsumer outputConsumer) throws ServerOperationException {
+    private static void enableAutoSaveServer(EventDiscordOutput output) throws ServerOperationException {
         if(!ServerActions.isRunning()) {
             return;
         }
@@ -188,37 +188,15 @@ public class BackupHandler {
             if(autosave != true) {
                 throw new ServerOperationException("Failed to enable autosave: response: " + autosave + "; expected: true");
             }
-            outputConsumer.accept(OutputType.PLAYERS, "Enabled autosave after backup");
+            Config.get().events.backupAutosaveEnabled.send(output);
         } catch (RpcCommunicationException e) {
             throw new ServerOperationException("Failed to enable autosave", e);
         }
     }
 
-    private static String durationString(Duration duration) {
-        int seconds = duration.toSecondsPart();
-        int minutes = duration.toMinutesPart();
-        int hours = duration.toHoursPart();
-
-        if(hours == 0 && minutes == 0) {
-            return String.format("%d seconds", seconds);
-        }
-        List<String> output = new ArrayList<>();
-
-        if(hours != 0) {
-            output.add(String.format("%d hours", hours));
-        }
-        if(minutes != 0 || seconds != 0) {
-            output.add(String.format("%d minutes", minutes));
-        }
-        if(seconds != 0) {
-            output.add(String.format("%d seconds", seconds));
-        }
-        return String.join(" ", output);
-    }
-
-    private record NamedDelay(
-            String name,
-            long delayMs
+    private record DurationDelay(
+            Duration total,
+            long untilNext
     ) {}
 
     public enum Mode {

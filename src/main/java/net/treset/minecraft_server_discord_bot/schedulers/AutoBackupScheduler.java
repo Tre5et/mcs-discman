@@ -1,8 +1,8 @@
 package net.treset.minecraft_server_discord_bot.schedulers;
 
 import net.treset.minecraft_server_discord_bot.config.Config;
+import net.treset.minecraft_server_discord_bot.config.event.EventDiscordOutput;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
-import net.treset.minecraft_server_discord_bot.logging.OutputConsumer;
 import net.treset.minecraft_server_discord_bot.server.BackupHandler;
 
 import java.time.Duration;
@@ -20,7 +20,7 @@ public class AutoBackupScheduler {
     private static ScheduledFuture<?> task = null;
     private static boolean eventSinceLastBackup = true;
 
-    public static void scheduleNext(OutputConsumer outputConsumer) {
+    public static void scheduleNext() {
         if(task != null) task.cancel(false);
         task = null;
         if(Config.get().backup == null || Config.get().backup.auto == null) {
@@ -34,10 +34,10 @@ public class AutoBackupScheduler {
         }
 
         long until = Duration.between(now, next).getSeconds();
-        task = scheduler.schedule(() -> createAuto(outputConsumer), until, TimeUnit.SECONDS);
+        task = scheduler.schedule(AutoBackupScheduler::createAuto, until, TimeUnit.SECONDS);
     }
 
-    public static void createAuto(OutputConsumer outputConsumer) {
+    public static void createAuto() {
         try {
             if (Config.get().backup == null) {
                 return;
@@ -49,7 +49,7 @@ public class AutoBackupScheduler {
 
             BackupHandler.Mode mode = Config.get().backup.auto.restartMode.mode();
 
-            BackupHandler.execute(mode, t -> backupNameFormatter.format(t) + "-auto", outputConsumer, false);
+            BackupHandler.execute(mode, t -> backupNameFormatter.format(t) + "-auto", new EventDiscordOutput.Message(), false);
         } finally {
             new Thread(() -> {
                 try {
@@ -57,7 +57,7 @@ public class AutoBackupScheduler {
                 } catch (InterruptedException e) {
                     Logger.warn(e, "Unable to wait before scheduling next backup");
                 }
-                scheduleNext(outputConsumer);
+                scheduleNext();
             }).start();
         }
     }
