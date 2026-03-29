@@ -3,6 +3,7 @@ package net.treset.minecraft_server_discord_bot.commands;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -53,5 +54,10 @@ public class OnlineCommand extends Command<CommandConfig.Online> {
             Logger.warn(e,"Failed to get players for players command", e);
             return null;
         }
+    }
+
+    @Override
+    public CommandData data() {
+        return new CommandData("online", "See who is currently online!");
     }
 }

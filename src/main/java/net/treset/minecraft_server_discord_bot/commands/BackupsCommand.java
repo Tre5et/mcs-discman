@@ -1,6 +1,7 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
@@ -36,5 +37,10 @@ public class BackupsCommand extends Command<CommandConfig.Backups> {
         event.getHook().sendMessage(output).queue();
 
         Logger.info("Handled.");
+    }
+
+    @Override
+    public CommandData data() {
+        return new CommandData("backups", "See where to find backups!");
     }
 }

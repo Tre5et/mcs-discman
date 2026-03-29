@@ -1,6 +1,7 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
@@ -36,6 +37,8 @@ public abstract class Command<C extends CommandConfig> {
     }
 
     protected abstract void process(SlashCommandEvent event, C config);
+
+    public abstract CommandData data();
 }
 
 

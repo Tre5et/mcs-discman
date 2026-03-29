@@ -1,6 +1,9 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.treset.minecraft_server_discord_bot.config.event.EventDiscordOutput;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.server.BackupHandler;
@@ -43,5 +46,14 @@ public class CreateBackupCommand extends Command<CommandConfig.CreateBackup> {
                 new EventDiscordOutput.Reply(event.getHook()),
                 skipNotify
         )).start();
+    }
+
+    @Override
+    public CommandData data() {
+        return new CommandData("createbackup", "Create a backup! [Moderator only]").addOptions(
+                new OptionData(OptionType.STRING, "mode", "The backup mode to use.", true)
+                        .addChoice("restart", "restart").addChoice("while running", "while-running"),
+                new OptionData(OptionType.BOOLEAN, "skip-notify", "Don't notify the players and create the backup instantly")
+        );
     }
 }

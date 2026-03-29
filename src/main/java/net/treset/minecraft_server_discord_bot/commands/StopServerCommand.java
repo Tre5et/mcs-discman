@@ -1,6 +1,7 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -30,5 +31,10 @@ public class StopServerCommand extends Command<CommandConfig.Stop> {
             }
             event.getHook().sendMessage(function.messageStopped.get()).queue();
         }
+    }
+
+    @Override
+    public CommandData data() {
+        return new CommandData("stopserver", "Start the server! [Moderator only]");
     }
 }

@@ -57,7 +57,7 @@ public class CommandsConfig extends ValidatableConfig {
         messageDenied.validate();
         messageDisabled.validate();
 
-        Set<Map.Entry<CommandData, Command<?>>> updatedCommands = new HashSet<>();
+        Set<Command<?>> updatedCommands = new HashSet<>();
         updatedCommands.add(active.validateAndGet(newConfig));
         updatedCommands.add(backups.validateAndGet(newConfig));
         updatedCommands.add(connection.validateAndGet(newConfig));
@@ -73,14 +73,15 @@ public class CommandsConfig extends ValidatableConfig {
         updatedCommands.add(say.validateAndGet(newConfig));
         updatedCommands.add(start.validateAndGet(newConfig));
         updatedCommands.add(stop.validateAndGet(newConfig));
-        updatedCommands = updatedCommands.stream().filter(Objects::nonNull).collect(Collectors.toSet());
 
-        this.commands = updatedCommands.stream()
-                .collect(Collectors.toMap(e -> e.getKey().getName(), Map.Entry::getValue));
+        Map<Command<?>, CommandData> commands = updatedCommands.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(c -> c, Command::data));
+
+        this.commands = commands.entrySet().stream()
+                .collect(Collectors.toMap(c -> c.getValue().getName(), Map.Entry::getKey));
 
         newConfig.discord.jdaGuild.updateCommands()
-                .addCommands(
-                        updatedCommands.stream().map(Map.Entry::getKey).collect(Collectors.toSet())
-                ).queue();
+                .addCommands(commands.values()).queue();
     }
 }

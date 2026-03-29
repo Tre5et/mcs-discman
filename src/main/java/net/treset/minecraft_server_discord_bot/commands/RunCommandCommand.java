@@ -1,6 +1,8 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -46,5 +48,11 @@ public class RunCommandCommand extends Command<CommandConfig.RunCommand> {
             Logger.warn(e, "Failed to request command execution: \"%s\"", cmd);
             event.getHook().sendMessage(function.messageRequestFailed.get()).queue();
         }
+    }
+
+    @Override
+    public CommandData data() {
+        return new CommandData("runcommand", "Run a command on the server! [Moderator only]")
+                .addOption(OptionType.STRING, "command", "The command to run.", true);
     }
 }

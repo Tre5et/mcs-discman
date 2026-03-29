@@ -4,6 +4,7 @@ import dev.treset.mcdl.servermanagement.exception.RpcCommunicationException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcVersion;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -41,5 +42,10 @@ public class DetailsCommand extends Command<CommandConfig.Details> {
             Logger.warn(e, "Failed to get version for details command", e);
             return null;
         }
+    }
+
+    @Override
+    public CommandData data() {
+        return new CommandData("details", "See details about the server!");
     }
 }

@@ -1,6 +1,9 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.server.CrashHandler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
@@ -70,5 +73,13 @@ public class ConnectionCommand extends Command<CommandConfig.Connection> {
             CrashHandler.unexpectStop();
             return function.messageCloseFailed.get();
         }
+    }
+
+    @Override
+    public CommandData data() {
+        return new CommandData("connection", "Manage connection to server mod! [Moderator only]")
+                .addOptions(new OptionData(OptionType.STRING, "action", "The thing to do.", true)
+                        .addChoice("status", "status").addChoice("open", "open").addChoice("close", "close"))
+                .addOption(OptionType.BOOLEAN, "force", "Force closing the connection; Does nothing if another action than close is selected", false);
     }
 }

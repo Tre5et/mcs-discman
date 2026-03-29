@@ -1,6 +1,7 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
@@ -49,5 +50,10 @@ public class RestartServerCommand extends Command<CommandConfig.Restart> {
         }
 
         Logger.info("Handled. Restarted.");
+    }
+
+    @Override
+    public CommandData data() {
+        return new CommandData("restartserver", "Restart the server! [Moderator only]");
     }
 }

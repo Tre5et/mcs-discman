@@ -1,6 +1,7 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
@@ -23,5 +24,10 @@ public class ActiveCommand extends Command<CommandConfig.Active> {
         event.getHook().sendMessage(output).queue();
 
         Logger.info("Handled: %s.", running ? "running": "not running");
+    }
+
+    @Override
+    public CommandData data() {
+        return new CommandData("active", "Check if the server is running!");
     }
 }
