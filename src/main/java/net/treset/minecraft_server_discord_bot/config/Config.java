@@ -29,7 +29,7 @@ public class Config {
     private static final File DEBUG_CONFIG = new File("debug/discman.yaml");
 
     private static final ObjectMapper MAPPER = YAMLMapper.builder()
-            .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
+            .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false)
             .build();
 
     private static Config config;

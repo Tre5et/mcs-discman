@@ -38,7 +38,9 @@ You are going to need this later.
 - If you want the bot to be active in a private channel (which I recommend), make sure to give the newly created role for your bot permissions to access it.
 
 ## Edit the config
-The configuration takes place in the `mcsdiscman.yaml` file. Don't worry if you don't know YAML, it's very easy! The file included by default contains placeholders for all required options.
+The configuration takes place in the `mcsdiscman.yaml` file. Don't worry if you don't know YAML, it's very easy! Check the [mini guide](YAML_GUIDE.md).
+
+The file included by default contains placeholders for all required options.
 
 ### `discord`
 This includes information on how to connect to discord.
@@ -199,7 +201,7 @@ To do this, some initial configuration is required:
 - In the search bar at the top search for "google drive api" and click on the entry "Google Drive Api" under marketplace.
 - Click "Enable".
 - Click on "Credentials" on the left.
-- Click "Create Credentials" -> "OAuth client ID".
+- Click "Create Credentials" → "OAuth client ID".
 - Select "OAuth consent screen" on the left.
 - Select "External" and click "Create".
 - Enter the information in the fileds marked with a red *.
@@ -211,7 +213,7 @@ To do this, some initial configuration is required:
 - Click "Back to Dashboard".
 - Click "Publish App" and click "Confirm".
 - Go to the tab "Credentials" on the left.
-- Click "Create Credentials" -> "OAuth client ID" .
+- Click "Create Credentials" → "OAuth client ID" .
 - Select "Desktop App" from the dropdown, enter a name and click "Create".
 - On the popup click "Download JSON", then click "OK".
 - If you want to download the file again, click on the pen icon to the right of the created credentials and click "Download JSON" at the top.
@@ -252,7 +254,41 @@ backup:
       credentialsFile: credentials.json
 ```
 
-> If you wish to be able to upload to another cloud provider, open a [GitHub issue](https://github.com/Tre5et/mcs-discman/issues) and I might look into it. Or of course implement it yourself and create a pull request. The codebase is set up so that it is easy to add multiple providers. Reference `config.backup.UploadConfig`.
+> If you wish to be able to upload to another cloud provider, open a [GitHub issue](https://github.com/Tre5et/mcs-discman/issues) and I might look into it. Or of course implement it yourself and create a pull request. The codebase is set up so that it is easy to add new upload services. Reference `config.backup.UploadConfig`.
+
+## Configuring Crash detection
+The manager can automatically detect server crashes and attempt to restart the sever if a crash is detected.
+
+> The crash detection can produce false positives, if the server management protocol connection is interrupted. This can especially happen if the server is not run on the same machine as the manager. It is always recommended to use a start command that ensures only one instance of the server is running at a time.
+
+To enable crash detection you can simply add the line 
+```yaml
+crash:
+```
+at the base level of the config.
+
+There are two options to further configure the behavior in case of repeated crashes:
+- `maxRetries` defines the maximum amount of times the manager will attempt to restart the server after a crash. (default: 5)
+- `recentTimeout` configures the amount of time in seconds that a crash restart will be considered in the amount of retries configured in `maxRetries`. This means that if the server fails crashes `maxRetries` times within `recentTimeout` the manager will not attempt to restart it again. (default: 3600 s ⇒ 5 min)
+
+## Configure an inactivity reminder
+The manager can remind admins to consider stopping the server after it stayed unused for a number of days. These options are configured in the `inactivity` block.
+
+There are two ways to define when this reminder is sent:
+- `interval` defines a simple interval of days when to send the reminder. If this is for example set to 5, a reminder will be sent on every fifth day after the last activity.
+- `schedule` defines a list of days after which to send the reminder. A reminder will be sent if the number of days since the last activity is equal to any of the numbers configured in the list.
+Both of these options are mutually exclusive. Only one of them can be used at a time.
+
+A complete config could for example look like this:
+```yaml
+inactivity:
+  schedule:
+    - 3
+    - 6
+    - 15
+    - 30
+    - 60
+```
 
 # Troubleshooting the server manager
 

@@ -93,8 +93,7 @@ commands:
     messageDenied: # optional; falls back to commands.messageDenied
     messageFailed: Failed to get members!
     messageNoMembers: There are no current members.
-    messageMembers: >-
-      Current members are: **{list}**.
+    messageMembers: 'Current members are: **{list}**. Current members are: **{list}**.'
     messageContactAdmin: To become a member contact **{admin}**.
 
   online:
@@ -157,12 +156,9 @@ commands:
       - default
     messageDisabled: # optional; falls back to commands.messageDisabled
     messageDenied: # optional; falls back to commands.messageDenied
-    messageSuccess: >-
-      Success: {response}
-    messageInvalid: >-
-      Invalid command: {response}
-    messageNoResponse: >-
-      Ran: {response}
+    messageSuccess: 'Success: {response}'
+    messageInvalid: 'Invalid command: {response}'
+    messageNoResponse: 'Ran: {response}'
     messageFailed: Failed to run command.
     messageRequestFailed: Failed to request command execution.
 
@@ -211,29 +207,25 @@ events:
   joined:
     discord: always
     game: never
-    message: >-
-      {name} joined the game.
+    message: '{name} joined the game.'
     channels:
       - default
   left:
     discord: always
     game: never
-    message: >-
-      {name} left the game.
+    message: '{name} left the game.'
     channels:
       - default
   advancement:
     discord: always
     game: never
-    message: >-
-      {message}.
+    message: '{message}.'
     channels:
       - default
   death:
     discord: always
     game: never
-    message: >-
-      {message}.
+    message: '{message}.'
     channels:
       - default
   started:
