@@ -1,7 +1,8 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
@@ -13,17 +14,17 @@ public class ReloadConfigCommand extends Command<CommandConfig.Reload> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.Reload function) {
+    protected void process(SlashCommandInteraction interaction, CommandConfig.Reload function) {
         try {
             Config.load();
-            event.getHook().sendMessage(function.messageReloaded.get()).queue();
+            interaction.getHook().sendMessage(function.messageReloaded.get()).queue();
         } catch (ConfigException e) {
-            event.getHook().sendMessage(function.messageFailed.get()).queue();
+            interaction.getHook().sendMessage(function.messageFailed.get()).queue();
         }
     }
 
     @Override
     public CommandData data() {
-        return new CommandData("reloadconfig", "Reloads the configuration from a file! [Moderator only]");
+        return Commands.slash("reloadconfig", "Reloads the configuration from a file! [Moderator only]");
     }
 }

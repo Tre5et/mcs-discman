@@ -3,8 +3,9 @@ package net.treset.minecraft_server_discord_bot.commands;
 import dev.treset.mcdl.servermanagement.exception.RpcCommunicationException;
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcVersion;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -18,18 +19,18 @@ public class DetailsCommand extends Command<CommandConfig.Details> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.Details function) {
+    protected void process(SlashCommandInteraction interaction, CommandConfig.Details function) {
         String output;
 
         String version = getVersion();
         if(version == null) {
             output = function.messageFailed.get();
-            event.getHook().sendMessage(output).queue();
+            interaction.getHook().sendMessage(output).queue();
             return;
         }
 
         output = function.messageVersion.get(new MessageTemplates.DetailsContext(version));
-        event.getHook().sendMessage(output).queue();
+        interaction.getHook().sendMessage(output).queue();
 
         Logger.info("Handled.");
     }
@@ -46,6 +47,6 @@ public class DetailsCommand extends Command<CommandConfig.Details> {
 
     @Override
     public CommandData data() {
-        return new CommandData("details", "See details about the server!");
+        return Commands.slash("details", "See details about the server!");
     }
 }

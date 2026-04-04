@@ -1,9 +1,8 @@
 package net.treset.minecraft_server_discord_bot.config.function;
 
-import net.dv8tion.jda.api.entities.ISnowflake;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.treset.minecraft_server_discord_bot.commands.Command;
 import net.treset.minecraft_server_discord_bot.commands.Commands;
 import net.treset.minecraft_server_discord_bot.config.Config;
@@ -12,8 +11,11 @@ import net.treset.minecraft_server_discord_bot.config.message.Message;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class CommandConfig extends ValidatableConfig {
@@ -23,7 +25,7 @@ public abstract class CommandConfig extends ValidatableConfig {
     public Message.Default messageDisabled;
     public Message.Default messageDenied;
     public transient Set<Role> allowedJdaRoles;
-    public transient Set<MessageChannel> allowedJdaChannels;
+    public transient Set<GuildMessageChannel> allowedJdaChannels;
     
     public abstract Command<?> command();
 
@@ -40,11 +42,12 @@ public abstract class CommandConfig extends ValidatableConfig {
                 .anyMatch(role -> hasMatchingId(allowedJdaRoles, role.getIdLong()));
     }
 
-    public boolean isCorrectChannel(MessageChannel channel) {
+    public boolean isCorrectChannel(MessageChannelUnion channel) {
         if (channel == null) return false;
+        if (!(channel instanceof GuildMessageChannel)) return false;
         if (allowedJdaChannels == null || allowedJdaChannels.isEmpty()) return true;
 
-        return hasMatchingId(allowedJdaChannels, channel.getIdLong());
+        return hasMatchingId(allowedJdaChannels, channel.asGuildMessageChannel().getIdLong());
     }
 
     private static boolean hasMatchingId(Set<? extends ISnowflake> entries, long id) {
@@ -405,6 +408,108 @@ public abstract class CommandConfig extends ValidatableConfig {
             messageStopping.validate();
             messageStopFailed.validate();
             messageStopped.validate();
+        }
+    }
+
+    public static class Reminder extends EnabledAndAll {
+        public String storageFile = "./reminders.json";
+        public MentionAllowConstraint allowedMentions = MentionAllowConstraint.all;
+        public boolean allowInGame = true;
+        public boolean allowDiscord = true;
+        public List<String> defaultMentions = List.of("user:self");
+
+        public transient List<Function<User, IMentionable>> defaultJdaMentions = new ArrayList<>();
+
+        @Override
+        public Command<?> command() {
+            return Commands.REMINDER;
+        }
+
+        @Override
+        public void validate(Config newConfig) throws ConfigException {
+            super.validate(newConfig);
+
+            List<Member> members = newConfig.discord.jdaGuild.getMembers();
+
+            for(String m : defaultMentions) {
+                String[] parts = m.split(":");
+                if(parts.length != 2 || !(parts[0].equals("user") || parts[0].equals("role"))) {
+                    throw new ConfigException("Failed to parse default mention '" + m + "'. Format: '[user|role]:[id]' expected.");
+                }
+                if(parts[0].equals("user")) {
+                    if(parts[1].equals("self")) {
+                        defaultJdaMentions.add(u -> u);
+                    } else {
+                        Member member = members.stream().filter(m1 -> m1.getUser().getName().equals(parts[1])).findAny().orElse(null);
+                        if(member == null) {
+                            throw new ConfigException("User '@" + parts[1] + "' was not found. They may not be part of the guild.");
+                        }
+                        defaultJdaMentions.add(u -> member.getUser());
+                    }
+                } else {
+                    List<Role> roles = newConfig.discord.jdaGuild.getRolesByName(parts[1], true);
+                    if(roles.isEmpty()) {
+                        throw new ConfigException("Role '" + parts[1] + "' was not found.");
+                    }
+                    defaultJdaMentions.addAll(roles.stream().map(r -> (Function<User,IMentionable>) u -> r).toList());
+                }
+            }
+        }
+
+        public MentionableString getMentionStrings(List<IMentionable> customMentions, User user) {
+            List<IMentionable> allowed = new ArrayList<>();
+            allowed.addAll(defaultJdaMentions.stream()
+                            .map(m -> m.apply(user))
+                            .filter(m -> allowedMentions.isAllowed(m, user)).toList()
+            );
+            allowed.addAll(customMentions.stream().filter(m -> allowedMentions.isAllowed(m, user)).toList());
+            if(allowed.isEmpty()) return new MentionableString("", "");
+
+            String discord = allowed.stream().map(IMentionable::getAsMention).collect(Collectors.joining(" ")) + ": ";
+            String game = allowed.stream().map(m -> {
+                if(m instanceof User) return ((User) m).getEffectiveName();
+                if(m instanceof Member) return ((Member) m).getEffectiveName();
+                if(m instanceof Role) return ((Role) m).getName();
+                return null;
+            }).filter(Objects::nonNull).collect(Collectors.joining(", ")) + ": ";
+            return new MentionableString(discord, game);
+        }
+
+        public record MentionableString(
+                String discord,
+                String inGame
+        ) {}
+
+        public enum MentionAllowConstraint {
+            none((s,u,r) -> false),
+            self((s,u,r) -> !u && !r),
+            users((s,u,r) -> !r),
+            roles((s, u, r) -> !s && !u),
+            rolesAndSelf((s, u, r) -> !u),
+            all((s,u,r) -> true);
+
+            private final TriFunction<Boolean, Boolean, Boolean, Boolean> checker;
+
+            MentionAllowConstraint(TriFunction<Boolean, Boolean, Boolean, Boolean> checker) {
+                this.checker = checker;
+            }
+
+            public boolean check(boolean hasSelf, boolean hasUsers, boolean hasRoles) {
+                return checker.apply(hasSelf, hasUsers, hasRoles);
+            }
+
+            public boolean isAllowed(IMentionable mention, User self) {
+                if(mention instanceof User || mention instanceof Member) {
+                    return check(mention.getIdLong() == self.getIdLong(), mention.getIdLong() != self.getIdLong(), false);
+                } else if(mention instanceof Role) {
+                    return check(false, false, true);
+                }
+                return false;
+            }
+        }
+
+        private interface TriFunction<T1,T2,T3,R> {
+            R apply(T1 v1, T2 v2, T3 v3);
         }
     }
 }

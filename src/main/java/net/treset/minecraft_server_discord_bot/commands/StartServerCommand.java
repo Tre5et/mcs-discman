@@ -1,7 +1,8 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -15,19 +16,19 @@ public class StartServerCommand extends Command<CommandConfig.Start> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.Start function) {
+    protected void process(SlashCommandInteraction interaction, CommandConfig.Start function) {
         if(ServerActions.isRunning()) {
-            event.getHook().sendMessage(function.messageAlreadyRunning.get()).queue();
+            interaction.getHook().sendMessage(function.messageAlreadyRunning.get()).queue();
 
             Logger.info("Handled. Already running.");
         } else {
-            event.getHook().sendMessage(function.messageStarting.get()).queue();
+            interaction.getHook().sendMessage(function.messageStarting.get()).queue();
             try {
                 ServerActions.startServer();
-                event.getHook().sendMessage(function.messageStarted.get()).queue();
+                interaction.getHook().sendMessage(function.messageStarted.get()).queue();
             } catch (ServerOperationException e) {
                 Logger.error(e, "Failed to start server");
-                event.getHook().sendMessage(function.messageStartFailed.get()).queue();
+                interaction.getHook().sendMessage(function.messageStartFailed.get()).queue();
             }
             Logger.info("Handled.");
         }
@@ -35,6 +36,6 @@ public class StartServerCommand extends Command<CommandConfig.Start> {
 
     @Override
     public CommandData data() {
-        return new CommandData("startserver", "Start the server! [Moderator only]");
+        return Commands.slash("startserver", "Start the server! [Moderator only]");
     }
 }

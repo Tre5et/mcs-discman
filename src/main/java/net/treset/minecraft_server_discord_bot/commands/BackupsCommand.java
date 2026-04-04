@@ -1,7 +1,8 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
@@ -15,7 +16,7 @@ public class BackupsCommand extends Command<CommandConfig.Backups> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.Backups function) {
+    protected void process(SlashCommandInteraction interaction, CommandConfig.Backups function) {
         String output;
         MessageTemplates.BackupsContext context = new MessageTemplates.BackupsContext(
                 Config.get().backup.publicLocation,
@@ -34,13 +35,13 @@ public class BackupsCommand extends Command<CommandConfig.Backups> {
             output = function.messageNone.get();
         }
 
-        event.getHook().sendMessage(output).queue();
+        interaction.getHook().sendMessage(output).queue();
 
         Logger.info("Handled.");
     }
 
     @Override
     public CommandData data() {
-        return new CommandData("backups", "See where to find backups!");
+        return Commands.slash("backups", "See where to find backups!");
     }
 }

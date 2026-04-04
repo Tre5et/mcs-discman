@@ -1,10 +1,11 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.treset.minecraft_server_discord_bot.config.event.EventDiscordOutput;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.server.BackupHandler;
 
@@ -20,14 +21,14 @@ public class CreateBackupCommand extends Command<CommandConfig.CreateBackup> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.CreateBackup function) {
+    protected void process(SlashCommandInteraction interaction, CommandConfig.CreateBackup function) {
 
-        String mode = Objects.requireNonNull(event.getOption("mode")).getAsString();
+        String mode = Objects.requireNonNull(interaction.getOption("mode")).getAsString();
         BackupHandler.Mode backupMode = switch (mode) {
             case "restart" -> BackupHandler.Mode.RESTART;
             case "while-running" -> BackupHandler.Mode.WHILE_RUNNING;
             default -> {
-                event.getHook().sendMessage(function.messageInvalidMode.get()).queue();
+                interaction.getHook().sendMessage(function.messageInvalidMode.get()).queue();
                 yield null;
             }
         };
@@ -35,22 +36,22 @@ public class CreateBackupCommand extends Command<CommandConfig.CreateBackup> {
             return;
         }
         boolean skipNotify;
-        if(event.getOption("skip-notify") != null) {
-            skipNotify = Objects.requireNonNull(event.getOption("skip-notify")).getAsBoolean();
+        if(interaction.getOption("skip-notify") != null) {
+            skipNotify = Objects.requireNonNull(interaction.getOption("skip-notify")).getAsBoolean();
         } else {
             skipNotify = false;
         }
         new Thread(() -> BackupHandler.execute(
                 backupMode,
                 backupNameFormatter::format,
-                new EventDiscordOutput.Reply(event.getHook()),
+                new EventDiscordOutput.Reply(interaction.getHook()),
                 skipNotify
         )).start();
     }
 
     @Override
     public CommandData data() {
-        return new CommandData("createbackup", "Create a backup! [Moderator only]").addOptions(
+        return Commands.slash("createbackup", "Create a backup! [Moderator only]").addOptions(
                 new OptionData(OptionType.STRING, "mode", "The backup mode to use.", true)
                         .addChoice("restart", "restart").addChoice("while running", "while-running"),
                 new OptionData(OptionType.BOOLEAN, "skip-notify", "Don't notify the players and create the backup instantly")

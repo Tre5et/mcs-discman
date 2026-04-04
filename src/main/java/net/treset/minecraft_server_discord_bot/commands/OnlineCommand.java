@@ -2,8 +2,9 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -20,13 +21,13 @@ public class OnlineCommand extends Command<CommandConfig.Online> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.Online function) {
+    protected void process(SlashCommandInteraction interaction, CommandConfig.Online function) {
         String output;
 
         List<String> players = getPlayers();
         if(players == null) {
             output = function.messageFailed.get();
-            event.getHook().sendMessage(output).queue();
+            interaction.getHook().sendMessage(output).queue();
             return;
         }
 
@@ -42,7 +43,7 @@ public class OnlineCommand extends Command<CommandConfig.Online> {
                     : function.messageMultiplePlayers.get(context);
         }
 
-        event.getHook().sendMessage(output).queue();
+        interaction.getHook().sendMessage(output).queue();
 
         Logger.info("Handled.");
     }
@@ -58,6 +59,6 @@ public class OnlineCommand extends Command<CommandConfig.Online> {
 
     @Override
     public CommandData data() {
-        return new CommandData("online", "See who is currently online!");
+        return Commands.slash("online", "See who is currently online!");
     }
 }

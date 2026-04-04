@@ -1,6 +1,6 @@
 package net.treset.minecraft_server_discord_bot.config.function;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.commands.Command;
 import net.treset.minecraft_server_discord_bot.config.Config;
@@ -32,10 +32,11 @@ public class CommandsConfig extends ValidatableConfig {
     public CommandConfig.Say say = new CommandConfig.Say();
     public CommandConfig.Start start = new CommandConfig.Start();
     public CommandConfig.Stop stop = new CommandConfig.Stop();
+    public CommandConfig.Reminder reminder = new CommandConfig.Reminder();
 
     public transient Map<String, Command<?>> commands;
 
-    public void handleCommand(SlashCommandEvent event) {
+    public void handleCommand(SlashCommandInteraction event) {
         event.deferReply().queue();
 
         if(commands.containsKey(event.getName())) {
@@ -73,6 +74,7 @@ public class CommandsConfig extends ValidatableConfig {
         updatedCommands.add(say.validateAndGet(newConfig));
         updatedCommands.add(start.validateAndGet(newConfig));
         updatedCommands.add(stop.validateAndGet(newConfig));
+        updatedCommands.add(reminder.validateAndGet(newConfig));
 
         Map<Command<?>, CommandData> commands = updatedCommands.stream()
                 .filter(Objects::nonNull)

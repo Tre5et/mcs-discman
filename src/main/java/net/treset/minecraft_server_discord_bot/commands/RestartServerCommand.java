@@ -1,7 +1,8 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
@@ -16,20 +17,20 @@ public class RestartServerCommand extends Command<CommandConfig.Restart> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.Restart function) {
+    protected void process(SlashCommandInteraction interaction, CommandConfig.Restart function) {
         if(ServerActions.isRunning()) {
-            event.getHook().sendMessage(function.messageStopping.get()).queue();
+            interaction.getHook().sendMessage(function.messageStopping.get()).queue();
             Logger.info("Stopping server.");
 
             try {
                 ServerActions.stopServer();
             } catch (ServerOperationException e) {
                 Logger.error(e, "Failed to stop server for restart");
-                event.getHook().sendMessage(function.messageStopFailed.get()).queue();
+                interaction.getHook().sendMessage(function.messageStopFailed.get()).queue();
                 return;
             }
 
-            event.getHook().sendMessage(function.messageStopped.get()).queue();
+            interaction.getHook().sendMessage(function.messageStopped.get()).queue();
 
             Logger.info("Stopped server.");
             try {
@@ -39,13 +40,13 @@ public class RestartServerCommand extends Command<CommandConfig.Restart> {
             }
 
         } else {
-            event.getHook().sendMessage(function.messageRestarting.get()).queue();
+            interaction.getHook().sendMessage(function.messageRestarting.get()).queue();
         }
         try {
             ServerActions.startServer();
-            event.getHook().sendMessage(function.messageRestarted.get()).queue();
+            interaction.getHook().sendMessage(function.messageRestarted.get()).queue();
         } catch (ServerOperationException e) {
-            event.getHook().sendMessage(function.messageRestartFailed.get()).queue();
+            interaction.getHook().sendMessage(function.messageRestartFailed.get()).queue();
             Logger.error(e, "Failed to restart server");
         }
 
@@ -54,6 +55,6 @@ public class RestartServerCommand extends Command<CommandConfig.Restart> {
 
     @Override
     public CommandData data() {
-        return new CommandData("restartserver", "Restart the server! [Moderator only]");
+        return Commands.slash("restartserver", "Restart the server! [Moderator only]");
     }
 }

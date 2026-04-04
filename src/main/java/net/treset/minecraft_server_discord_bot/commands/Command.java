@@ -1,6 +1,6 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -15,28 +15,28 @@ public abstract class Command<C extends CommandConfig> {
         this.configSupplier = configSupplier;
     }
 
-    public final void handle(SlashCommandEvent event) {
+    public final void handle(SlashCommandInteraction interaction) {
         C config = configSupplier.get();
-        if (!config.isCorrectChannel(event.getChannel())) {
-            event.getHook().deleteOriginal().queue();
+        if (!config.isCorrectChannel(interaction.getChannel())) {
+            interaction.getHook().deleteOriginal().queue();
             Logger.info("Handled. Invalid Channel.");
             return;
         }
         if (!config.enabled) {
-            event.getHook().sendMessage(config.messageDisabled.get()).queue();
+            interaction.getHook().sendMessage(config.messageDisabled.get()).queue();
             Logger.info("Handled. Disabled.");
             return;
         }
-        if (!config.isAllowed(Objects.requireNonNull(event.getMember()))) {
-            event.getHook().sendMessage(config.messageDenied.get()).queue();
+        if (!config.isAllowed(Objects.requireNonNull(interaction.getMember()))) {
+            interaction.getHook().sendMessage(config.messageDenied.get()).queue();
             Logger.info("Handled. Permission required.");
             return;
         }
 
-        process(event, config);
+        process(interaction, config);
     }
 
-    protected abstract void process(SlashCommandEvent event, C config);
+    protected abstract void process(SlashCommandInteraction interaction, C config);
 
     public abstract CommandData data();
 }

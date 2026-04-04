@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation "net.dv8tion:JDA:4.4.0_350"
+    implementation "net.dv8tion:JDA:6.4.0"
     implementation "com.github.cliftonlabs:json-simple:4.0.0"
 
     implementation 'com.google.api-client:google-api-client:1.32.2'

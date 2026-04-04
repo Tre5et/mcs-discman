@@ -4,7 +4,7 @@ import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcMessage;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcSystemMessage;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
 import net.treset.minecraft_server_discord_bot.config.message.Message;
@@ -28,7 +28,7 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public Message<C> message;
     public List<String> channels = List.of("default");
 
-    public transient Set<MessageChannel> jdaChannels;
+    public transient Set<GuildMessageChannel> jdaChannels;
 
     public EventConfig(EventCondition discord, EventCondition game, String message) {
         this.discord = discord;

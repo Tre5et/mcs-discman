@@ -19,5 +19,6 @@ public interface Commands {
     Command<CommandConfig.Say> SAY = new SayCommand(() -> Config.get().commands.say);
     Command<CommandConfig.Start> START = new StartServerCommand(() -> Config.get().commands.start);
     Command<CommandConfig.Stop> STOP = new StopServerCommand(() -> Config.get().commands.stop);
+    Command<CommandConfig.Reminder> REMINDER = new ReminderCommand(() -> Config.get().commands.reminder);
 }
 

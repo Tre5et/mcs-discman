@@ -1,8 +1,9 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.server.CrashHandler;
@@ -18,17 +19,17 @@ public class ConnectionCommand extends Command<CommandConfig.Connection> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.Connection function) {
+    protected void process(SlashCommandInteraction interaction, CommandConfig.Connection function) {
         String output;
-        String type = Objects.requireNonNull(event.getOption("action")).getAsString();
+        String type = Objects.requireNonNull(interaction.getOption("action")).getAsString();
         switch (type) {
             case "status" -> output = getStatus(function);
             case "open" -> output = openConnection(function);
-            case "close" -> output = closeConnection(event, function);
+            case "close" -> output = closeConnection(interaction, function);
             default -> output = function.messageUnknownAction.get();
         }
 
-        event.getHook().sendMessage(output).queue();
+        interaction.getHook().sendMessage(output).queue();
     }
 
     private static String getStatus(CommandConfig.Connection function) {
@@ -50,14 +51,14 @@ public class ConnectionCommand extends Command<CommandConfig.Connection> {
         return function.messageOpenSuccess.get();
     }
 
-    private static String closeConnection(SlashCommandEvent event, CommandConfig.Connection function) {
+    private static String closeConnection(SlashCommandInteraction interaction, CommandConfig.Connection function) {
         if(!ManagementClient.get().isConnected()) {
             return function.messageCloseNoConnection.get();
         }
 
         boolean force = false;
-        if(event.getOption("force") != null) {
-            force = Objects.requireNonNull(event.getOption("force")).getAsBoolean();
+        if(interaction.getOption("force") != null) {
+            force = Objects.requireNonNull(interaction.getOption("force")).getAsBoolean();
         }
 
         CrashHandler.expectStop();
@@ -77,7 +78,7 @@ public class ConnectionCommand extends Command<CommandConfig.Connection> {
 
     @Override
     public CommandData data() {
-        return new CommandData("connection", "Manage connection to server mod! [Moderator only]")
+        return Commands.slash("connection", "Manage connection to server mod! [Moderator only]")
                 .addOptions(new OptionData(OptionType.STRING, "action", "The thing to do.", true)
                         .addChoice("status", "status").addChoice("open", "open").addChoice("close", "close"))
                 .addOption(OptionType.BOOLEAN, "force", "Force closing the connection; Does nothing if another action than close is selected", false);

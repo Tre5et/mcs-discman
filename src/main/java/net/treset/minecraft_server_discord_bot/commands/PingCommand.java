@@ -1,7 +1,8 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
@@ -13,14 +14,14 @@ public class PingCommand extends Command<CommandConfig.Ping> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.Ping function) {
-        event.getHook().sendMessage(function.messagePong.get()).queue();
+    protected void process(SlashCommandInteraction interaction, CommandConfig.Ping function) {
+        interaction.getHook().sendMessage(function.messagePong.get()).queue();
 
         Logger.info("Handled.");
     }
 
     @Override
     public CommandData data() {
-        return new CommandData("ping", "See if the bot is online!");
+        return Commands.slash("ping", "See if the bot is online!");
     }
 }

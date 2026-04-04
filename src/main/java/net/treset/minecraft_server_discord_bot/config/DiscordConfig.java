@@ -1,8 +1,8 @@
 package net.treset.minecraft_server_discord_bot.config;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.treset.minecraft_server_discord_bot.discord.DiscordBot;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 
@@ -20,7 +20,7 @@ public class DiscordConfig extends ValidatableConfig {
     public String admin;
 
     public transient Guild jdaGuild;
-    public transient Map<String, MessageChannel> jdaChannels;
+    public transient Map<String, GuildMessageChannel> jdaChannels;
     public transient Map<String, Role> jdaRoles;
 
     @Override
@@ -48,7 +48,7 @@ public class DiscordConfig extends ValidatableConfig {
 
         jdaChannels = new HashMap<>();
         for(Map.Entry<String, Long> e : channels.entrySet()) {
-            MessageChannel c = DiscordBot.JDA.getTextChannelById(e.getValue());
+            GuildMessageChannel c = DiscordBot.JDA.getChannelById(GuildMessageChannel.class, e.getValue());
             if(c == null) throw new ConfigException("Could not find channel '" + e.getKey() + "' with id '" + e.getValue() + "'.");
             jdaChannels.put(e.getKey(), c);
         }

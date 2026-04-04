@@ -2,8 +2,9 @@ package net.treset.minecraft_server_discord_bot.commands;
 
 import dev.treset.mcdl.servermanagement.vanilla.RpcMethods;
 import dev.treset.mcdl.servermanagement.vanilla.types.RpcPlayer;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
@@ -21,13 +22,13 @@ public class MembersCommand extends Command<CommandConfig.Members> {
     }
 
     @Override
-    protected void process(SlashCommandEvent event, CommandConfig.Members function) {
+    protected void process(SlashCommandInteraction interaction, CommandConfig.Members function) {
         String output;
 
         List<String> members = getMembers();
         if(members == null) {
             output = function.messageFailed.get();
-            event.getHook().sendMessage(output).queue();
+            interaction.getHook().sendMessage(output).queue();
             return;
         }
 
@@ -37,7 +38,7 @@ public class MembersCommand extends Command<CommandConfig.Members> {
         if(Config.get().discord.admin != null) {
             output += "\n" + function.messageContactAdmin.get(context);
         }
-        event.getHook().sendMessage(output).queue();
+        interaction.getHook().sendMessage(output).queue();
 
         Logger.info("Handled.");
     }
@@ -53,6 +54,6 @@ public class MembersCommand extends Command<CommandConfig.Members> {
 
     @Override
     public CommandData data() {
-        return new CommandData("members", "See the current members of the server!");
+        return Commands.slash("members", "See the current members of the server!");
     }
 }
