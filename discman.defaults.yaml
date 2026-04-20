@@ -198,219 +198,257 @@ commands:
     messageStopped: Server stopped.
 
 events:
+  # Optional per event: isActivity controls whether this event counts as activity
+  # for event-driven schedulers (auto-backup createIf: event, inactivity timer reset).
   online:
     discord: always
     game: never
+    isActivity: false
     message: Hi, I'm online now.
     channels:
       - default
   joined:
     discord: always
     game: never
+    isActivity: true
     message: '{name} joined the game.'
     channels:
       - default
   left:
     discord: always
     game: never
+    isActivity: true
     message: '{name} left the game.'
     channels:
       - default
   advancement:
     discord: always
     game: never
+    isActivity: true
     message: '{message}.'
     channels:
       - default
   death:
     discord: always
     game: never
+    isActivity: true
     message: '{message}.'
     channels:
       - default
   started:
     discord: never
     game: never
+    isActivity: true
     message: Server started.
     channels:
       - default
   startFailed:
     discord: always
     game: never
+    isActivity: true
     message: Failed to start server.
     channels:
       - default
   stopping:
     discord: never
     game: never
+    isActivity: true
     message: Server is stopping...
     channels:
       - default
   stopped:
     discord: never
     game: never
+    isActivity: true
     message: Server stopped.
     channels:
       - default
   backupNotConfigured:
     discord: always
     game: always
+    isActivity: false
     message: Backup is not configured.
     channels:
       - default
   backupPreparationFailed:
     discord: always
     game: always
+    isActivity: false
     message: Failed to prepare for backup. Aborting!
     channels:
       - default
   backupPreparationUndoFailed:
     discord: always
     game: always
+    isActivity: false
     message: Failed to undo backup preparation. The server may not save correctly!
     channels:
       - default
   backupStarted:
     discord: always
     game: always
+    isActivity: false
     message: Creating backup...
     channels:
       - default
   backupCompleted:
     discord: always
     game: always
+    isActivity: false
     message: Backup created.
     channels:
       - default
   backupFailed:
     discord: always
     game: always
+    isActivity: false
     message: Failed to create backup!
     channels:
       - default
   backupCreatedLocal:
     discord: always
     game: always
+    isActivity: false
     message: Created backup successfully. Upload is disabled.
     channels:
       - default
   backupUploading:
     discord: always
     game: always
+    isActivity: false
     message: Uploading backup to {service}...
     channels:
       - default
   backupUploadFailed:
     discord: always
     game: always
+    isActivity: false
     message: Failed to upload backup to {service}. The local backup was created.
     channels:
       - default
   backupWhileRunningAnnouncement:
     discord: never
     game: always
+    isActivity: false
     message: Creating backup in {duration}.
     channels:
       - default
   backupRestartAnnouncement:
     discord: never
     game: always
+    isActivity: false
     message: Restarting server in {duration}.
     channels:
       - default
   backupAnnouncing:
     discord: always
     game: never
+    isActivity: false
     message: Announcing backup to players (performing in {duration}).
     channels:
       - default
   backupAutosaveDisabled:
     discord: never
     game: always
+    isActivity: false
     message: Disabled autosave for backup.
     channels:
       - default
   backupAutosaveEnabled:
     discord: never
     game: always
+    isActivity: false
     message: Enabled autosave after backup.
     channels:
       - default
   backupSaving:
     discord: never
     game: always
+    isActivity: false
     message: Saving before backup...
     channels:
       - default
   backupSaved:
     discord: never
     game: always
+    isActivity: false
     message: Save complete.
     channels:
       - default
   backupServerStarting:
     discord: always
     game: never
+    isActivity: false
     message: Starting server after backup...
     channels:
       - default
   backupServerStarted:
     discord: always
     game: always
+    isActivity: false
     message: Started server after backup.
     channels:
       - default
   backupServerStopping:
     discord: always
     game: never
+    isActivity: false
     message: Stopping server for backup...
     channels:
       - default
   backupServerStopped:
     discord: always
     game: never
+    isActivity: false
     message: Stopped server for backup.
     channels:
       - default
   inactive:
     discord: always
     game: never
+    isActivity: false
     message: The server has been inactive for {duration}. Consider stopping it.
     channels:
       - default
   crashDetected:
     discord: always
     game: never
+    isActivity: true
     message: Unexpected server stop detected. Confirming server has stopped...
     channels:
       - default
   crashConfirmed:
     discord: always
     game: never
+    isActivity: true
     message: Unexpected stop confirmed.
     channels:
       - default
   crashTooMany:
     discord: always
     game: never
+    isActivity: true
     message: Too many crashes recently. Not attempting to restart.
     channels:
       - default
   crashRestarting:
     discord: always
     game: never
+    isActivity: true
     message: Attempting to restart server...
     channels:
       - default
   crashRestartFailed:
     discord: always
     game: never
+    isActivity: true
     message: Failed to restart server after crash.
     channels:
       - default
   crashStarted:
     discord: always
     game: never
+    isActivity: true
     message: Restarted server after crash.
     channels:
       - default
@@ -472,7 +510,4 @@ inactivity:
 crash:
   maxRetries: 5
   recentTimeout: 3600
-
-
-
 

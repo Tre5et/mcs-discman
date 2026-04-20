@@ -12,6 +12,7 @@ import net.treset.minecraft_server_discord_bot.config.message.MessageTemplate;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
+import net.treset.minecraft_server_discord_bot.schedulers.EventScheduler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 import net.treset.minecraft_server_discord_bot.server.data.RpcAdvancement;
 import net.treset.minecraft_server_discord_bot.server.data.RpcDeath;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public abstract class EventConfig<C> extends ValidatableConfig {
     public EventCondition discord;
     public EventCondition game;
+    public boolean isActivity;
     public Message<C> message;
     public List<String> channels = List.of("default");
 
@@ -41,6 +43,10 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     }
 
     public void send(C source, EventDiscordOutput output, boolean success) {
+        if(isActivity) {
+            EventScheduler.eventOccurred();
+        }
+
         String result = message(source);
         if(discord.shouldSend(success)) {
             output.output(result, jdaChannels);
@@ -149,6 +155,7 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public static class Joined extends EventConfig<RpcPlayer> {
         public Joined() {
             super(EventCondition.always, EventCondition.never, "{name} joined the game.");
+            isActivity = true;
         }
 
         @Override
@@ -160,6 +167,7 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public static class Left extends EventConfig<RpcPlayer> {
         public Left() {
             super(EventCondition.always, EventCondition.never, "{name} left the game.");
+            isActivity = true;
         }
 
         @Override
@@ -171,6 +179,7 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public static class Advancement extends EventConfig<RpcAdvancement> {
         public Advancement() {
             super(EventCondition.always, EventCondition.never, "{message}.");
+            isActivity = true;
         }
 
         @Override
@@ -182,6 +191,7 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public static class Death extends EventConfig<RpcDeath> {
         public Death() {
             super(EventCondition.always, EventCondition.never, "{message}.");
+            isActivity = true;
         }
 
         @Override
@@ -193,24 +203,28 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public static class Started extends Never {
         public Started() {
             super("Server started.");
+            isActivity = true;
         }
     }
 
     public static class StartFailed extends AlwaysAndNever {
         public StartFailed() {
             super("Failed to start server.");
+            isActivity = true;
         }
     }
 
     public static class Stopping extends Never {
         public Stopping() {
             super("Server is stopping...");
+            isActivity = true;
         }
     }
 
     public static class Stopped extends Never {
         public Stopped() {
             super("Server stopped.");
+            isActivity = true;
         }
     }
 
@@ -373,36 +387,42 @@ public abstract class EventConfig<C> extends ValidatableConfig {
     public static class CrashDetected extends AlwaysAndNever {
         public CrashDetected() {
             super("Unexpected server stop detected. Confirming server has stopped...");
+            isActivity = true;
         }
     }
 
     public static class CrashConfirmed extends AlwaysAndNever {
         public CrashConfirmed() {
             super("Unexpected stop confirmed.");
+            isActivity = true;
         }
     }
 
     public static class CrashTooMany extends AlwaysAndNever {
         public CrashTooMany() {
             super("Too many crashes recently. Not attempting to restart.");
+            isActivity = true;
         }
     }
 
     public static class CrashRestarting extends AlwaysAndNever {
         public CrashRestarting() {
             super("Attempting to restart server...");
+            isActivity = true;
         }
     }
 
     public static class CrashRestartFailed extends AlwaysAndNever {
         public CrashRestartFailed() {
             super("Failed to restart server after crash.");
+            isActivity = true;
         }
     }
 
     public static class CrashStarted extends AlwaysAndNever {
         public CrashStarted() {
             super("Restarted server after crash.");
+            isActivity = true;
         }
     }
 }

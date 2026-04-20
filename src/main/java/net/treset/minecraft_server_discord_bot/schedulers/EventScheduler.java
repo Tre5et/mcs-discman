@@ -1,5 +1,7 @@
 package net.treset.minecraft_server_discord_bot.schedulers;
 
+import net.treset.minecraft_server_discord_bot.logging.Logger;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +14,11 @@ public class EventScheduler {
     public static void eventOccurred() {
         lastEventTimestamp = LocalDateTime.now();
         for(Consumer<LocalDateTime> handler : eventHandlers) {
-            handler.accept(lastEventTimestamp);
+            try {
+                handler.accept(lastEventTimestamp);
+            } catch (RuntimeException e) {
+                Logger.warn(e, "An EventScheduler handler failed and was ignored");
+            }
         }
     }
 

@@ -45,12 +45,12 @@ public class AutoBackupScheduler {
             if (!Config.get().backup.auto.createIf.shouldCreate(eventSinceLastBackup)) {
                 return;
             }
-            eventSinceLastBackup = false;
 
             BackupHandler.Mode mode = Config.get().backup.auto.restartMode.mode();
 
             BackupHandler.execute(mode, t -> backupNameFormatter.format(t) + "-auto", new EventDiscordOutput.Message(), false);
         } finally {
+            eventSinceLastBackup = false;
             new Thread(() -> {
                 try {
                     Thread.sleep(1000);
