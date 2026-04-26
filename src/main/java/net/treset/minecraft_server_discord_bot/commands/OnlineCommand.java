@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
@@ -26,21 +27,21 @@ public class OnlineCommand extends Command<CommandConfig.Online> {
 
         List<String> players = getPlayers();
         if(players == null) {
-            output = function.messageFailed.get();
+            output = function.messageFailed.get(MessageContext.DISCORD);
             interaction.getHook().sendMessage(output).queue();
             return;
         }
 
         if (players.isEmpty()) {
-            output = function.messageNoPlayers.get();
+            output = function.messageNoPlayers.get(MessageContext.DISCORD);
         } else {
             MessageTemplates.OnlineContext context = new MessageTemplates.OnlineContext(
                     Formatter.formatList(players, "\n"),
                     players.size()
             );
             output = players.size() == 1
-                    ? function.messageSinglePlayer.get(context)
-                    : function.messageMultiplePlayers.get(context);
+                    ? function.messageSinglePlayer.get(context, MessageContext.DISCORD)
+                    : function.messageMultiplePlayers.get(context, MessageContext.DISCORD);
         }
 
         interaction.getHook().sendMessage(output).queue();

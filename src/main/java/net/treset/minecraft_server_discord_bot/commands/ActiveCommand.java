@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
 
@@ -19,8 +20,8 @@ public class ActiveCommand extends Command<CommandConfig.Active> {
         String output;
 
         boolean running = ServerActions.isRunning();
-        if(running) output = function.messageActive.get();
-        else output = function.messageInactive.get();
+        if(running) output = function.messageActive.get(MessageContext.DISCORD);
+        else output = function.messageInactive.get(MessageContext.DISCORD);
 
         interaction.getHook().sendMessage(output).queue();
 

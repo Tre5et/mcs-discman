@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.exception.ServerOperationException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ServerActions;
@@ -18,19 +19,19 @@ public class StopServerCommand extends Command<CommandConfig.Stop> {
     @Override
     protected void process(SlashCommandInteraction interaction, CommandConfig.Stop function) {
         if(!ServerActions.isRunning()) {
-            interaction.getHook().sendMessage(function.messageAlreadyStopped.get()).queue();
+            interaction.getHook().sendMessage(function.messageAlreadyStopped.get(MessageContext.DISCORD)).queue();
             Logger.info("Handled. Already stopped.");
         } else {
-            interaction.getHook().sendMessage(function.messageStopping.get()).queue();
+            interaction.getHook().sendMessage(function.messageStopping.get(MessageContext.DISCORD)).queue();
             Logger.info("Stopping server.");
 
             try {
                 ServerActions.stopServer();
             } catch (ServerOperationException e) {
                 Logger.error(e, "Failed to stop server");
-                interaction.getHook().sendMessage(function.messageStopFailed.get()).queue();
+                interaction.getHook().sendMessage(function.messageStopFailed.get(MessageContext.DISCORD)).queue();
             }
-            interaction.getHook().sendMessage(function.messageStopped.get()).queue();
+            interaction.getHook().sendMessage(function.messageStopped.get(MessageContext.DISCORD)).queue();
         }
     }
 

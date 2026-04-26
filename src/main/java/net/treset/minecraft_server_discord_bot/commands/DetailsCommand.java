@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
@@ -24,12 +25,12 @@ public class DetailsCommand extends Command<CommandConfig.Details> {
 
         String version = getVersion();
         if(version == null) {
-            output = function.messageFailed.get();
+            output = function.messageFailed.get(MessageContext.DISCORD);
             interaction.getHook().sendMessage(output).queue();
             return;
         }
 
-        output = function.messageVersion.get(new MessageTemplates.DetailsContext(version));
+        output = function.messageVersion.get(new MessageTemplates.DetailsContext(version), MessageContext.DISCORD);
         interaction.getHook().sendMessage(output).queue();
 
         Logger.info("Handled.");

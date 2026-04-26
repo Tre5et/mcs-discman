@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
@@ -20,9 +21,9 @@ public class JoinCommand extends Command<CommandConfig.Join> {
         String output;
 
         if(Config.get().server.url != null) {
-            output = function.messageJoin.get(new MessageTemplates.JoinContext(Config.get().server.url));
+            output = function.messageJoin.get(new MessageTemplates.JoinContext(Config.get().server.url), MessageContext.DISCORD);
         } else {
-            output = function.messageMissingInfo.get();
+            output = function.messageMissingInfo.get(MessageContext.DISCORD);
         }
 
         interaction.getHook().sendMessage(output).queue();

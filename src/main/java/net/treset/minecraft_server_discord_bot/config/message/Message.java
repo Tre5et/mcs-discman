@@ -46,9 +46,13 @@ public class Message<C> extends ValidatableConfig {
         formattableMessage = messageFormat.toString();
     }
 
-    public String get(C source) {
-        Object[] resolvedKeys = formatKeys.stream().map(k -> template.value(source, k)).toArray(String[]::new);
+    public String get(C source, MessageContext context) {
+        Object[] resolvedKeys = formatKeys.stream().map(k -> template.value(source, context, k)).toArray(String[]::new);
         return String.format(formattableMessage, resolvedKeys);
+    }
+
+    public String get(C source) {
+        return get(source, MessageContext.IN_GAME);
     }
 
     @Override
@@ -79,8 +83,8 @@ public class Message<C> extends ValidatableConfig {
             super(message);
         }
 
-        public String get() {
-            return super.get(null);
+        public String get(MessageContext context) {
+            return super.get(null, context);
         }
 
         public void validate() throws ConfigException {

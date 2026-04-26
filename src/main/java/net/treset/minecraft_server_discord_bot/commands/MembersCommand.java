@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
@@ -27,16 +28,16 @@ public class MembersCommand extends Command<CommandConfig.Members> {
 
         List<String> members = getMembers();
         if(members == null) {
-            output = function.messageFailed.get();
+            output = function.messageFailed.get(MessageContext.DISCORD);
             interaction.getHook().sendMessage(output).queue();
             return;
         }
 
         String memberList = Formatter.formatList(members, ", ");
         MessageTemplates.MembersContext context = new MessageTemplates.MembersContext(memberList, Config.get().discord.admin, members.size());
-        output = members.isEmpty() ? function.messageNoMembers.get() : function.messageMembers.get(context);
+        output = members.isEmpty() ? function.messageNoMembers.get(MessageContext.DISCORD) : function.messageMembers.get(context, MessageContext.DISCORD);
         if(Config.get().discord.admin != null) {
-            output += "\n" + function.messageContactAdmin.get(context);
+            output += "\n" + function.messageContactAdmin.get(context, MessageContext.DISCORD);
         }
         interaction.getHook().sendMessage(output).queue();
 

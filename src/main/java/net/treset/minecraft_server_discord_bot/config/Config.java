@@ -24,6 +24,7 @@ public class Config {
     public BackupConfig backup;
     public InactivityConfig inactivity;
     public CrashConfig crash;
+    public StringsConfig strings = new StringsConfig();
 
     private static final File CONFIG_FILE = new File("discman.yaml");
     private static final File DEBUG_CONFIG = new File("debug/discman.yaml");
@@ -65,6 +66,8 @@ public class Config {
         if(newConfig.crash != null) {
             newConfig.crash.validate(newConfig);
         }
+
+        newConfig.strings.validate(newConfig);
 
         config = newConfig;
 

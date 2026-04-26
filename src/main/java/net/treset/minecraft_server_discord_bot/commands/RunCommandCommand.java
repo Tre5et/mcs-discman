@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 import net.treset.minecraft_server_discord_bot.server.DiscmanRpcMethods;
@@ -30,24 +31,24 @@ public class RunCommandCommand extends Command<CommandConfig.RunCommand> {
             switch (res.status()) {
                 case SUCCESS -> {
                     Logger.info("Handled. Success: \"%s\" -> \"%s\"", cmd, res.message().literal());
-                    interaction.getHook().sendMessage(function.messageSuccess.get(context)).queue();
+                    interaction.getHook().sendMessage(function.messageSuccess.get(context, MessageContext.DISCORD)).queue();
                 }
                 case FAILURE -> {
                     Logger.info("Handled. Failure: \"%s\" -> \"%s\"", cmd, res.message().literal());
-                    interaction.getHook().sendMessage(function.messageInvalid.get(context)).queue();
+                    interaction.getHook().sendMessage(function.messageInvalid.get(context, MessageContext.DISCORD)).queue();
                 }
                 case NO_RESPONSE -> {
                     Logger.info("Handled. Unknown: \"%s\" -> \"%s\"", cmd, res.message().literal());
-                    interaction.getHook().sendMessage(function.messageNoResponse.get(context)).queue();
+                    interaction.getHook().sendMessage(function.messageNoResponse.get(context, MessageContext.DISCORD)).queue();
                 }
                 default -> {
                     Logger.warn("Failed to parse command result: \"%s\" -> \"s\"", cmd, res);
-                    interaction.getHook().sendMessage(function.messageFailed.get()).queue();
+                    interaction.getHook().sendMessage(function.messageFailed.get(MessageContext.DISCORD)).queue();
                 }
             }
         } catch (IOException e) {
             Logger.warn(e, "Failed to request command execution: \"%s\"", cmd);
-            interaction.getHook().sendMessage(function.messageRequestFailed.get()).queue();
+            interaction.getHook().sendMessage(function.messageRequestFailed.get(MessageContext.DISCORD)).queue();
         }
     }
 

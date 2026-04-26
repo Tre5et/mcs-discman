@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
 import net.treset.minecraft_server_discord_bot.config.message.Message;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplate;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
@@ -38,8 +39,8 @@ public abstract class EventConfig<C> extends ValidatableConfig {
         this.message = new Message<>(message);
     }
 
-    public String message(C source) {
-        return message.get(source);
+    public String message(C source, MessageContext context) {
+        return message.get(source, context);
     }
 
     public void send(C source, EventDiscordOutput output, boolean success) {
@@ -47,16 +48,15 @@ public abstract class EventConfig<C> extends ValidatableConfig {
             EventScheduler.eventOccurred();
         }
 
-        String result = message(source);
         if(discord.shouldSend(success)) {
-            output.output(result, jdaChannels);
+            output.output(message(source, MessageContext.DISCORD), jdaChannels);
         }
         if(game.shouldSend(success) && ManagementClient.get() != null && ManagementClient.get().isConnected()) {
             ManagementClient.get().send(
                     RpcMethods.Server.SYSTEM_MESSAGE,
-                    new RpcSystemMessage(null, false, new RpcMessage(null, null, "[Discman] " + result)),
+                    new RpcSystemMessage(null, false, new RpcMessage(null, null,  Config.get().strings.inGamePrefix + " " + message(source, MessageContext.IN_GAME))),
                     r -> {},
-                    e -> Logger.warn(e, "Failed to send message '%s' to server", result)
+                    e -> Logger.warn(e, "Failed to send message to server")
             );
         }
     }
@@ -96,8 +96,8 @@ public abstract class EventConfig<C> extends ValidatableConfig {
             super(discord, game, message);
         }
 
-        public String message() {
-            return message(null);
+        public String message(MessageContext context) {
+            return message(null, context);
         }
 
         public void send(EventDiscordOutput output, boolean success) {

@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 import java.util.function.Supplier;
 
@@ -17,9 +18,9 @@ public class ReloadConfigCommand extends Command<CommandConfig.Reload> {
     protected void process(SlashCommandInteraction interaction, CommandConfig.Reload function) {
         try {
             Config.load();
-            interaction.getHook().sendMessage(function.messageReloaded.get()).queue();
+            interaction.getHook().sendMessage(function.messageReloaded.get(MessageContext.DISCORD)).queue();
         } catch (ConfigException e) {
-            interaction.getHook().sendMessage(function.messageFailed.get()).queue();
+            interaction.getHook().sendMessage(function.messageFailed.get(MessageContext.DISCORD)).queue();
         }
     }
 

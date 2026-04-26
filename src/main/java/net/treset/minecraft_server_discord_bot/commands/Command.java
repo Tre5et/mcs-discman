@@ -3,6 +3,7 @@ package net.treset.minecraft_server_discord_bot.commands;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
 import java.util.Objects;
@@ -23,12 +24,12 @@ public abstract class Command<C extends CommandConfig> {
             return;
         }
         if (!config.enabled) {
-            interaction.getHook().sendMessage(config.messageDisabled.get()).queue();
+            interaction.getHook().sendMessage(config.messageDisabled.get(MessageContext.DISCORD)).queue();
             Logger.info("Handled. Disabled.");
             return;
         }
         if (!config.isAllowed(Objects.requireNonNull(interaction.getMember()))) {
-            interaction.getHook().sendMessage(config.messageDenied.get()).queue();
+            interaction.getHook().sendMessage(config.messageDenied.get(MessageContext.DISCORD)).queue();
             Logger.info("Handled. Permission required.");
             return;
         }

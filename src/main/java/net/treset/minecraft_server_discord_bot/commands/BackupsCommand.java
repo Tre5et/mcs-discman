@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
@@ -25,14 +26,14 @@ public class BackupsCommand extends Command<CommandConfig.Backups> {
 
         if(Config.get().backup.publicLocation != null) {
             if(Config.get().discord.admin != null) {
-                output = function.messageLocationAndAdmin.get(context);
+                output = function.messageLocationAndAdmin.get(context, MessageContext.DISCORD);
             } else {
-                output = function.messageLocation.get(context);
+                output = function.messageLocation.get(context, MessageContext.DISCORD);
             }
         } else if(Config.get().discord.admin != null) {
-            output = function.messageAdmin.get(context);
+            output = function.messageAdmin.get(context, MessageContext.DISCORD);
         } else {
-            output = function.messageNone.get();
+            output = function.messageNone.get(MessageContext.DISCORD);
         }
 
         interaction.getHook().sendMessage(output).queue();

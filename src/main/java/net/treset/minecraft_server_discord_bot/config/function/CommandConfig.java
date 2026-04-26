@@ -10,11 +10,10 @@ import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
 import net.treset.minecraft_server_discord_bot.config.message.Message;
 import net.treset.minecraft_server_discord_bot.config.message.MessageTemplates;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
+import net.treset.minecraft_server_discord_bot.schedulers.ReminderScheduler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -417,6 +416,10 @@ public abstract class CommandConfig extends ValidatableConfig {
         public boolean allowInGame = true;
         public boolean allowDiscord = true;
         public List<String> defaultMentions = List.of("user:self");
+        public Message<ReminderScheduler.Reminder> message = new Message<>("Reminder set for {reminder_timestamp_short}.");
+        public Message<ReminderScheduler.Reminder> messageFailed = new Message<>("Failed to schedule reminder.");
+        public Message<ReminderScheduler.Reminder> messageInvalidChannel = new Message<>("Could not find original reminder channel. Reverting to default.");
+        public Message<ReminderScheduler.Reminder> messageRemoveFailed = new Message<>("Could not remove reminder from permanent storage after sending. It may be re-sent in the future.");
 
         public transient List<Function<User, IMentionable>> defaultJdaMentions = new ArrayList<>();
 
@@ -453,6 +456,14 @@ public abstract class CommandConfig extends ValidatableConfig {
                     }
                     defaultJdaMentions.addAll(roles.stream().map(r -> (Function<User,IMentionable>) u -> r).toList());
                 }
+            }
+
+            message.validate(MessageTemplates.REMINDER);
+
+            try {
+                ReminderScheduler.load(this);
+            } catch (IOException e) {
+                throw new ConfigException("Failed to initialize reminder scheduler", e);
             }
         }
 

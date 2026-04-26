@@ -6,6 +6,7 @@ import net.treset.minecraft_server_discord_bot.commands.Command;
 import net.treset.minecraft_server_discord_bot.config.Config;
 import net.treset.minecraft_server_discord_bot.config.ValidatableConfig;
 import net.treset.minecraft_server_discord_bot.config.message.Message;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.exception.ConfigException;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
 
@@ -43,7 +44,7 @@ public class CommandsConfig extends ValidatableConfig {
             commands.get(event.getName()).handle(event);
         } else {
             Logger.warn("Received unknown command '" + event.getName() + "'.");
-            event.getHook().sendMessage(messageUnknown.get()).queue();
+            event.getHook().sendMessage(messageUnknown.get(MessageContext.DISCORD)).queue();
         }
     }
 

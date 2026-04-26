@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.treset.minecraft_server_discord_bot.config.event.EventDiscordOutput;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.server.BackupHandler;
 
 import java.time.format.DateTimeFormatter;
@@ -28,7 +29,7 @@ public class CreateBackupCommand extends Command<CommandConfig.CreateBackup> {
             case "restart" -> BackupHandler.Mode.RESTART;
             case "while-running" -> BackupHandler.Mode.WHILE_RUNNING;
             default -> {
-                interaction.getHook().sendMessage(function.messageInvalidMode.get()).queue();
+                interaction.getHook().sendMessage(function.messageInvalidMode.get(MessageContext.DISCORD)).queue();
                 yield null;
             }
         };

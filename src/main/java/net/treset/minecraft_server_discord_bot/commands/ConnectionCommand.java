@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
+import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.server.CrashHandler;
 import net.treset.minecraft_server_discord_bot.server.ManagementClient;
 
@@ -26,7 +27,7 @@ public class ConnectionCommand extends Command<CommandConfig.Connection> {
             case "status" -> output = getStatus(function);
             case "open" -> output = openConnection(function);
             case "close" -> output = closeConnection(interaction, function);
-            default -> output = function.messageUnknownAction.get();
+            default -> output = function.messageUnknownAction.get(MessageContext.DISCORD);
         }
 
         interaction.getHook().sendMessage(output).queue();
@@ -34,26 +35,26 @@ public class ConnectionCommand extends Command<CommandConfig.Connection> {
 
     private static String getStatus(CommandConfig.Connection function) {
         if(ManagementClient.get().isConnected()) {
-            return function.messageStatusOpen.get();
+            return function.messageStatusOpen.get(MessageContext.DISCORD);
         }
-        return function.messageStatusClosed.get();
+        return function.messageStatusClosed.get(MessageContext.DISCORD);
     }
 
     private static String openConnection(CommandConfig.Connection function) {
         if(ManagementClient.get().isConnected()) {
-            return function.messageOpenAlreadyOpen.get();
+            return function.messageOpenAlreadyOpen.get(MessageContext.DISCORD);
         }
         try {
             ManagementClient.get().connect();
         } catch (IOException e) {
-            return function.messageOpenFailed.get();
+            return function.messageOpenFailed.get(MessageContext.DISCORD);
         }
-        return function.messageOpenSuccess.get();
+        return function.messageOpenSuccess.get(MessageContext.DISCORD);
     }
 
     private static String closeConnection(SlashCommandInteraction interaction, CommandConfig.Connection function) {
         if(!ManagementClient.get().isConnected()) {
-            return function.messageCloseNoConnection.get();
+            return function.messageCloseNoConnection.get(MessageContext.DISCORD);
         }
 
         boolean force = false;
@@ -64,15 +65,15 @@ public class ConnectionCommand extends Command<CommandConfig.Connection> {
         CrashHandler.expectStop();
         if(force) {
             ManagementClient.get().forceDisconnect();
-            return function.messageCloseForced.get();
+            return function.messageCloseForced.get(MessageContext.DISCORD);
         }
 
         try {
             ManagementClient.get().disconnect();
-            return function.messageCloseSuccess.get();
+            return function.messageCloseSuccess.get(MessageContext.DISCORD);
         } catch (IOException e) {
             CrashHandler.unexpectStop();
-            return function.messageCloseFailed.get();
+            return function.messageCloseFailed.get(MessageContext.DISCORD);
         }
     }
 
