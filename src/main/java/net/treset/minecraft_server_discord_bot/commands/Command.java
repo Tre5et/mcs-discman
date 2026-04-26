@@ -1,5 +1,6 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
@@ -35,6 +36,15 @@ public abstract class Command<C extends CommandConfig> {
         }
 
         process(interaction, config);
+    }
+
+    public boolean handleButtonInteraction(ButtonInteractionEvent event) {
+        C config = configSupplier.get();
+        return processButtonInteraction(event, config);
+    }
+
+    protected boolean processButtonInteraction(ButtonInteractionEvent event, C config) {
+        return false;
     }
 
     protected abstract void process(SlashCommandInteraction interaction, C config);

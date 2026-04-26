@@ -1,5 +1,6 @@
 package net.treset.minecraft_server_discord_bot.config.function;
 
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.treset.minecraft_server_discord_bot.commands.Command;
@@ -46,6 +47,16 @@ public class CommandsConfig extends ValidatableConfig {
             Logger.warn("Received unknown command '" + event.getName() + "'.");
             event.getHook().sendMessage(messageUnknown.get(MessageContext.DISCORD)).queue();
         }
+    }
+
+    public void handleButtonInteraction(ButtonInteractionEvent event) {
+        for(Map.Entry<String, Command<?>> command : commands.entrySet()) {
+            if(event.getComponentId().startsWith(command.getKey())) {
+                if(command.getValue().handleButtonInteraction(event)) return;
+            }
+        }
+        Logger.warn("Received unknown button interaction '" + event.getComponentId() + "'.");
+        event.getHook().sendMessage(messageUnknown.get(MessageContext.DISCORD)).queue();
     }
 
     @Override

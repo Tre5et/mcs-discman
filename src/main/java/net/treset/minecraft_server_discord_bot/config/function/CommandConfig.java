@@ -420,6 +420,9 @@ public abstract class CommandConfig extends ValidatableConfig {
         public Message<ReminderScheduler.Reminder> messageFailed = new Message<>("Failed to schedule reminder.");
         public Message<ReminderScheduler.Reminder> messageInvalidChannel = new Message<>("Could not find original reminder channel. Reverting to default.");
         public Message<ReminderScheduler.Reminder> messageRemoveFailed = new Message<>("Could not remove reminder from permanent storage after sending. It may be re-sent in the future.");
+        public Message<String> messageNotFround = new Message<>("The reminder is already expired.");
+        public Message<ReminderScheduler.Reminder> messageCanceled = new Message<>("Reminder was canceled.");
+        public Message<ReminderScheduler.Reminder> buttonCancel = new Message<>("Cancel");
 
         public transient List<Function<User, IMentionable>> defaultJdaMentions = new ArrayList<>();
 
@@ -459,6 +462,10 @@ public abstract class CommandConfig extends ValidatableConfig {
             }
 
             message.validate(MessageTemplates.REMINDER);
+            messageRemoveFailed.validate(MessageTemplates.REMINDER);
+            messageNotFround.validate(MessageTemplates.STRING);
+            messageCanceled.validate(MessageTemplates.REMINDER);
+            buttonCancel.validate(MessageTemplates.REMINDER);
 
             try {
                 ReminderScheduler.load(this);

@@ -54,7 +54,7 @@ public abstract class EventConfig<C> extends ValidatableConfig {
         if(game.shouldSend(success) && ManagementClient.get() != null && ManagementClient.get().isConnected()) {
             ManagementClient.get().send(
                     RpcMethods.Server.SYSTEM_MESSAGE,
-                    new RpcSystemMessage(null, false, new RpcMessage(null, null,  Config.get().strings.inGamePrefix + " " + message(source, MessageContext.IN_GAME))),
+                    new RpcSystemMessage(null, false, new RpcMessage(null, null,  Config.get().strings.inGamePrefix + " " + message(source, MessageContext.RAW))),
                     r -> {},
                     e -> Logger.warn(e, "Failed to send message to server")
             );

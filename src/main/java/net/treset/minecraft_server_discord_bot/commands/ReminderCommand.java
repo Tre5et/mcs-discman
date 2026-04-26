@@ -1,12 +1,17 @@
 package net.treset.minecraft_server_discord_bot.commands;
 
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.entities.IMentionable;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.treset.minecraft_server_discord_bot.config.event.EventDiscordOutput;
 import net.treset.minecraft_server_discord_bot.config.function.CommandConfig;
 import net.treset.minecraft_server_discord_bot.config.message.MessageContext;
 import net.treset.minecraft_server_discord_bot.logging.Logger;
@@ -59,7 +64,25 @@ public class ReminderCommand extends Command<CommandConfig.Reminder> {
             interaction.getHook().sendMessage(config.messageFailed.get(reminder, MessageContext.DISCORD)).queue();
             return;
         }
-        interaction.getHook().sendMessage(config.message.get(reminder, MessageContext.DISCORD)).queue();
+        interaction.getHook()
+                .sendMessage(config.message.get(reminder, MessageContext.DISCORD))
+                .setComponents(ActionRow.of(Button.of(ButtonStyle.DANGER, "reminderCancel:"+reminder.id(), "Cancel")))
+                .queue();
+    }
+
+    @Override
+    public boolean processButtonInteraction(ButtonInteractionEvent event, CommandConfig.Reminder config) {
+        if(event.getComponentId().startsWith("reminderCancel:")) {
+            String[] parts = event.getComponentId().split(":");
+            ReminderScheduler.Reminder canceled = ReminderScheduler.cancel(UUID.fromString(parts[1]), new EventDiscordOutput.Interaction(event));
+            if(canceled != null) {
+                event.editMessage(config.messageCanceled.get(canceled, MessageContext.RAW)).and(
+                        event.getMessage().editMessageComponents()
+                ).queue();
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

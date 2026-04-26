@@ -37,35 +37,35 @@ public class MessageTemplates {
     public static final DateTimeTemplate DATE_TIME = new DateTimeTemplate(Map.ofEntries(
             Map.entry("timestamp_full_weekday", context -> switch (context) {
                 case DISCORD -> discordTimeStamp("F");
-                case IN_GAME -> Config.get().strings.timestampFullWeekday.get(LocalDateTime.now());
+                case RAW -> Config.get().strings.timestampFullWeekday.get(LocalDateTime.now());
             }),
             Map.entry("timestamp_full", context -> switch (context) {
                 case DISCORD -> discordTimeStamp("f");
-                case IN_GAME -> Config.get().strings.timestampFull.get(LocalDateTime.now());
+                case RAW -> Config.get().strings.timestampFull.get(LocalDateTime.now());
             }),
             Map.entry("timestamp_date", context -> switch (context) {
                 case DISCORD -> discordTimeStamp("D");
-                case IN_GAME -> Config.get().strings.timestampDate.get(LocalDateTime.now());
+                case RAW -> Config.get().strings.timestampDate.get(LocalDateTime.now());
             }),
             Map.entry("timestamp_date_short", context -> switch (context) {
                 case DISCORD -> discordTimeStamp("d");
-                case IN_GAME -> Config.get().strings.timestampDateShort.get(LocalDateTime.now());
+                case RAW -> Config.get().strings.timestampDateShort.get(LocalDateTime.now());
             }),
             Map.entry("timestamp_time_seconds", context -> switch (context) {
                 case DISCORD -> discordTimeStamp("T");
-                case IN_GAME -> Config.get().strings.timestampTimeSeconds.get(LocalDateTime.now());
+                case RAW -> Config.get().strings.timestampTimeSeconds.get(LocalDateTime.now());
             }),
             Map.entry("timestamp_time", context -> switch (context) {
                 case DISCORD -> discordTimeStamp("t");
-                case IN_GAME -> Config.get().strings.timestampTime.get(LocalDateTime.now());
+                case RAW -> Config.get().strings.timestampTime.get(LocalDateTime.now());
             }),
             Map.entry("timestamp_short_seconds", context -> switch (context) {
                 case DISCORD -> discordTimeStamp("S");
-                case IN_GAME -> Config.get().strings.timestampShortSeconds.get(LocalDateTime.now());
+                case RAW -> Config.get().strings.timestampShortSeconds.get(LocalDateTime.now());
             }),
             Map.entry("timestamp_short", context -> switch (context) {
                 case DISCORD -> discordTimeStamp("s");
-                case IN_GAME -> Config.get().strings.timestampShort.get(LocalDateTime.now());
+                case RAW -> Config.get().strings.timestampShort.get(LocalDateTime.now());
             }),
             Map.entry("timestring_full_weekday", context -> Config.get().strings.timestampFullWeekday.get(LocalDateTime.now())),
             Map.entry("timestring_full", context -> Config.get().strings.timestampFull.get(LocalDateTime.now())),
@@ -94,9 +94,9 @@ public class MessageTemplates {
             Map.entry("weekday_name", (dateTime, context) -> weekday(dateTime)),
             Map.entry("hour_24", (dateTime, context) -> String.valueOf(dateTime.getHour())),
             Map.entry("hour_12", (dateTime, context) -> String.valueOf(((dateTime.getHour() + 11) % 12) + 1)),
-            Map.entry("am_pm", (dateTime, context) -> (dateTime.getHour() + 11) / 12 < 2 ? Config.get().strings.am : Config.get().strings.pm),
-            Map.entry("minute", (dateTime, context) -> String.valueOf(dateTime.getMinute())),
-            Map.entry("second", (dateTime, context) -> String.valueOf(dateTime.getSecond()))
+            Map.entry("am_pm", (dateTime, context) -> dateTime.getHour() < 12 ? Config.get().strings.am : Config.get().strings.pm),
+            Map.entry("minute", (dateTime, context) -> String.format("%02d", dateTime.getMinute())),
+            Map.entry("second", (dateTime, context) -> String.format("%02d", dateTime.getSecond()))
     ));
 
     public static final MessageTemplate<RpcPlayer> PLAYER = DATE_TIME.extendSimple(
@@ -181,39 +181,39 @@ public class MessageTemplates {
             Map.entry("message", (reminder, context) -> reminder.message()),
             Map.entry("reminder_timestamp_full_weekday", (reminder, context) -> switch (context) {
                 case DISCORD -> discordTimeStamp(reminder.time(), "F");
-                case IN_GAME -> Config.get().strings.timestampFullWeekday.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
+                case RAW -> Config.get().strings.timestampFullWeekday.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
             }),
             Map.entry("reminder_timestamp_full", (reminder, context) -> switch (context) {
                 case DISCORD -> discordTimeStamp(reminder.time(), "f");
-                case IN_GAME -> Config.get().strings.timestampFull.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
+                case RAW -> Config.get().strings.timestampFull.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
             }),
             Map.entry("reminder_timestamp_date", (reminder, context) -> switch (context) {
                 case DISCORD -> discordTimeStamp(reminder.time(), "D");
-                case IN_GAME -> Config.get().strings.timestampDate.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
+                case RAW -> Config.get().strings.timestampDate.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
             }),
             Map.entry("reminder_timestamp_date_short", (reminder, context) -> switch (context) {
                 case DISCORD -> discordTimeStamp(reminder.time(), "d");
-                case IN_GAME -> Config.get().strings.timestampDateShort.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
+                case RAW -> Config.get().strings.timestampDateShort.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
             }),
             Map.entry("reminder_timestamp_time_seconds", (reminder, context) -> switch (context) {
                 case DISCORD -> discordTimeStamp(reminder.time(), "T");
-                case IN_GAME -> Config.get().strings.timestampTimeSeconds.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
+                case RAW -> Config.get().strings.timestampTimeSeconds.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
             }),
             Map.entry("reminder_timestamp_time", (reminder, context) -> switch (context) {
                 case DISCORD -> discordTimeStamp(reminder.time(), "t");
-                case IN_GAME -> Config.get().strings.timestampTime.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
+                case RAW -> Config.get().strings.timestampTime.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
             }),
             Map.entry("reminder_timestamp_short_seconds", (reminder, context) -> switch (context) {
                 case DISCORD -> discordTimeStamp(reminder.time(), "S");
-                case IN_GAME -> Config.get().strings.timestampShortSeconds.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
+                case RAW -> Config.get().strings.timestampShortSeconds.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
             }),
             Map.entry("reminder_timestamp_short", (reminder, context) -> switch (context) {
                 case DISCORD -> discordTimeStamp(reminder.time(), "s");
-                case IN_GAME -> Config.get().strings.timestampShort.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
+                case RAW -> Config.get().strings.timestampShort.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()));
             }),
             Map.entry("reminder_timestamp_remaining", (reminder, context) -> switch (context) {
                 case DISCORD -> discordTimeStamp(reminder.time(), "R");
-                case IN_GAME -> Config.get().strings.timeIn.get(durationString(Duration.between(Instant.now(), reminder.time())));
+                case RAW -> Config.get().strings.timeIn.get(durationString(Duration.between(Instant.now(), reminder.time())));
             }),
             Map.entry("reminder_timestring_full_weekday", (reminder, context) -> Config.get().strings.timestampFullWeekday.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()))),
             Map.entry("reminder_timestring_full", (reminder, context) -> Config.get().strings.timestampFull.get(LocalDateTime.ofInstant(reminder.time(), ZoneId.systemDefault()))),

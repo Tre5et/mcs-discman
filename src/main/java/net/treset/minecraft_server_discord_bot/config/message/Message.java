@@ -52,7 +52,7 @@ public class Message<C> extends ValidatableConfig {
     }
 
     public String get(C source) {
-        return get(source, MessageContext.IN_GAME);
+        return get(source, MessageContext.RAW);
     }
 
     @Override

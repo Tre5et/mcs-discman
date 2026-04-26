@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class ReminderScheduler {
     private static final ObjectMapper MAPPER = JsonMapper.builder().build();
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private static final Map<UUID, ScheduledFuture<?>> scheduled = new HashMap<>();
+    private static final Map<UUID, Map.Entry<Reminder, ScheduledFuture<?>>> scheduled = new HashMap<>();
 
     public static void load(CommandConfig.Reminder config) throws IOException {
         File file = getStorageFile(config);
@@ -50,9 +50,27 @@ public class ReminderScheduler {
 
         long until = Duration.between(now, reminder.time).getSeconds();
         ScheduledFuture<?> schedule = scheduler.schedule(() -> send(reminder, new EventDiscordOutput.Message()), until, TimeUnit.SECONDS);
-        scheduled.put(reminder.id, schedule);
+        scheduled.put(reminder.id, Map.entry(reminder, schedule));
 
         addToStorageFile(reminder, config);
+    }
+
+    public static Reminder cancel(UUID id, EventDiscordOutput output) {
+        if(scheduled.containsKey(id)) {
+            Map.Entry<Reminder, ScheduledFuture<?>> entry = scheduled.get(id);
+            entry.getValue().cancel(true);
+            try {
+                removeFromStorageFile(entry.getKey(), Config.get().commands.reminder);
+            } catch (IOException e) {
+                Logger.error(e, "Failed to remove reminder %s from storage file.", entry.getKey().id);
+                output.output(Config.get().commands.reminder.messageRemoveFailed.get(entry.getKey(), MessageContext.DISCORD), Set.of(Config.get().discord.jdaChannels.get("default")));
+            }
+            scheduled.remove(id);
+            return entry.getKey();
+        }
+        Logger.warn("Reminder %s was not found.", id);
+        output.output(Config.get().commands.reminder.messageNotFround.get(id.toString(), MessageContext.DISCORD), Set.of(Config.get().discord.jdaChannels.get("default")));
+        return null;
     }
 
     public static void send(Reminder reminder, EventDiscordOutput output) {
